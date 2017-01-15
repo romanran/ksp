@@ -1,11 +1,17 @@
 function doStage{
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
 		STAGE.
-		SET stg_res TO getResources().
+		DECLARE LOCAL stg_res TO getStageResources().
 		IF STAGE:NUMBER = 0{
-			return true.
+			return lex(
+				"res", stg_res,
+				"done", true
+			).
 		}else{
-			return false.
+			return lex(
+				"res", stg_res,
+				"done", false
+			).
 		}
 	}
 }
@@ -20,13 +26,26 @@ function checkProperty{
 	return bool.
 }
 
-function getResources{
+function getStageResources{
 	SET res_l TO LEXICON().
 	wait 0.1.
 	print STAGE:RESOURCES.
-	FOR RES IN STAGE:RESOURCES{
-		IF RES:CAPACITY > 0{
-			res_l:ADD(RES:NAME, RES:CAPACITY).
+	FOR res IN STAGE:RESOURCES{
+		IF res:CAPACITY > 0{
+			res_l:ADD(res:NAME, res:CAPACITY, res:AMOUNT).
+		}
+	}
+	CLEARSCREEN.
+	RETURN res_l.
+}
+
+function getResources{
+	SET res_l TO LEXICON().
+	wait 0.1.
+	print SHIP:RESOURCES.
+	FOR res IN SHIP:RESOURCES{
+		IF res:CAPACITY > 0{
+			res_l:ADD(res:NAME, res:CAPACITY, res:AMOUNT).
 		}
 	}
 	CLEARSCREEN.

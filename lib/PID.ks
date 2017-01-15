@@ -1,7 +1,7 @@
 function setPID{
 	PARAMETER setp IS "err1".
 	IF setp = "err1"{
-		PRINT "No setpoint value specified"
+		PRINT "No setpoint value specified".
 		return false.
 	}
 	PARAMETER prop IS 0.2.

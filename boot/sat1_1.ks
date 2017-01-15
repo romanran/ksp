@@ -1,11 +1,9 @@
 IF ADDONS:RT:HASKSCCONNECTION( SHIP ){
-	COPYPATH("0:lib/GETMODULES", "1:").
 	COPYPATH("0:lib/COMSAT_HEIGHT", "1:").
 	COPYPATH("0:lib/PID", "1:").
 	COPYPATH("0:lib/DOONCE", "1:").
 	COPYPATH("0:lib/FUNCTIONS", "1:").
 }
-RUNPATH("GETMODULES").
 RUNPATH("COMSAT_HEIGHT").
 RUNPATH("PID").
 RUNPATH("DOONCE").
@@ -19,6 +17,7 @@ RUNPATH("FUNCTIONS").
 //check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
 
 SET root_part TO SHIP:ROOTPART.
+SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
 CLEARSCREEN.
 SET TERMINAL:CHARWIDTH TO 10.
@@ -28,44 +27,44 @@ SET TERMINAL:HEIGHT TO 25.
 SET trgt TO GetTrgtAlt(3, 100000).
 
 SET done TO false.
+SET done_staging TO false.
+SET from_save TO true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true.
+SET chronos TO PROCESSOR("chronos").
 
-IF( SHIP:PRELAUNCH ){
-	PRINT "V1.0".
+IF SHIP:STATUS = "PRELAUNCH"{
+	PRINT "V1.1".
 	PRINT "Comm range:"+trgt["r"]+"m.".
 	PRINT "Target altitude:"+trgt["alt"]+"m.".
 	SET start TO false.
 
 	UNLOCK PIDC.
+	SET from_save TO false.
 	SET PIDC to setPID(0, 1).
 	SET PIDC:MAXOUTPUT TO 1.
 	SET PIDC:MINOUTPUT TO 1.
 	PRINT calcDeltaV(1000).
 	SET thrott TO 1.
 	SET trgt_pitch TO 0.
-	SET gf TO 0.
 	SET safe_alt TO 150.
 	
-	SET chronos TO PROCESSOR("chronos").
-	SET THROTTLE TO 0.
-
 	SET ship_engines TO LIST().
 	LIST ENGINES IN ship_engines.
 
-	SET doneGravTurn TO false.
-	SET doneStaging TO false.
+	SET stg TO LEXICON().
+	SET stg_res TO LEXICON().
+	SET ship_res TO getResources().
 
-	SET pitch_1s TO true.
-	SET once_pitch2 TO true.
 	//add once objects
-	SET set_throttle_1s TO doOnce.
-	SET deploy_1s TO doOnce.
-	SET antennas_1s TO doOnce.
-	SET fairing_1s TO doOnce.
-	SET rcs_1s TO doOnce.
-	SET circ_prepare_1s TO doOnce.
-	SET circ_burn_1s TO doOnce.
-	SET de_acc_1s TO doOnce.
-	SET abort_1s IS doOnce.
+	SET pitch2_1s TO doOnce().
+	SET set_throttle_1s TO doOnce().
+	SET deploy_1s TO doOnce().
+	SET antennas_1s TO doOnce().
+	SET fairing_1s TO doOnce().
+	SET rcs_1s TO doOnce().
+	SET circ_prepare_1s TO doOnce().
+	SET circ_burn_1s TO doOnce().
+	SET de_acc_1s TO doOnce().
+	SET abort_1s TO doOnce().
 
 	SET wait_ready to true.
 
@@ -74,7 +73,7 @@ IF( SHIP:PRELAUNCH ){
 	SET PIDC:SETPOINT TO target_kpa.
 
 
-	PRINT "WAITING FOR LAUNCH CONFIRMATION ON AG1...".
+	PRINT "READY FOR LAUNCH CONFIRMATION ON AG1...".
 	SET first_stage_engines TO LIST().
 	SET antennas TO getModules("ModuleRTAntenna").
 	LOCAL last_eng_i TO 0.
@@ -100,12 +99,12 @@ IF( SHIP:PRELAUNCH ){
 		SET start TO TRUE.
 	}
 	PRINT "SYSTEMS READY".
-	WAIT UNTIL S = TRUE.
+	WAIT UNTIL start = TRUE.
 
-	FROM{ LOCAL i is 5.} UNTIL i = 0 STEP { SET i TO i-1.} DO{
+	FROM{ LOCAL i is 5.} UNTIL i < 0 STEP { SET i TO i-1.} DO{
 		IF i = 0{
 			SET root_part:TAG TO "LIFTOFF".
-			HUDTEXT(i+"LIFTOFF!", 1, 2, 40, green, false).
+			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 		}ELSE{
 			HUDTEXT(i+"...", 1, 2, 30, green, false).
 		}
@@ -124,17 +123,26 @@ IF( SHIP:PRELAUNCH ){
 }
 LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
 
+IF from_save = true{
+	SET stg_res TO getStageResources().
+	SET ship_res TO getResources().
+	SET rcs_1s TO doOnce().
+	SET deploy_1s TO doOnce().
+	SET antennas_1s TO doOnce().
+}
+
 UNTIL done{
 	ON AG5{
+		//stage override, just in case
 		doStage().
 	}
 	IF root_part:TAG = "LIFTOFF" OR root_part:TAG = "THRUSTING"{
 		set_throttle_1s["do"]({
-			SET pid_1s TO doOnce.
+			SET pitch_1s TO doOnce().
+			SET pid_1s TO doOnce().
 			SET pid_timer TO TIME:SECONDS.
 			LOCK THROTTLE TO thrott.
 			LOCK accvec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV.
-			LOCK gf TO ROUND(accvec:MAG/g, 3).
 			LOCK dyn_p TO ROUND(SHIP:Q*CONSTANT:ATMtokPa, 3).
 			LOCK thrott TO MAX(ROUND(PIDC:UPDATE(TIME:SECONDS-pid_timer, dyn_p), 3), 0.01).
 			SET once_thrott TO false.
@@ -148,7 +156,7 @@ UNTIL done{
 			LOCK STEERING TO HEADING (0, trgt_pitch).
 		}).
 		
-		IF RADAR:ALT > safe_alt {
+		IF ALT:RADAR > safe_alt {
 			pid_1s["do"]({
 				//reset pid from initial safe altitude gain 100% thrust
 				SET set_pid TO false.
@@ -160,23 +168,22 @@ UNTIL done{
 		SET PIDC:SETPOINT TO target_kpa.
 		PRINT "THR" at(0,1).
 		PRINT thrott at(18,1).
-		PRINT "GF: " at (0,2).
-		PRINT gf at(18,2).
-		PRINT "T.PIT: " at(0,3).
-		PRINT trgt_pitch at(18,3).
-		PRINT "KPA:" at(0,4).
-		PRINT target_kpa  at(18,4).
-		PRINT "T.KPA:" at(0,5).
-		PRINT dyn_p at(18,5).
+		PRINT "T.PIT: " at(0,2).
+		PRINT trgt_pitch at(18,2).
+		PRINT "KPA:" at(0,3).
+		PRINT target_kpa  at(18,3).
+		PRINT "T.KPA:" at(0,4).
+		PRINT dyn_p at(18,4).
 		
-		HUDTEXT("THR: "+thrott, 0.01, 3, 12, green, false).
-		HUDTEXT("T. kPa: "+target_kpa, 0.01, 3, 12, green, false).
-		HUDTEXT("kPa: "+dyn_p, 0.01, 3, 12, green, false).
+		HUDTEXT("THR: "+thrott, 1, 3, 12, green, false).
+		HUDTEXT("T. kPa: "+target_kpa, 1, 3, 12, green, false).
+		HUDTEXT("kPa: "+dyn_p, 1, 3, 12, green, false).
 		HUDTEXT("PITCH: "+ (90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR)), 0.01, 3, 12, green, false).
 		
-		IF trgt_pitch > 89 AND once_pitch2{
-			UNLOCK STEERING.
-			SET once_pitch2 TO false.
+		IF trgt_pitch > 89{
+			pitch2_1s({
+				UNLOCK STEERING.
+			}).
 		}
 		
 		IF ship_p < 0 AND ALTITUDE < 40000{
@@ -188,6 +195,7 @@ UNTIL done{
 		}
 		
 		IF (ROUND(APOAPSIS) > trgt["alt"] - 200000) AND ALTITUDE>50000 {
+			//decrease acceleration to not to overshoot target apoapsis
 			de_acc_1s["do"]({
 				HUDTEXT("Decreasing acceleration", 2, 2, 42, green, false).
 				UNLOCK PIDC.
@@ -195,81 +203,37 @@ UNTIL done{
 				LOCK THROTTLE TO MIN( TAN( CONSTANT:Radtodeg*(1-(APOAPSIS/trgt["alt"]))*5 ), 1).
 			}).
 		}
+		
+		IF ALTITUDE > 40000 AND STAGE:LIQUIDFUEL < 5 {
+			fairing_1s["do"]({
+				SET fairing TO getModules("ModuleProceduralFairing").
+				IF fairing:LENGTH > 0{
+					FOR fpart IN fairing:VALUES {
+						fpart:GETMODULE("ModuleProceduralFairing"):DOEVENT("DEPLOY").
+					}
+				}ELSE{
+					HUDTEXT("NO FAIRINGS DETECTED", 2, 2, 42, RGB(255,60,0), false).
+				}
+				SET wait_rcs to TIME:SECONDS.
+			}).
+		}//eject fairing	
+		
 		IF ROUND(APOAPSIS) >= trgt["alt"] AND ALTITUDE>70000{
 			LOCK THROTTLE TO 0.
 			HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
 			CLEARSCREEN.
-			SET timer3 TO TIME:SECONDS.
 			//leaving thrusting section at that time
 			SET root_part:TAG TO "COASTING".
 		}
 	}//--thrusting
 	
-	IF root_part:TAG = "COASTING"{
-		IF TIME:SECONDS > (timer3 + 2) AND deploy_1s["get"]>0{
-			HUDTEXT("WARPING", 2, 2, 42, green, false).
-			SET WARPMODE TO "RAILS".
-			WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
-			IF STAGE:RESOURCES["ELECTRICCHARGE"]:CAPACITY / STAGE:RESOURCES["ELECTRICCHARGE"]:AMOUNT < 10{
-				SET root_part:TAG TO "EC_SAVING".
-			}
-			IF ETA:APOAPSIS < 60 AND ETA:APOAPSIS <> 0{
-				CANCELWARP
-				SET root_part:TAG TO "KERBINJECTION".
-			}
-		}
-	}//--coasting
-	IF root_part:TAG = "EC_SAVING"{
-		CANCELWARP.
-		RCS ON.
-		
-	}
-	IF doneStaging=false{
-		IF STAGE:LIQUIDFUEL < 1 AND stg_res:HASKEY("LIQUIDFUEL"){
-			//FOR eng IN ship_engines{
-				//eng:SHUTDOWN.
-			//}
-			chronos:CONNECTION:SENDMESSAGE(2).
-			HUDTEXT("OUT OF LIQUID FUEL", 1, 2, 42, green, false).
-
-			IF NOT CORE:MESSAGES:EMPTY{
-				SET is_done TO CORE:MESSAGES:POP.
-				IF is_done:CONTENT = "done"{
-					HUDTEXT("SEPARATING...", 1, 2, 42, green, false).
-					SET doneStaging TO doStage().
-					CLEARSCREEN.
-				}
-			}
-		}
-		IF STAGE:SOLIDFUEL < 0.1 AND stg_res:HASKEY("SOLIDFUEL"){
-			HUDTEXT("OUT OF SOLID FUEL, STAGING, RESETTING PID", 3, 2, 42, green, false).
-			SET pid_timer TO TIME:SECONDS.
-			PIDC:RESET.
-			SET pid_1s["reset"]().
-			SET doneStaging TO doStage().
-		}
-	}//--staging handler
-	
-	IF ALTITUDE > 40000 AND STAGE:LIQUIDFUEL < 5 {
-		fairing_1s["do"]({
-			SET fairing TO getModules("ModuleProceduralFairing").
-			IF fairing:LENGTH > 0{
-				FOR fpart IN fairing:VALUES {
-					fpart:GETMODULE("ModuleProceduralFairing"):DOEVENT("DEPLOY").
-				}
-			}ELSE{
-				HUDTEXT("NO FAIRINGS DETECTED", 2, 2, 42, RGB(255,60,0), false).
-			}
-			SET wait_rcs to TIME:SECONDS.
-		}).
-	}//eject fairing	
-	
-	IF ALTITUDE > 80000{
+	IF ALTITUDE > 80000 AND from_save = false{
 		deploy_1s["do"]({
 			PANELS ON.
 			RADIATORS ON.
 			SET wait_deploy to TIME:SECONDS.
 		}).
+		
 		IF TIME:SECONDS > (wait_deploy + 3){
 			antennas_1s["do"]({
 				LIGHTS ON.
@@ -304,43 +268,91 @@ UNTIL done{
 		}
 	}//--vacuum, deploy panels and antennas, turn on lights
 	
+	IF root_part:TAG = "COASTING"{
+		IF deploy_1s["get"]() > 0{
+			HUDTEXT("WARPING", 2, 2, 42, green, false).
+			SET WARPMODE TO "RAILS".
+			WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
+			IF STAGE:RESOURCES["ELECTRICCHARGE"]:CAPACITY / STAGE:RESOURCES["ELECTRICCHARGE"]:AMOUNT < 10{
+				SET root_part:TAG TO "EC_SAVING".
+			}
+			IF ETA:APOAPSIS < 60 AND ETA:APOAPSIS <> 0{
+				CANCELWARP.
+				SET root_part:TAG TO "KERBINJECTION".
+			}
+		}
+	}//--coasting
+	
+	IF root_part:TAG = "EC_SAVING"{
+		CANCELWARP.
+		RCS ON.
+		PANELS ON.
+		FUELCELLS ON.
+	}
+	
+	IF done_staging=false{
+		IF STAGE:LIQUIDFUEL < 1 AND stg_res:HASKEY("LIQUIDFUEL"){
+			//FOR eng IN ship_engines{
+				//eng:SHUTDOWN.
+			//}
+			chronos:CONNECTION:SENDMESSAGE(2).
+			HUDTEXT("OUT OF LIQUID FUEL", 1, 2, 42, green, false).
+
+			IF NOT CORE:MESSAGES:EMPTY{
+				SET is_done TO CORE:MESSAGES:POP.
+				IF is_done:CONTENT = "done"{
+					HUDTEXT("SEPARATING...", 1, 2, 42, green, false).
+					SET stg TO doStage().
+					SET done_staging TO stg["done"].
+					SET stg_res TO stg["res"].
+					CLEARSCREEN.
+				}
+			}
+		}
+		IF STAGE:SOLIDFUEL < 0.1 AND stg_res:HASKEY("SOLIDFUEL"){
+			HUDTEXT("OUT OF SOLID FUEL, STAGING, RESETTING PID", 3, 2, 42, green, false).
+			SET pid_timer TO TIME:SECONDS.
+			PIDC:RESET.
+			pid_1s["reset"]().
+			SET stg TO doStage().
+			SET done_staging TO stg["done"].
+			SET stg_res TO stg["res"].
+		}
+	}//--staging handler
+	
 	IF root_part:TAG = "KERBINJECTION"{
 		rcs_1s["do"]({
 			RCS ON.
 		}).
-		IF TIME:SECONDS > (timer3 + 3){
-			circ_prepare_1s["do"]({
-				HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).
-				SET STEERING TO HEADING (0, -5).
-				SET thrott2 TO 1.
-				SET 
-				
-				SET deltaV_change TO calcDeltaV(trgt["alt"]).
-				SET burn_time TO calcBurnTime(deltaV_change).
-			}).
-			
-			IF ETA:APOAPSIS <= burn_time/2{
-				circ_burn_1s["do"]({
-					HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
-					SET pid_timer TO TIME:SECONDS.
-					LOCK thrott2 TO 1-(PERIAPSIS^4/trgt["alt"]^4).
-					SET circ_pid to setPID(trgt["alt"], 0.6).
-					LOCK trgt_pitch TO ROUND(circ_pid:UPDATE(TIME:SECONDS-pid_timer, APOAPSIS), 3).
-					LOCK THROTTLE to thrott2.
-					LOCK STEERING TO HEADING (0, trgt_pitch).
-				}).	
-			}
-			IF FLOOR(PERIAPSIS) = FLOOR(APOAPSIS){
-				UNLOCK thrott2.
-				SET thrott2 TO 0.
-				SET circuralise TO false.
-				HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
-				//we are in the orbit
-				SET done TO true.
-			}
-			PRINT "THROTTLE: " at(0,1).
-			PRINT thrott2 at(18,1).
+		circ_prepare_1s["do"]({
+			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).
+			SET STEERING TO HEADING (0, -5).
+			SET thrott2 TO 1.			
+			SET deltaV_change TO calcDeltaV(trgt["alt"]).
+			SET burn_time TO calcBurnTime(deltaV_change).
+		}).
+		
+		IF ETA:APOAPSIS <= burn_time/2{
+			circ_burn_1s["do"]({
+				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
+				SET pid_timer TO TIME:SECONDS.
+				LOCK thrott2 TO 1-(PERIAPSIS^4/trgt["alt"]^4).
+				SET circ_pid to setPID(trgt["alt"], 0.6).
+				LOCK trgt_pitch TO ROUND(circ_pid:UPDATE(TIME:SECONDS-pid_timer, APOAPSIS), 3).
+				LOCK THROTTLE to thrott2.
+				LOCK STEERING TO HEADING (0, trgt_pitch).
+			}).	
 		}
+		IF FLOOR(PERIAPSIS) = FLOOR(APOAPSIS){
+			UNLOCK thrott2.
+			SET thrott2 TO 0.
+			SET circuralise TO false.
+			HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
+			//we are in the orbit
+			SET done TO true.
+		}
+		PRINT "THROTTLE: " at(0,1).
+		PRINT thrott2 at(18,1).
 	}//target orbit injection
 	
 	WAIT 0.
