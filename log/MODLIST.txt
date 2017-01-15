@@ -1,0 +1,1429 @@
+MODULES FOR PART NAMED fairingSize1 (Satellite Test 8)
+MODULES FOR PART NAMED proceduralTankLiquid
+MODULES FOR PART NAMED radialDecoupler
+MODULES FOR PART NAMED SYSRB.0625L5
+MODULES FOR PART NAMED standardNoseCone
+MODULES FOR PART NAMED parachuteRadial
+MODULES FOR PART NAMED radialDecoupler
+MODULES FOR PART NAMED SYSRB.0625L5
+MODULES FOR PART NAMED standardNoseCone
+MODULES FOR PART NAMED parachuteRadial
+MODULES FOR PART NAMED basicFin
+MODULES FOR PART NAMED basicFin
+MODULES FOR PART NAMED launchClamp1
+MODULES FOR PART NAMED launchClamp1
+MODULES FOR PART NAMED liquidEngine2
+MODULES FOR PART NAMED stackSeparatorMini
+MODULES FOR PART NAMED proceduralTankLiquid
+MODULES FOR PART NAMED cl.mini.asas
+MODULES FOR PART NAMED sensorGravimeter
+MODULES FOR PART NAMED sensorAccelerometer
+MODULES FOR PART NAMED probeCoreOcto2
+MODULES FOR PART NAMED KR-2042
+MODULES FOR PART NAMED batteryBankMini
+MODULES FOR PART NAMED solarPanels3
+MODULES FOR PART NAMED solarPanels3
+MODULES FOR PART NAMED Parabol.KhiNa
+MODULES FOR PART NAMED fairingSize1 (Satellite Test 8):
+   -LIST of 6 items:
+[0] = "ModuleProceduralFairing"
+[1] = "ModuleCargoBay"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED liquidEngine2:
+   -LIST of 11 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleJettison"
+[2] = "ModuleGimbal"
+[3] = "FXModuleAnimateThrottle"
+[4] = "ModuleAlternator"
+[5] = "ModuleSurfaceFX"
+[6] = "ModuleTestSubject"
+[7] = "ModuleAGX"
+[8] = "tjs_EngineLight"
+[9] = "HotSpotModule"
+[10] = "KOSNameTag"
+MODULES FOR PART NAMED stackSeparatorMini:
+   -LIST of 8 items:
+[0] = "ModuleDecouple"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED cl.mini.asas:
+   -LIST of 5 items:
+[0] = "ModuleReactionWheel"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorGravimeter:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorAccelerometer:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED probeCoreOcto2:
+   -LIST of 11 items:
+[0] = "ModuleCommand"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "ModuleScienceContainer"
+[5] = "ModuleScienceExperiment"
+[6] = "KOSNameTag"
+[7] = "ModuleSPU"
+[8] = "ModuleRTAntennaPassive"
+[9] = "ModuleTripLogger"
+[10] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED KR-2042:
+   -LIST of 8 items:
+[0] = "kOSProcessor"
+[1] = "ModuleLight"
+[2] = "kOSLightModule"
+[3] = "ModuleAGX"
+[4] = "BulbModule"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "ModulekOSVoidAction"
+MODULES FOR PART NAMED batteryBankMini:
+   -LIST of 5 items:
+[0] = "ModuleAGX"
+[1] = "ModuleControllableEmissive"
+[2] = "ModuleResourceIndicator"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED Parabol.KhiNa:
+   -LIST of 6 items:
+[0] = "ModuleAnimateGeneric"
+[1] = "ModuleRTAntenna"
+[2] = "ModuleSPUPassive"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED fairingSize1 (Satellite Test 8):
+   -LIST of 6 items:
+[0] = "ModuleProceduralFairing"
+[1] = "ModuleCargoBay"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED liquidEngine2:
+   -LIST of 11 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleJettison"
+[2] = "ModuleGimbal"
+[3] = "FXModuleAnimateThrottle"
+[4] = "ModuleAlternator"
+[5] = "ModuleSurfaceFX"
+[6] = "ModuleTestSubject"
+[7] = "ModuleAGX"
+[8] = "tjs_EngineLight"
+[9] = "HotSpotModule"
+[10] = "KOSNameTag"
+MODULES FOR PART NAMED stackSeparatorMini:
+   -LIST of 8 items:
+[0] = "ModuleDecouple"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED cl.mini.asas:
+   -LIST of 5 items:
+[0] = "ModuleReactionWheel"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorGravimeter:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorAccelerometer:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED probeCoreOcto2:
+   -LIST of 11 items:
+[0] = "ModuleCommand"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "ModuleScienceContainer"
+[5] = "ModuleScienceExperiment"
+[6] = "KOSNameTag"
+[7] = "ModuleSPU"
+[8] = "ModuleRTAntennaPassive"
+[9] = "ModuleTripLogger"
+[10] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED KR-2042:
+   -LIST of 8 items:
+[0] = "kOSProcessor"
+[1] = "ModuleLight"
+[2] = "kOSLightModule"
+[3] = "ModuleAGX"
+[4] = "BulbModule"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "ModulekOSVoidAction"
+MODULES FOR PART NAMED batteryBankMini:
+   -LIST of 5 items:
+[0] = "ModuleAGX"
+[1] = "ModuleControllableEmissive"
+[2] = "ModuleResourceIndicator"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED Parabol.KhiNa:
+   -LIST of 6 items:
+[0] = "ModuleAnimateGeneric"
+[1] = "ModuleRTAntenna"
+[2] = "ModuleSPUPassive"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED fairingSize1 (Satellite Test 8):
+   -LIST of 6 items:
+[0] = "ModuleProceduralFairing"
+[1] = "ModuleCargoBay"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED liquidEngine2:
+   -LIST of 11 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleJettison"
+[2] = "ModuleGimbal"
+[3] = "FXModuleAnimateThrottle"
+[4] = "ModuleAlternator"
+[5] = "ModuleSurfaceFX"
+[6] = "ModuleTestSubject"
+[7] = "ModuleAGX"
+[8] = "tjs_EngineLight"
+[9] = "HotSpotModule"
+[10] = "KOSNameTag"
+MODULES FOR PART NAMED stackSeparatorMini:
+   -LIST of 8 items:
+[0] = "ModuleDecouple"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED cl.mini.asas:
+   -LIST of 5 items:
+[0] = "ModuleReactionWheel"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorGravimeter:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorAccelerometer:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED probeCoreOcto2:
+   -LIST of 11 items:
+[0] = "ModuleCommand"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "ModuleScienceContainer"
+[5] = "ModuleScienceExperiment"
+[6] = "KOSNameTag"
+[7] = "ModuleSPU"
+[8] = "ModuleRTAntennaPassive"
+[9] = "ModuleTripLogger"
+[10] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED KR-2042:
+   -LIST of 8 items:
+[0] = "kOSProcessor"
+[1] = "ModuleLight"
+[2] = "kOSLightModule"
+[3] = "ModuleAGX"
+[4] = "BulbModule"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "ModulekOSVoidAction"
+MODULES FOR PART NAMED batteryBankMini:
+   -LIST of 5 items:
+[0] = "ModuleAGX"
+[1] = "ModuleControllableEmissive"
+[2] = "ModuleResourceIndicator"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED Parabol.KhiNa:
+   -LIST of 6 items:
+[0] = "ModuleAnimateGeneric"
+[1] = "ModuleRTAntenna"
+[2] = "ModuleSPUPassive"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED fairingSize1 (Satellite Test 8):
+   -LIST of 6 items:
+[0] = "ModuleProceduralFairing"
+[1] = "ModuleCargoBay"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED liquidEngine2:
+   -LIST of 11 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleJettison"
+[2] = "ModuleGimbal"
+[3] = "FXModuleAnimateThrottle"
+[4] = "ModuleAlternator"
+[5] = "ModuleSurfaceFX"
+[6] = "ModuleTestSubject"
+[7] = "ModuleAGX"
+[8] = "tjs_EngineLight"
+[9] = "HotSpotModule"
+[10] = "KOSNameTag"
+MODULES FOR PART NAMED stackSeparatorMini:
+   -LIST of 8 items:
+[0] = "ModuleDecouple"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED cl.mini.asas:
+   -LIST of 5 items:
+[0] = "ModuleReactionWheel"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorGravimeter:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorAccelerometer:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED probeCoreOcto2:
+   -LIST of 11 items:
+[0] = "ModuleCommand"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "ModuleScienceContainer"
+[5] = "ModuleScienceExperiment"
+[6] = "KOSNameTag"
+[7] = "ModuleSPU"
+[8] = "ModuleRTAntennaPassive"
+[9] = "ModuleTripLogger"
+[10] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED KR-2042:
+   -LIST of 8 items:
+[0] = "kOSProcessor"
+[1] = "ModuleLight"
+[2] = "kOSLightModule"
+[3] = "ModuleAGX"
+[4] = "BulbModule"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "ModulekOSVoidAction"
+MODULES FOR PART NAMED batteryBankMini:
+   -LIST of 5 items:
+[0] = "ModuleAGX"
+[1] = "ModuleControllableEmissive"
+[2] = "ModuleResourceIndicator"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED Parabol.KhiNa:
+   -LIST of 6 items:
+[0] = "ModuleAnimateGeneric"
+[1] = "ModuleRTAntenna"
+[2] = "ModuleSPUPassive"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED fairingSize1 (Satellite Test 8):
+   -LIST of 6 items:
+[0] = "ModuleProceduralFairing"
+[1] = "ModuleCargoBay"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED radialDecoupler:
+   -LIST of 8 items:
+[0] = "ModuleAnchoredDecoupler"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED SYSRB.0625L5:
+   -LIST of 8 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleGimbal"
+[2] = "ModuleTestSubject"
+[3] = "ModuleSurfaceFX"
+[4] = "ModuleAGX"
+[5] = "tjs_EngineLight"
+[6] = "HotSpotModule"
+[7] = "KOSNameTag"
+MODULES FOR PART NAMED standardNoseCone:
+   -LIST of 4 items:
+[0] = "ModuleAnimateHeat"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED parachuteRadial:
+   -LIST of 7 items:
+[0] = "ModuleParachute"
+[1] = "ModuleTestSubject"
+[2] = "ModuleDragModifier"
+[3] = "ModuleDragModifier"
+[4] = "ModuleAGX"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED basicFin:
+   -LIST of 4 items:
+[0] = "ModuleLiftingSurface"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED launchClamp1:
+   -LIST of 9 items:
+[0] = "LaunchClamp"
+[1] = "ModuleGenerator"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+[6] = "ModuleRTAntennaPassive"
+[7] = "KJRLaunchClampReinforcementModule"
+[8] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED liquidEngine2:
+   -LIST of 11 items:
+[0] = "ModuleEnginesFX"
+[1] = "ModuleJettison"
+[2] = "ModuleGimbal"
+[3] = "FXModuleAnimateThrottle"
+[4] = "ModuleAlternator"
+[5] = "ModuleSurfaceFX"
+[6] = "ModuleTestSubject"
+[7] = "ModuleAGX"
+[8] = "tjs_EngineLight"
+[9] = "HotSpotModule"
+[10] = "KOSNameTag"
+MODULES FOR PART NAMED stackSeparatorMini:
+   -LIST of 8 items:
+[0] = "ModuleDecouple"
+[1] = "ModuleToggleCrossfeed"
+[2] = "ModuleTestSubject"
+[3] = "ModuleAGX"
+[4] = "tjs_DecouplerLight"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "KJRDecouplerReinforcementModule"
+MODULES FOR PART NAMED proceduralTankLiquid:
+   -LIST of 9 items:
+[0] = "ProceduralPart"
+[1] = "ProceduralShapeCylinder"
+[2] = "ProceduralShapeCone"
+[3] = "ProceduralShapePill"
+[4] = "ProceduralShapeBezierCone"
+[5] = "TankContentSwitcher"
+[6] = "ModuleAGX"
+[7] = "HotSpotModule"
+[8] = "KOSNameTag"
+MODULES FOR PART NAMED cl.mini.asas:
+   -LIST of 5 items:
+[0] = "ModuleReactionWheel"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorGravimeter:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED sensorAccelerometer:
+   -LIST of 5 items:
+[0] = "ModuleEnviroSensor"
+[1] = "ModuleScienceExperiment"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED probeCoreOcto2:
+   -LIST of 11 items:
+[0] = "ModuleCommand"
+[1] = "ModuleSAS"
+[2] = "ModuleAGX"
+[3] = "HotSpotModule"
+[4] = "ModuleScienceContainer"
+[5] = "ModuleScienceExperiment"
+[6] = "KOSNameTag"
+[7] = "ModuleSPU"
+[8] = "ModuleRTAntennaPassive"
+[9] = "ModuleTripLogger"
+[10] = "ModuleRTDataTransmitter"
+MODULES FOR PART NAMED KR-2042:
+   -LIST of 8 items:
+[0] = "kOSProcessor"
+[1] = "ModuleLight"
+[2] = "kOSLightModule"
+[3] = "ModuleAGX"
+[4] = "BulbModule"
+[5] = "HotSpotModule"
+[6] = "KOSNameTag"
+[7] = "ModulekOSVoidAction"
+MODULES FOR PART NAMED batteryBankMini:
+   -LIST of 5 items:
+[0] = "ModuleAGX"
+[1] = "ModuleControllableEmissive"
+[2] = "ModuleResourceIndicator"
+[3] = "HotSpotModule"
+[4] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED solarPanels3:
+   -LIST of 4 items:
+[0] = "ModuleDeployableSolarPanel"
+[1] = "ModuleAGX"
+[2] = "HotSpotModule"
+[3] = "KOSNameTag"
+MODULES FOR PART NAMED Parabol.KhiNa:
+   -LIST of 6 items:
+[0] = "ModuleAnimateGeneric"
+[1] = "ModuleRTAntenna"
+[2] = "ModuleSPUPassive"
+[3] = "ModuleAGX"
+[4] = "HotSpotModule"
+[5] = "KOSNameTag"
+LEXICON of 1 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+LEXICON of 2 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+LEXICON of 3 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+LEXICON of 4 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+LEXICON of 5 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+LEXICON of 6 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+LEXICON of 6 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+LEXICON of 6 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+LEXICON of 6 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+LEXICON of 6 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+LEXICON of 7 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+LEXICON of 7 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+LEXICON of 8 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+LEXICON of 8 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+LEXICON of 9 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+LEXICON of 10 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+LEXICON of 10 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+LEXICON of 11 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+LEXICON of 12 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+["sensorGravimeter"] = "PART(sensorGravimeter,uid=4294194482)"
+LEXICON of 13 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+["sensorGravimeter"] = "PART(sensorGravimeter,uid=4294194482)"
+["sensorAccelerometer"] = "PART(sensorAccelerometer,uid=4294194450)"
+LEXICON of 14 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+["sensorGravimeter"] = "PART(sensorGravimeter,uid=4294194482)"
+["sensorAccelerometer"] = "PART(sensorAccelerometer,uid=4294194450)"
+["probeCoreOcto2"] = "PART(probeCoreOcto2,uid=4294194418)"
+LEXICON of 15 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+["sensorGravimeter"] = "PART(sensorGravimeter,uid=4294194482)"
+["sensorAccelerometer"] = "PART(sensorAccelerometer,uid=4294194450)"
+["probeCoreOcto2"] = "PART(probeCoreOcto2,uid=4294194418)"
+["KR-2042"] = "PART(KR-2042,uid=4294194368)"
+LEXICON of 16 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+["sensorGravimeter"] = "PART(sensorGravimeter,uid=4294194482)"
+["sensorAccelerometer"] = "PART(sensorAccelerometer,uid=4294194450)"
+["probeCoreOcto2"] = "PART(probeCoreOcto2,uid=4294194418)"
+["KR-2042"] = "PART(KR-2042,uid=4294194368)"
+["batteryBankMini"] = "PART(batteryBankMini,uid=4294193764)"
+LEXICON of 17 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+["sensorGravimeter"] = "PART(sensorGravimeter,uid=4294194482)"
+["sensorAccelerometer"] = "PART(sensorAccelerometer,uid=4294194450)"
+["probeCoreOcto2"] = "PART(probeCoreOcto2,uid=4294194418)"
+["KR-2042"] = "PART(KR-2042,uid=4294194368)"
+["batteryBankMini"] = "PART(batteryBankMini,uid=4294193764)"
+["solarPanels3"] = "PART(solarPanels3,uid=4294193704)"
+LEXICON of 17 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+["sensorGravimeter"] = "PART(sensorGravimeter,uid=4294194482)"
+["sensorAccelerometer"] = "PART(sensorAccelerometer,uid=4294194450)"
+["probeCoreOcto2"] = "PART(probeCoreOcto2,uid=4294194418)"
+["KR-2042"] = "PART(KR-2042,uid=4294194368)"
+["batteryBankMini"] = "PART(batteryBankMini,uid=4294193764)"
+["solarPanels3"] = "PART(solarPanels3,uid=4294193704)"
+LEXICON of 18 items:
+["fairingSize1 (Satellite Test 8)"] = "PART(fairingSize1 (Satellite Test 8),uid=4294195612)"
+["proceduralTankLiquid"] = "PART(proceduralTankLiquid,uid=4294195592)"
+["radialDecoupler"] = "PART(radialDecoupler,uid=4294195522)"
+["SYSRB.0625L5"] = "PART(SYSRB.0625L5,uid=4294195464)"
+["standardNoseCone"] = "PART(standardNoseCone,uid=4294195384)"
+["parachuteRadial"] = "PART(parachuteRadial,uid=4294195342)"
+["basicFin"] = "PART(basicFin,uid=4294195046)"
+["launchClamp1"] = "PART(launchClamp1,uid=4294194974)"
+["liquidEngine2"] = "PART(liquidEngine2,uid=4294194738)"
+["stackSeparatorMini"] = "PART(stackSeparatorMini,uid=4294194632)"
+["cl.mini.asas"] = "PART(cl.mini.asas,uid=4294194522)"
+["sensorGravimeter"] = "PART(sensorGravimeter,uid=4294194482)"
+["sensorAccelerometer"] = "PART(sensorAccelerometer,uid=4294194450)"
+["probeCoreOcto2"] = "PART(probeCoreOcto2,uid=4294194418)"
+["KR-2042"] = "PART(KR-2042,uid=4294194368)"
+["batteryBankMini"] = "PART(batteryBankMini,uid=4294193764)"
+["solarPanels3"] = "PART(solarPanels3,uid=4294193704)"
+["Parabol.KhiNa"] = "PART(Parabol.KhiNa,uid=4294193492)"

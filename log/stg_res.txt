@@ -1,0 +1,6 @@
+next stage---
+LEXICON of 4 items:
+["LiquidFuel"] = 58.02
+["Oxidizer"] = 70.92
+["MonoPropellant"] = 12.14
+["ElectricCharge"] = 210.005

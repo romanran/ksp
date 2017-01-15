@@ -1,0 +1,6 @@
+TIME(95193)MISSION START - SHIP("Sat-1")
+next stage---
+LEXICON of 1 items:
+["SolidFuel"] = 2
+TIME(105155)slowing down procedure
+TIME(105205)PHASE 1 Completed
