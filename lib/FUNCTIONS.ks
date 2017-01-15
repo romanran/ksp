@@ -29,26 +29,22 @@ function checkProperty{
 function getStageResources{
 	SET res_l TO LEXICON().
 	wait 0.1.
-	print STAGE:RESOURCES.
 	FOR res IN STAGE:RESOURCES{
 		IF res:CAPACITY > 0{
-			res_l:ADD(res:NAME, res:CAPACITY, res:AMOUNT).
+			res_l:ADD(res:NAME, res).
 		}
 	}
-	CLEARSCREEN.
 	RETURN res_l.
 }
 
 function getResources{
 	SET res_l TO LEXICON().
 	wait 0.1.
-	print SHIP:RESOURCES.
 	FOR res IN SHIP:RESOURCES{
 		IF res:CAPACITY > 0{
-			res_l:ADD(res:NAME, res:CAPACITY, res:AMOUNT).
+			res_l:ADD(res:NAME, res).
 		}
 	}
-	CLEARSCREEN.
 	RETURN res_l.
 }
 
@@ -75,8 +71,8 @@ function calcDeltaV{
 	// Takes target altitude as a parameter
 	LOCAL PARAMETER target_alt.
 	LOCAL PARAMETER ms IS 1000.1.
-	//LOCAL PARAMETER circ_m IS NODE(TIME:SECONDS+ETA:APOAPSIS, 0, 0, ms).
-	LOCAL PARAMETER circ_m IS NODE(TIME:SECONDS+10, 0, 0, ms).
+	LOCAL PARAMETER circ_m IS NODE(TIME:SECONDS+ETA:APOAPSIS, 0, 0, ms).
+	//LOCAL PARAMETER circ_m IS NODE(TIME:SECONDS+10, 0, 0, ms).
 	LOCAL PARAMETER i IS 0.
 	SET i TO i + 1.
 	IF i>100{

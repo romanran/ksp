@@ -36,13 +36,13 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	PRINT "Comm range:"+trgt["r"]+"m.".
 	PRINT "Target altitude:"+trgt["alt"]+"m.".
 	SET start TO false.
+	SET done TO true.
 
 	UNLOCK PIDC.
 	SET from_save TO false.
 	SET PIDC to setPID(0, 1).
 	SET PIDC:MAXOUTPUT TO 1.
 	SET PIDC:MINOUTPUT TO 1.
-	PRINT calcDeltaV(1000).
 	SET thrott TO 1.
 	SET trgt_pitch TO 0.
 	SET safe_alt TO 150.
@@ -53,6 +53,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	SET stg TO LEXICON().
 	SET stg_res TO LEXICON().
 	SET ship_res TO getResources().
+	PRINT ship_res["ELECTRICCHARGE"]:AMOUNT.
 
 	//add once objects
 	SET pitch2_1s TO doOnce().
@@ -73,7 +74,6 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	SET PIDC:SETPOINT TO target_kpa.
 
 
-	PRINT "READY FOR LAUNCH CONFIRMATION ON AG1...".
 	SET first_stage_engines TO LIST().
 	SET antennas TO getModules("ModuleRTAntenna").
 	LOCAL last_eng_i TO 0.
@@ -98,13 +98,14 @@ IF SHIP:STATUS = "PRELAUNCH"{
 		}
 		SET start TO TRUE.
 	}
-	PRINT "SYSTEMS READY".
+	PRINT "ALL SYSTEMS GO. AWAITING LAUNCH CONFIRMATION ON AG1...".
 	WAIT UNTIL start = TRUE.
 
 	FROM{ LOCAL i is 5.} UNTIL i < 0 STEP { SET i TO i-1.} DO{
 		IF i = 0{
 			SET root_part:TAG TO "LIFTOFF".
 			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
+			SET done TO false.
 		}ELSE{
 			HUDTEXT(i+"...", 1, 2, 30, green, false).
 		}
@@ -146,7 +147,9 @@ UNTIL done{
 			LOCK dyn_p TO ROUND(SHIP:Q*CONSTANT:ATMtokPa, 3).
 			LOCK thrott TO MAX(ROUND(PIDC:UPDATE(TIME:SECONDS-pid_timer, dyn_p), 3), 0.01).
 			SET once_thrott TO false.
-			doStage().
+			SET stg TO doStage().
+			SET done_staging TO stg["done"].
+			SET stg_res TO stg["res"].
 			SET root_part:TAG TO "THRUSTING".
 			CLEARSCREEN.
 		}).
@@ -175,9 +178,9 @@ UNTIL done{
 		PRINT "T.KPA:" at(0,4).
 		PRINT dyn_p at(18,4).
 		
-		HUDTEXT("THR: "+thrott, 1, 3, 12, green, false).
-		HUDTEXT("T. kPa: "+target_kpa, 1, 3, 12, green, false).
-		HUDTEXT("kPa: "+dyn_p, 1, 3, 12, green, false).
+		HUDTEXT("THR: "+ROUND(thrott), 0.5, 3, 12, green, false).
+		HUDTEXT("T. kPa: "+ROUND(target_kpa), 0.5, 3, 12, green, false).
+		HUDTEXT("kPa: "+ROUND(dyn_p), 0.5, 3, 12, green, false).
 		HUDTEXT("PITCH: "+ (90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR)), 0.01, 3, 12, green, false).
 		
 		IF trgt_pitch > 89{
@@ -214,7 +217,6 @@ UNTIL done{
 				}ELSE{
 					HUDTEXT("NO FAIRINGS DETECTED", 2, 2, 42, RGB(255,60,0), false).
 				}
-				SET wait_rcs to TIME:SECONDS.
 			}).
 		}//eject fairing	
 		
@@ -273,19 +275,19 @@ UNTIL done{
 			HUDTEXT("WARPING", 2, 2, 42, green, false).
 			SET WARPMODE TO "RAILS".
 			WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
-			IF STAGE:RESOURCES["ELECTRICCHARGE"]:CAPACITY / STAGE:RESOURCES["ELECTRICCHARGE"]:AMOUNT < 10{
-				SET root_part:TAG TO "EC_SAVING".
-			}
-			IF ETA:APOAPSIS < 60 AND ETA:APOAPSIS <> 0{
-				CANCELWARP.
-				SET root_part:TAG TO "KERBINJECTION".
-			}
+		}
+		IF ETA:APOAPSIS < 60 AND ETA:APOAPSIS <> 0{
+			CANCELWARP.
+			SET root_part:TAG TO "KERBINJECTION".
 		}
 	}//--coasting
 	
-	IF root_part:TAG = "EC_SAVING"{
+	IF ship_res["ELECTRICCHARGE"]:CAPACITY / ship_res["ELECTRICCHARGE"]:AMOUNT < 10{
+		//electic charge saving and generation
 		CANCELWARP.
 		RCS ON.
+		SAS OFF.
+		UNLOCK STEERING.
 		PANELS ON.
 		FUELCELLS ON.
 	}
@@ -330,6 +332,7 @@ UNTIL done{
 			SET thrott2 TO 1.			
 			SET deltaV_change TO calcDeltaV(trgt["alt"]).
 			SET burn_time TO calcBurnTime(deltaV_change).
+			PRINT burn_time.
 		}).
 		
 		IF ETA:APOAPSIS <= burn_time/2{
