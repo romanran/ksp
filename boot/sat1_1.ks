@@ -56,7 +56,6 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	PRINT ship_res["ELECTRICCHARGE"]:AMOUNT.
 
 	//add once objects
-	SET pitch2_1s TO doOnce().
 	SET set_throttle_1s TO doOnce().
 	SET deploy_1s TO doOnce().
 	SET antennas_1s TO doOnce().
@@ -66,6 +65,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	SET circ_burn_1s TO doOnce().
 	SET de_acc_1s TO doOnce().
 	SET abort_1s TO doOnce().
+	SET warp_1s TO doOnce().
 
 	SET wait_ready to true.
 
@@ -98,16 +98,19 @@ IF SHIP:STATUS = "PRELAUNCH"{
 		}
 		SET start TO TRUE.
 	}
-	PRINT "ALL SYSTEMS GO. AWAITING LAUNCH CONFIRMATION ON AG1...".
+	PRINT "ALL SYSTEMS ARE GO.".
+	PRINT "AWAITING LAUNCH CONFIRMATION ON AG1...".
 	WAIT UNTIL start = TRUE.
 
-	FROM{ LOCAL i is 5.} UNTIL i < 0 STEP { SET i TO i-1.} DO{
+	FROM{ LOCAL i IS 5.} UNTIL i < 0 STEP { SET i TO i-1.} DO{
 		IF i = 0{
-			SET root_part:TAG TO "LIFTOFF".
 			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
-			SET done TO false.
 		}ELSE{
 			HUDTEXT(i+"...", 1, 2, 30, green, false).
+		}
+		IF i = 1{
+			SET root_part:TAG TO "LIFTOFF".
+			SET done TO false.
 		}
 		IF i = 4{
 			LOCK THROTTLE TO 1.
@@ -142,6 +145,7 @@ UNTIL done{
 			SET pitch_1s TO doOnce().
 			SET pid_1s TO doOnce().
 			SET pid_timer TO TIME:SECONDS.
+			SET printer_timer TO TIME:SECONDS.
 			LOCK THROTTLE TO thrott.
 			LOCK accvec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV.
 			LOCK dyn_p TO ROUND(SHIP:Q*CONSTANT:ATMtokPa, 3).
@@ -168,6 +172,7 @@ UNTIL done{
 				PIDC:RESET.
 			}).
 		}
+		
 		SET PIDC:SETPOINT TO target_kpa.
 		PRINT "THR" at(0,1).
 		PRINT thrott at(18,1).
@@ -178,17 +183,14 @@ UNTIL done{
 		PRINT "T.KPA:" at(0,4).
 		PRINT dyn_p at(18,4).
 		
-		HUDTEXT("THR: "+ROUND(thrott), 0.5, 3, 12, green, false).
-		HUDTEXT("T. kPa: "+ROUND(target_kpa), 0.5, 3, 12, green, false).
-		HUDTEXT("kPa: "+ROUND(dyn_p), 0.5, 3, 12, green, false).
-		HUDTEXT("PITCH: "+ (90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR)), 0.01, 3, 12, green, false).
-		
-		IF trgt_pitch > 89{
-			pitch2_1s({
-				UNLOCK STEERING.
-			}).
+		IF printer_timer +1 = TIME:SECONDS {
+			HUDTEXT("THR: "+ROUND(thrott), 1, 3, 12, green, false).
+			HUDTEXT("T. kPa: "+ROUND(target_kpa), 1, 3, 12, green, false).
+			HUDTEXT("kPa: "+ROUND(dyn_p), 1, 3, 12, green, false).
+			HUDTEXT("PITCH: "+ (90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR)), 1, 3, 12, green, false).
+			SET printer_timer TO TIME:SECONDS.
 		}
-		
+			
 		IF ship_p < 0 AND ALTITUDE < 40000{
 			//if ship is off course
 			abort_1s["do"]({
@@ -272,19 +274,22 @@ UNTIL done{
 	
 	IF root_part:TAG = "COASTING"{
 		IF deploy_1s["get"]() > 0{
-			HUDTEXT("WARPING", 2, 2, 42, green, false).
-			SET WARPMODE TO "RAILS".
-			WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
+			warp_1s["do"](
+				HUDTEXT("WARPING", 2, 2, 42, green, false).
+				SET WARPMODE TO "RAILS".
+				WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
+			).
 		}
 		IF ETA:APOAPSIS < 60 AND ETA:APOAPSIS <> 0{
-			CANCELWARP.
+			KUNIVERSE:TIMEWARP:CANCELWARP().
 			SET root_part:TAG TO "KERBINJECTION".
 		}
 	}//--coasting
 	
-	IF ship_res["ELECTRICCHARGE"]:CAPACITY / ship_res["ELECTRICCHARGE"]:AMOUNT < 10{
+	IF (ship_res["ELECTRICCHARGE"]:AMOUNT / ship_res["ELECTRICCHARGE"]:CAPACITY)*100 < 10{
+		//if below 10% of max ships capacity
 		//electic charge saving and generation
-		CANCELWARP.
+		KUNIVERSE:TIMEWARP:CANCELWARP().
 		RCS ON.
 		SAS OFF.
 		UNLOCK STEERING.
@@ -330,8 +335,8 @@ UNTIL done{
 			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).
 			SET STEERING TO HEADING (0, -5).
 			SET thrott2 TO 1.			
-			SET deltaV_change TO calcDeltaV(trgt["alt"]).
-			SET burn_time TO calcBurnTime(deltaV_change).
+			SET dV_change TO calcDeltaV(trgt["alt"]).
+			SET burn_time TO calcBurnTime(dV_change).
 			PRINT burn_time.
 		}).
 		

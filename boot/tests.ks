@@ -6,14 +6,14 @@ PRINT "TEST START...".
 COPYPATH("0:lib/DOONCE", "1:").
 //COPYPATH("0:lib/GETRESOURCES_f", "1:").
 //COPYPATH("0:lib/TRAJECTORY", "1:").
-//COPYPATH("0:lib/FUNCTIONS", "1:").
+COPYPATH("0:lib/FUNCTIONS", "1:").
 //RUNPATH("GETMODULES").
 //RUNPATH("COMSAT_HEIGHT").
 //RUNPATH("PID").
 RUNPATH("DOONCE").
 //RUNPATH("GETRESOURCES").
 //RUNPATH("TRAJECTORY").
-//RUNPATH("FUNCTIONS").
+RUNPATH("FUNCTIONS").
 
 SET once_1 TO doOnce().
 SET once_2 TO doOnce().
@@ -32,7 +32,11 @@ function testWParam{
 
 UNTIL i > loops{
 	PRINT i.
-	once_1["do"]({ print "once 1 call on loop: "+i.}).
+	once_1["do"]({ 
+		print "once 1 call on loop: "+i.
+		SET dV_change TO calcDeltaV(700000).
+		PRINT dV_change.
+	}).
 	once_2["do"](testStage@).
 	once_3["do"](testWParam@, "test parameter").
 
