@@ -24,9 +24,13 @@ function doOnce {
 	function resetIt {
 		SET calls TO 0.
 	}
+	function getCalls{
+		return call.
+	}
 
 	return lex(
 		"do", call@,
+		"get", getCalls@,
 		"reset", resetIt@
 	).
 }

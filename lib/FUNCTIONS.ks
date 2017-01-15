@@ -2,6 +2,11 @@ function doStage{
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
 		STAGE.
 		SET stg_res TO getResources().
+		IF STAGE:NUMBER = 0{
+			return true.
+		}else{
+			return false.
+		}
 	}
 }
 function checkProperty{
@@ -14,6 +19,38 @@ function checkProperty{
 	}
 	return bool.
 }
+
+function getResources{
+	SET res_l TO LEXICON().
+	wait 0.1.
+	print STAGE:RESOURCES.
+	FOR RES IN STAGE:RESOURCES{
+		IF RES:CAPACITY > 0{
+			res_l:ADD(RES:NAME, RES:CAPACITY).
+		}
+	}
+	CLEARSCREEN.
+	RETURN res_l.
+}
+
+function getModules {
+	parameter m.
+	SET partlist TO SHIP:PARTS.
+	SET mA TO LEXICON().
+	FOR item IN partList {
+		LOCAL moduleList TO item:MODULES.
+		SET i TO 0.
+		FOR module IN moduleList {
+			IF mA:HASKEY(item:NAME+i){
+				SET i TO i+1.
+			}
+			IF module = M{
+				mA:ADD(item:NAME+i, item).
+			}
+		}.
+	}.
+	RETURN mA.
+}.
 
 function calcDeltaV{
 	// Takes target altitude as a parameter
@@ -56,4 +93,10 @@ function calcBurnTime {
   LOCAL g IS 9.80665.                 // Gravitational acceleration constant (m/s²)
 
   RETURN g * m * p * (1 - e^(-dV/(g*p))) / f.
+}
+
+function calcTrajectory{
+	LOCAL PARAMETER alt.
+	DECLARE LOCAL funcx TO ROUND(1-((alt^2)/(70000^2))^0.25,3).
+	RETURN ROUND((SIN(funcx*CONSTANT:RadToDeg))*(90*1.1884),2).
 }
