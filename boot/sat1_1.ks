@@ -75,7 +75,6 @@ IF SHIP:STATUS = "PRELAUNCH"{
 
 
 	SET first_stage_engines TO LIST().
-	SET antennas TO getModules("ModuleRTAntenna").
 	LOCAL last_eng_i TO 0.
 	FOR eng IN ship_engines{
 		IF eng:STAGE > last_eng_i{
@@ -274,11 +273,11 @@ UNTIL done{
 	
 	IF root_part:TAG = "COASTING"{
 		IF deploy_1s["get"]() > 0{
-			warp_1s["do"](
+			warp_1s["do"]({
 				HUDTEXT("WARPING", 2, 2, 42, green, false).
 				SET WARPMODE TO "RAILS".
 				WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
-			).
+			}).
 		}
 		IF ETA:APOAPSIS < 60 AND ETA:APOAPSIS <> 0{
 			KUNIVERSE:TIMEWARP:CANCELWARP().
@@ -335,9 +334,10 @@ UNTIL done{
 			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).
 			SET STEERING TO HEADING (0, -5).
 			SET thrott2 TO 1.			
-			SET dV_change TO calcDeltaV(trgt["alt"]).
+			SET dV_change TO calcDeltaV(trgt["altA"]).
+			HUDTEXT(dV_change, 3, 3, 15, green, false).
 			SET burn_time TO calcBurnTime(dV_change).
-			PRINT burn_time.
+			HUDTEXT(burn_time, 3, 3, 15, green, false).
 		}).
 		
 		IF ETA:APOAPSIS <= burn_time/2{
@@ -356,8 +356,6 @@ UNTIL done{
 			SET thrott2 TO 0.
 			SET circuralise TO false.
 			HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
-			//we are in the orbit
-			SET done TO true.
 		}
 		PRINT "THROTTLE: " at(0,1).
 		PRINT thrott2 at(18,1).
@@ -365,5 +363,3 @@ UNTIL done{
 	
 	WAIT 0.
 }
-
-PRINT "PROGRAM EXECUTED".

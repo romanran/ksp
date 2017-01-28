@@ -5,10 +5,11 @@ function GetTrgtAlt{
 	set h to KERBIN:RADIUS+min_h.
 	set altA to (h/COS(ang)). //absolute
 	set altR to altA-KERBIN:RADIUS. //relative altitude
-	set r to SQRT((altA*altA)*2).//range
-	set r to ROUND(r).
+	set comm_r to SQRT((altA*altA)*2).//range
+	set comm_r to ROUND(comm_r).
 	set o to lexicon().
-	o:ADD("r", r).
+	o:ADD("r", comm_r).
+	o:ADD("altA",  altA).
 	o:ADD("alt", altR).
 	return o.
 }
