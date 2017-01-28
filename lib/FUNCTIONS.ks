@@ -70,26 +70,38 @@ function getModules {
 function calcDeltaV{
 	// Takes target absolute altitude (desired orbit radius) as a parameter
 	LOCAL PARAMETER target_alt.
-	LOCAL grav_param IS SHIP:ORBIT:BODY:MASS. //GM
+	PRINT target_alt AT(0,10).
+	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
 	LOCAL v2 IS SQRT( grav_param * (1/target_alt) ).//speed in a circural orbit
-	RETURN v2 - SHIP:ORBIT:VELOCITY.//return speed difference
+	LOCAL trgtv IS 0.
+	//return speed difference
+	IF v2 > SHIP:VELOCITY:ORBIT:MAG {
+		SET trgtv TO v2 - SHIP:VELOCITY:ORBIT:MAG.
+	}ELSE{
+		SET trgtv TO SHIP:VELOCITY:ORBIT:MAG - v2.
+	}
+	RETURN trgtv.
 }
 function calcBurnTime {
 	// Takes dv as a parameter
 	LOCAL PARAMETER dV.
 	LOCAL f IS 0.
+	LOCAL p IS 0.
 	LIST ENGINES IN en.
 	FOR eng IN en{
 		IF eng:STAGE = STAGE:NUMBER{
-			LOCAL f IS f + eng:MAXTHRUST * 1000.  // Engine Thrust (kg * m/s²)
+			SET f TO f + eng:MAXTHRUST * 1000.  // Engine Thrust (kg * m/s²)
+			SET p TO eng:ISP.               // Engine ISP (s)
 		}
 	}
 	LOCAL m IS SHIP:MASS * 1000.        // Starting mass (kg)
 	LOCAL eul IS CONSTANT:E.            // Base of natural log
-	LOCAL p IS en[0]:ISP.               // Engine ISP (s)
 	LOCAL kerb_g IS 9.80665.                 // Gravitational acceleration constant (m/s²)
-
-  RETURN kerb_g * m * p * (1 - eul^(-dV/( kerb_g*p))) / f.
+	IF f > 0 AND p > 0{
+		RETURN kerb_g * m * p * (1 - eul^(-dV/( kerb_g*p))) / f.
+    }else{
+		RETURN 0.
+	}
 }
 
 function calcTrajectory{

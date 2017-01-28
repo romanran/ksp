@@ -9,12 +9,14 @@ RUNPATH("PID").
 RUNPATH("DOONCE").
 RUNPATH("FUNCTIONS").
 // * TODO*
-// set states in root part tag and check status from there
+//- set states in root part tag and check status from there
 // add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
 // write getNearestPart library for staging purposes 
 // if energy low, start fuel cell
 //rotate craft with pid for maximum sun exposure
 //check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
+//make program creator, move all of the ifs to function and load them on program checklist.
+//save created programs in json
 
 SET root_part TO SHIP:ROOTPART.
 SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
@@ -31,8 +33,18 @@ SET done_staging TO false.
 SET from_save TO true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true.
 SET chronos TO PROCESSOR("chronos").
 
+SET deploy_1s TO doOnce().
+SET antennas_1s TO doOnce().
+SET fairing_1s TO doOnce().
+SET rcs_1s TO doOnce().
+SET circ_prepare_1s TO doOnce().
+SET circ_burn_1s TO doOnce().
+SET de_acc_1s TO doOnce().
+SET abort_1s TO doOnce().
+SET warp_1s TO doOnce().
+
 IF SHIP:STATUS = "PRELAUNCH"{
-	PRINT "V1.1".
+	PRINT "V1.3".
 	PRINT "Comm range:"+trgt["r"]+"m.".
 	PRINT "Target altitude:"+trgt["alt"]+"m.".
 	SET start TO false.
@@ -57,22 +69,9 @@ IF SHIP:STATUS = "PRELAUNCH"{
 
 	//add once objects
 	SET set_throttle_1s TO doOnce().
-	SET deploy_1s TO doOnce().
-	SET antennas_1s TO doOnce().
-	SET fairing_1s TO doOnce().
-	SET rcs_1s TO doOnce().
-	SET circ_prepare_1s TO doOnce().
-	SET circ_burn_1s TO doOnce().
-	SET de_acc_1s TO doOnce().
-	SET abort_1s TO doOnce().
-	SET warp_1s TO doOnce().
 
-	SET wait_ready to true.
-
-	SET timer3 TO TIME:SECONDS.
 	LOCK target_kpa TO MAX(((-ALTITUDE+40000)/40000)*10, 1).
 	SET PIDC:SETPOINT TO target_kpa.
-
 
 	SET first_stage_engines TO LIST().
 	LOCAL last_eng_i TO 0.
@@ -99,10 +98,12 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	}
 	PRINT "ALL SYSTEMS ARE GO.".
 	PRINT "AWAITING LAUNCH CONFIRMATION ON AG1...".
+	PRINT "ABORT ON AG3...".
 	WAIT UNTIL start = TRUE.
 
-	FROM{ LOCAL i IS 5.} UNTIL i < 0 STEP { SET i TO i-1.} DO{
-		IF i = 0{
+	FROM{ LOCAL i IS 5.} UNTIL i < 1 STEP { SET i TO i-1.} DO{
+		WAIT 1.
+		IF i = 1{
 			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 		}ELSE{
 			HUDTEXT(i+"...", 1, 2, 30, green, false).
@@ -114,7 +115,12 @@ IF SHIP:STATUS = "PRELAUNCH"{
 		IF i = 4{
 			LOCK THROTTLE TO 1.
 		}
-		WAIT 1.
+		ON AG3{
+			if ksc_light:LENGTH > 0{
+				ksc_light[0]:GETMODULE("modulelight"):DOACTION("togglelight", false).
+			}
+			reboot.
+		}
 		IF i = 2 {
 			FOR eng IN first_stage_engines{
 				eng:ACTIVATE.
@@ -125,6 +131,8 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	CLEARSCREEN.
 }
 LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
+LOCAL pid_timer IS TIME:SECONDS.
+LOCAL antennas IS getModules("ModuleRTAntenna").
 
 IF from_save = true{
 	SET stg_res TO getStageResources().
@@ -174,13 +182,13 @@ UNTIL done{
 		
 		SET PIDC:SETPOINT TO target_kpa.
 		PRINT "THR" at(0,1).
-		PRINT thrott at(18,1).
+		PRINT thrott at(10,1).
 		PRINT "T.PIT: " at(0,2).
-		PRINT trgt_pitch at(18,2).
-		PRINT "KPA:" at(0,3).
-		PRINT target_kpa  at(18,3).
-		PRINT "T.KPA:" at(0,4).
-		PRINT dyn_p at(18,4).
+		PRINT trgt_pitch at(10,2).
+		PRINT "kPa:" at(0,3).
+		PRINT target_kpa  at(10,3).
+		PRINT "T.kPa:" at(0,4).
+		PRINT dyn_p at(10,4).
 		
 		IF printer_timer +1 = TIME:SECONDS {
 			HUDTEXT("THR: "+ROUND(thrott), 1, 3, 12, green, false).
@@ -240,7 +248,6 @@ UNTIL done{
 		IF TIME:SECONDS > (wait_deploy + 3){
 			antennas_1s["do"]({
 				LIGHTS ON.
-				SET antennas TO getModules("ModuleRTAntenna").
 				IF antennas:LENGTH > 0{
 					HUDTEXT("DEPLOYING ANTENNAS", 2, 2, 42, RGB(55,255,0), false).
 					FOR ant IN antennas:VALUES{
@@ -330,14 +337,17 @@ UNTIL done{
 		rcs_1s["do"]({
 			RCS ON.
 		}).
+		LOCAL burn_time IS -10. //dont fire until its calculated
+		LOCAL dV_change IS 0.
+		LOCAL thrott2 IS 0.
 		circ_prepare_1s["do"]({
 			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).
-			SET STEERING TO HEADING (0, -5).
-			SET thrott2 TO 1.			
+			SET STEERING TO HEADING (0, -5).		
 			SET dV_change TO calcDeltaV(trgt["altA"]).
-			HUDTEXT(dV_change, 3, 3, 15, green, false).
+			PRINT "dv change: "+dV_change AT(0,5).
 			SET burn_time TO calcBurnTime(dV_change).
-			HUDTEXT(burn_time, 3, 3, 15, green, false).
+			PRINT "t: "+burn_time AT(0,6).
+			HUDTEXT(burn_time, 3, 3, 20, green, false).
 		}).
 		
 		IF ETA:APOAPSIS <= burn_time/2{
@@ -353,6 +363,7 @@ UNTIL done{
 		}
 		IF FLOOR(PERIAPSIS) = FLOOR(APOAPSIS){
 			UNLOCK thrott2.
+			UNLOCK STEERING.
 			SET thrott2 TO 0.
 			SET circuralise TO false.
 			HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
