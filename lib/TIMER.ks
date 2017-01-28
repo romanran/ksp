@@ -5,10 +5,8 @@ function Timer {
 	
 	function checkTimer {
 		PARAMETER wait_for.
-		HUDTEXT(wait_for, 5, 4, 30, blue, false).
 		PARAMETER fun IS 0.
 		PARAMETER params IS "empty".
-		HUDTEXT(internal_t + wait_for, 5, 3, 54, blue, false).
 		IF FLOOR(TIME:SECONDS) >= internal_t + wait_for AND invokes = 0{
 			SET invokes TO 1.
 			IF (fun <> 0){
@@ -23,7 +21,6 @@ function Timer {
 
 	function setTimer {
 		SET internal_t TO FLOOR(TIME:SECONDS).
-		HUDTEXT(FLOOR(TIME:SECONDS), 5, 3, 54, red, false).
 		SET invokes TO 0.
 	}
 	

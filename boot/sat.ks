@@ -19,6 +19,7 @@ RUNPATH("FUNCTIONS").
 //check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
 //make program creator, move all of the ifs to function and load them on program checklist.
 //save created programs in json
+// check if start TWR on countdown
 
 LOCAL root_part IS SHIP:ROOTPART.
 SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
@@ -42,6 +43,7 @@ LOCAL circ_prepare_1s IS doOnce().
 LOCAL circ_burn_1s IS doOnce().
 LOCAL de_acc_1s IS doOnce().
 LOCAL abort_1s IS doOnce().
+LOCAL stage_1s IS doOnce().
 LOCAL warp_1s IS doOnce().
 LOCAL set_throttle_1s TO doOnce().
 LOCAL ant_Timer IS Timer().
@@ -57,6 +59,8 @@ LOCAL trgt_pitch IS 0.
 LOCAL thrott IS 0. //throttle
 LOCAL safe_alt IS 150. //safe altitude to release max thrust during a launch
 LOCAL target_kPa IS 1.
+LOCAL burn_time IS -10. //dont fire until its calculated
+LOCAL dV_change IS 0.
 
 IF SHIP:STATUS = "PRELAUNCH"{
 	PRINT "V1.3".
@@ -109,7 +113,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 
 	FROM{ LOCAL i IS 5.} UNTIL i = 0 STEP { SET i TO i-1.} DO{
 		WAIT 1.
-		HUDTEXT(i+"...", 1, 2, 30, green, false).
+		HUDTEXT(i+"...", 1, 2, 40, green, false).
 
 		IF i = 1{
 			SET root_part:TAG TO "LIFTOFF".
@@ -125,6 +129,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 			reboot.
 		}
 		IF i = 2 {
+			HUDTEXT("ENGINE START", 1, 2, 40, green, false).
 			FOR eng IN first_stage_engines{
 				eng:ACTIVATE.
 			}
@@ -139,14 +144,52 @@ LOCAL pid_timer IS TIME:SECONDS.
 SET stg_res TO getStageResources().
 SET ship_res TO getResources().
 
-HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 UNTIL done{
 	ON AG5{
 		//stage override, just in case
-		doStage().
+		SET stg TO doStage().
+		SET done_staging TO stg["done"].
+		SET stg_res TO stg["res"].
 	}
+	IF done_staging=false{
+		IF STAGE:LIQUIDFUEL < 1 AND stg_res:HASKEY("LIQUIDFUEL"){
+			//FOR eng IN ship_engines{
+				//eng:SHUTDOWN.
+			//}
+			stage_1s["do"]({
+				staging_Timer["set"]().
+				HUDTEXT("OUT OF LIQUID FUEL", 1, 2, 42, green, false).
+				HUDTEXT("SEPARATING...", 2, 2, 42, green, false).
+				SET stg TO doStage().
+				SET done_staging TO stg["done"].
+				SET stg_res TO stg["res"].
+				CLEARSCREEN.
+			}).
+		}
+		IF STAGE:SOLIDFUEL < 0.1 AND stg_res:HASKEY("SOLIDFUEL"){
+			stage_1s["do"]({
+				staging_Timer["set"]().
+				HUDTEXT("OUT OF SOLID FUEL, STAGING, RESETTING PID", 6, 2, 42, green, false).
+				SET pid_timer TO TIME:SECONDS.
+				IF DEFINED PIDC{
+					PIDC:RESET.
+				}
+				IF DEFINED pid_1s{
+					pid_1s["reset"]().
+				}
+				SET stg TO doStage().
+				SET done_staging TO stg["done"].
+				SET stg_res TO stg["res"].
+			}).
+		}
+		staging_Timer["ready"](2, {
+			stage_1s["reset"]().
+		}).
+	}//--staging handler
+	
 	IF root_part:TAG = "LIFTOFF" OR root_part:TAG = "THRUSTING"{
 		set_throttle_1s["do"]({
+			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 			SET pitch_1s TO doOnce().
 			SET pid_1s TO doOnce().
 			SET pid_timer TO TIME:SECONDS.
@@ -189,10 +232,10 @@ UNTIL done{
 		PRINT dyn_p at(10,4).
 		
 		IF printer_timer + 1 = FLOOR(TIME:SECONDS) {
-			HUDTEXT("THR: "+ROUND(thrott), 1, 3, 12, green, false).
-			HUDTEXT("T. kPa: "+ROUND(target_kpa), 1, 3, 12, green, false).
-			HUDTEXT("kPa: "+ROUND(dyn_p), 1, 3, 12, green, false).
-			HUDTEXT("PITCH: "+ (90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR)), 1, 3, 12, green, false).
+			HUDTEXT("THR: "+ROUND(thrott, 3)*100, 1.2, 3, 15, green, false).
+			HUDTEXT("T. kPa: "+ROUND(target_kpa, 3), 1.2, 3, 15, green, false).
+			HUDTEXT("kPa: "+ROUND(dyn_p, 3), 1.2, 3, 15, green, false).
+			HUDTEXT("PITCH: "+ ROUND(90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR), 3), 1.2, 3, 15, green, false).
 			SET printer_timer TO FLOOR(TIME:SECONDS).
 		}
 			
@@ -296,45 +339,14 @@ UNTIL done{
 		PANELS ON.
 		FUELCELLS ON.
 	}
-	
-	IF done_staging=false{
-		IF STAGE:LIQUIDFUEL < 1 AND stg_res:HASKEY("LIQUIDFUEL"){
-			//FOR eng IN ship_engines{
-				//eng:SHUTDOWN.
-			//}
-			staging_Timer["set"]().
-			HUDTEXT("OUT OF LIQUID FUEL", 1, 2, 42, green, false).
-			HUDTEXT("WAITING FOR SEAPRATION", 1, 2, 42, green, false).
-			staging_Timer["ready"](1, {
-				HUDTEXT("SEPARATION IN 1...", 1, 2, 42, green, false).
-			}).
-			staging_Timer["ready"](2, {
-				HUDTEXT("SEPARATING...", 2, 2, 42, green, false).
-				SET stg TO doStage().
-				SET done_staging TO stg["done"].
-				SET stg_res TO stg["res"].
-				CLEARSCREEN.
-			}).
-		}
-		IF STAGE:SOLIDFUEL < 0.1 AND stg_res:HASKEY("SOLIDFUEL"){
-			HUDTEXT("OUT OF SOLID FUEL, STAGING, RESETTING PID", 6, 2, 42, green, false).
-			SET pid_timer TO TIME:SECONDS.
-			PIDC:RESET.
-			pid_1s["reset"]().
-			SET stg TO doStage().
-			SET done_staging TO stg["done"].
-			SET stg_res TO stg["res"].
-		}
-	}//--staging handler
-	
+		
 	IF root_part:TAG = "KERBINJECTION"{
 		rcs_1s["do"]({
 			RCS ON.
 		}).
-		LOCAL burn_time IS -10. //dont fire until its calculated
-		LOCAL dV_change IS 0.
-		SET thrott TO 0.
+
 		circ_prepare_1s["do"]({
+			SET thrott TO 0.
 			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).
 			SET STEERING TO HEADING (0, -5).		
 			SET dV_change TO calcDeltaV(trgt["altA"]).
@@ -342,24 +354,24 @@ UNTIL done{
 			SET burn_time TO calcBurnTime(dV_change).
 			PRINT "t: "+burn_time AT(0,6).
 			HUDTEXT(burn_time, 3, 3, 20, green, false).
+			SET STEERING TO SHIP:PROGRADE.
 		}).
 		
-		IF ETA:APOAPSIS <= burn_time/2{
+		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time/2){
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
 				SET pid_timer TO TIME:SECONDS.
-				LOCK thrott TO 1-(PERIAPSIS^4/trgt["alt"]^4).
+				LOCK thrott TO 1-(APOAPSIS^4/trgt["alt"]^4).
 				SET circ_pid to setPID(trgt["alt"], 0.6).
 				LOCK trgt_pitch TO ROUND(circ_pid:UPDATE(TIME:SECONDS-pid_timer, APOAPSIS), 3).
 				LOCK THROTTLE to thrott.
-				LOCK STEERING TO HEADING (0, trgt_pitch).
+				LOCK STEERING TO SHIP:PROGRADE.
 			}).	
 		}
 		IF FLOOR(PERIAPSIS) = FLOOR(APOAPSIS){
 			UNLOCK thrott.
 			UNLOCK STEERING.
 			SET thrott TO 0.
-			SET circuralise TO false.
 			HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
 		}
 		PRINT "THROTTLE: " at(0,1).
