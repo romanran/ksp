@@ -20,7 +20,7 @@ RUNPATH("FUNCTIONS").
 //make program creator, move all of the ifs to function and load them on program checklist.
 //save created programs in json
 
-SET root_part TO SHIP:ROOTPART.
+LOCAL root_part IS SHIP:ROOTPART.
 SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
 CLEARSCREEN.
@@ -28,29 +28,41 @@ SET TERMINAL:CHARWIDTH TO 10.
 SET TERMINAL:CHARHEIGHT TO 12.
 SET TERMINAL:WIDTH TO 37.
 SET TERMINAL:HEIGHT TO 25.
-SET trgt TO GetTrgtAlt(3, 100000).
+LOCAL trgt IS GetTrgtAlt(3, 100000).
 
-SET done TO false.
-SET done_staging TO false.
-SET from_save TO true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true.
+LOCAL done IS false.
+LOCAL done_staging IS false.
+LOCAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true.
 
-SET deploy_1s TO doOnce().
-SET fairing_1s TO doOnce().
-SET rcs_1s TO doOnce().
-SET circ_prepare_1s TO doOnce().
-SET circ_burn_1s TO doOnce().
-SET de_acc_1s TO doOnce().
-SET abort_1s TO doOnce().
-SET warp_1s TO doOnce().
-SET ant_Timer TO Timer().
-SET conn_Timer TO Timer().
-SET staging_Timer TO Timer().
+LOCAL ship_res IS getResources().
+LOCAL deploy_1s IS doOnce().
+LOCAL fairing_1s IS doOnce().
+LOCAL rcs_1s IS doOnce().
+LOCAL circ_prepare_1s IS doOnce().
+LOCAL circ_burn_1s IS doOnce().
+LOCAL de_acc_1s IS doOnce().
+LOCAL abort_1s IS doOnce().
+LOCAL warp_1s IS doOnce().
+LOCAL set_throttle_1s TO doOnce().
+LOCAL ant_Timer IS Timer().
+LOCAL conn_Timer IS Timer().
+LOCAL staging_Timer IS Timer().
+
+LOCAL stg IS LEXICON().
+LOCAL stg_res IS LEXICON().
+LOCAL antennas IS LEXICON().
+LOCAL ship_engines IS LIST().
+
+LOCAL trgt_pitch IS 0.
+LOCAL thrott IS 0. //throttle
+LOCAL safe_alt IS 150. //safe altitude to release max thrust during a launch
+LOCAL target_kPa IS 1.
 
 IF SHIP:STATUS = "PRELAUNCH"{
 	PRINT "V1.3".
 	PRINT "Comm range:"+trgt["r"]+"m.".
 	PRINT "Target altitude:"+trgt["alt"]+"m.".
-	SET start TO false.
+	LOCAL start IS false.
 	SET done TO true.
 
 	UNLOCK PIDC.
@@ -58,23 +70,16 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	SET PIDC to setPID(0, 1).
 	SET PIDC:MAXOUTPUT TO 1.
 	SET PIDC:MINOUTPUT TO 1.
-	SET thrott TO 1.
 	SET trgt_pitch TO 0.
-	SET safe_alt TO 150.
+	SET thrott TO 1.
 	
-	SET ship_engines TO LIST().
 	LIST ENGINES IN ship_engines.
-
-	SET stg TO LEXICON().
-	SET stg_res TO LEXICON().
-
 	//add once objects
-	SET set_throttle_1s TO doOnce().
 
-	LOCK target_kpa TO MAX(((-ALTITUDE+40000)/40000)*10, 1).
-	SET PIDC:SETPOINT TO target_kpa.
+	LOCK target_kPa TO MAX(((-ALTITUDE+40000)/40000)*10, 1).
+	SET PIDC:SETPOINT TO target_kPa.
 
-	SET first_stage_engines TO LIST().
+	LOCAL first_stage_engines IS LIST().
 	LOCAL last_eng_i TO 0.
 	FOR eng IN ship_engines{
 		IF eng:STAGE > last_eng_i{
@@ -87,7 +92,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 		}
 	}
 
-	SET ksc_light TO SHIP:PARTSTAGGED("ksc_light").
+	LOCAL ksc_light TO SHIP:PARTSTAGGED("ksc_light").
 	IF ksc_light:LENGTH > 0{
 		SET ksc_m_light TO ksc_light[0]:GETMODULE("modulelight").
 	}
@@ -102,7 +107,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	PRINT "ABORT ON AG3...".
 	WAIT UNTIL start = TRUE.
 
-	FROM{ LOCAL i IS 5.} UNTIL i <= 1 STEP { SET i TO i-1.} DO{
+	FROM{ LOCAL i IS 5.} UNTIL i = 0 STEP { SET i TO i-1.} DO{
 		WAIT 1.
 		HUDTEXT(i+"...", 1, 2, 30, green, false).
 
@@ -131,12 +136,8 @@ IF SHIP:STATUS = "PRELAUNCH"{
 
 LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
 LOCAL pid_timer IS TIME:SECONDS.
-LOCAL antennas IS getModules("ModuleRTAntenna").
-
-IF from_save = true{
-	SET stg_res TO getStageResources().
-	SET ship_res TO getResources().
-}
+SET stg_res TO getStageResources().
+SET ship_res TO getResources().
 
 HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 UNTIL done{
@@ -239,6 +240,7 @@ UNTIL done{
 		deploy_1s["do"]({
 			PANELS ON.
 			RADIATORS ON.
+			SET antennas TO getModules("ModuleRTAntenna").
 			ant_Timer["set"]().
 		}).
 		
@@ -331,7 +333,7 @@ UNTIL done{
 		}).
 		LOCAL burn_time IS -10. //dont fire until its calculated
 		LOCAL dV_change IS 0.
-		LOCAL thrott2 IS 0.
+		SET thrott TO 0.
 		circ_prepare_1s["do"]({
 			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).
 			SET STEERING TO HEADING (0, -5).		
@@ -346,22 +348,22 @@ UNTIL done{
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
 				SET pid_timer TO TIME:SECONDS.
-				LOCK thrott2 TO 1-(PERIAPSIS^4/trgt["alt"]^4).
+				LOCK thrott TO 1-(PERIAPSIS^4/trgt["alt"]^4).
 				SET circ_pid to setPID(trgt["alt"], 0.6).
 				LOCK trgt_pitch TO ROUND(circ_pid:UPDATE(TIME:SECONDS-pid_timer, APOAPSIS), 3).
-				LOCK THROTTLE to thrott2.
+				LOCK THROTTLE to thrott.
 				LOCK STEERING TO HEADING (0, trgt_pitch).
 			}).	
 		}
 		IF FLOOR(PERIAPSIS) = FLOOR(APOAPSIS){
-			UNLOCK thrott2.
+			UNLOCK thrott.
 			UNLOCK STEERING.
-			SET thrott2 TO 0.
+			SET thrott TO 0.
 			SET circuralise TO false.
 			HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
 		}
 		PRINT "THROTTLE: " at(0,1).
-		PRINT thrott2 at(18,1).
+		PRINT thrott at(18,1).
 	}//target orbit injection
 	
 	WAIT 0.
