@@ -2,10 +2,12 @@ IF ADDONS:RT:HASKSCCONNECTION( SHIP ){
 	COPYPATH("0:lib/COMSAT_HEIGHT", "1:").
 	COPYPATH("0:lib/PID", "1:").
 	COPYPATH("0:lib/DOONCE", "1:").
+	COPYPATH("0:lib/TIMER", "1:").
 	COPYPATH("0:lib/FUNCTIONS", "1:").
 }
 RUNPATH("COMSAT_HEIGHT").
 RUNPATH("PID").
+RUNPATH("TIMER").
 RUNPATH("DOONCE").
 RUNPATH("FUNCTIONS").
 // * TODO*
@@ -31,10 +33,8 @@ SET trgt TO GetTrgtAlt(3, 100000).
 SET done TO false.
 SET done_staging TO false.
 SET from_save TO true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true.
-SET chronos TO PROCESSOR("chronos").
 
 SET deploy_1s TO doOnce().
-SET antennas_1s TO doOnce().
 SET fairing_1s TO doOnce().
 SET rcs_1s TO doOnce().
 SET circ_prepare_1s TO doOnce().
@@ -42,6 +42,9 @@ SET circ_burn_1s TO doOnce().
 SET de_acc_1s TO doOnce().
 SET abort_1s TO doOnce().
 SET warp_1s TO doOnce().
+SET ant_Timer TO Timer().
+SET conn_Timer TO Timer().
+SET staging_Timer TO Timer().
 
 IF SHIP:STATUS = "PRELAUNCH"{
 	PRINT "V1.3".
@@ -64,8 +67,6 @@ IF SHIP:STATUS = "PRELAUNCH"{
 
 	SET stg TO LEXICON().
 	SET stg_res TO LEXICON().
-	SET ship_res TO getResources().
-	PRINT ship_res["ELECTRICCHARGE"]:AMOUNT.
 
 	//add once objects
 	SET set_throttle_1s TO doOnce().
@@ -101,13 +102,10 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	PRINT "ABORT ON AG3...".
 	WAIT UNTIL start = TRUE.
 
-	FROM{ LOCAL i IS 5.} UNTIL i < 1 STEP { SET i TO i-1.} DO{
+	FROM{ LOCAL i IS 5.} UNTIL i <= 1 STEP { SET i TO i-1.} DO{
 		WAIT 1.
-		IF i = 1{
-			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
-		}ELSE{
-			HUDTEXT(i+"...", 1, 2, 30, green, false).
-		}
+		HUDTEXT(i+"...", 1, 2, 30, green, false).
+
 		IF i = 1{
 			SET root_part:TAG TO "LIFTOFF".
 			SET done TO false.
@@ -130,6 +128,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 
 	CLEARSCREEN.
 }
+
 LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
 LOCAL pid_timer IS TIME:SECONDS.
 LOCAL antennas IS getModules("ModuleRTAntenna").
@@ -137,11 +136,9 @@ LOCAL antennas IS getModules("ModuleRTAntenna").
 IF from_save = true{
 	SET stg_res TO getStageResources().
 	SET ship_res TO getResources().
-	SET rcs_1s TO doOnce().
-	SET deploy_1s TO doOnce().
-	SET antennas_1s TO doOnce().
 }
 
+HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 UNTIL done{
 	ON AG5{
 		//stage override, just in case
@@ -152,7 +149,7 @@ UNTIL done{
 			SET pitch_1s TO doOnce().
 			SET pid_1s TO doOnce().
 			SET pid_timer TO TIME:SECONDS.
-			SET printer_timer TO TIME:SECONDS.
+			SET printer_timer TO FLOOR(TIME:SECONDS).
 			LOCK THROTTLE TO thrott.
 			LOCK accvec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV.
 			LOCK dyn_p TO ROUND(SHIP:Q*CONSTANT:ATMtokPa, 3).
@@ -190,12 +187,12 @@ UNTIL done{
 		PRINT "T.kPa:" at(0,4).
 		PRINT dyn_p at(10,4).
 		
-		IF printer_timer +1 = TIME:SECONDS {
+		IF printer_timer + 1 = FLOOR(TIME:SECONDS) {
 			HUDTEXT("THR: "+ROUND(thrott), 1, 3, 12, green, false).
 			HUDTEXT("T. kPa: "+ROUND(target_kpa), 1, 3, 12, green, false).
 			HUDTEXT("kPa: "+ROUND(dyn_p), 1, 3, 12, green, false).
 			HUDTEXT("PITCH: "+ (90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR)), 1, 3, 12, green, false).
-			SET printer_timer TO TIME:SECONDS.
+			SET printer_timer TO FLOOR(TIME:SECONDS).
 		}
 			
 		IF ship_p < 0 AND ALTITUDE < 40000{
@@ -242,40 +239,35 @@ UNTIL done{
 		deploy_1s["do"]({
 			PANELS ON.
 			RADIATORS ON.
-			SET wait_deploy to TIME:SECONDS.
+			ant_Timer["set"]().
 		}).
 		
-		IF TIME:SECONDS > (wait_deploy + 3){
-			antennas_1s["do"]({
-				LIGHTS ON.
-				IF antennas:LENGTH > 0{
-					HUDTEXT("DEPLOYING ANTENNAS", 2, 2, 42, RGB(55,255,0), false).
-					FOR ant IN antennas:VALUES{
-						SET ant1 TO ant:GETMODULE("ModuleRTAntenna").
-						IF ant1:HASEVENT("ACTIVATE"){
-							ant1:DOEVENT("ACTIVATE").
-							chronos:CONNECTION:SENDMESSAGE(5).
-						}
-					}
-				}ELSE{
-					HUDTEXT("NO ANTENNAS DETECTED", 2, 2, 42, RGB(255,60,0), false).
-				}
-			}).
-		}
-
-		IF NOT CORE:MESSAGES:EMPTY{
-			SET is_done TO CORE:MESSAGES:POP.
-			IF is_done:CONTENT = "done"{
-				FOR ant IN antennas:VALUES {
+		IF ant_Timer["ready"](3, {
+			LIGHTS ON.
+			IF antennas:LENGTH > 0{
+				HUDTEXT("DEPLOYING ANTENNAS", 2, 2, 42, RGB(55,255,0), false).
+				FOR ant IN antennas:VALUES{
 					SET ant1 TO ant:GETMODULE("ModuleRTAntenna").
-					IF ADDONS:RT:HASKSCCONNECTION(ship){
-						// copy flight log
-					}else{
-						chronos:CONNECTION:SENDMESSAGE(50).
+					IF ant1:HASEVENT("ACTIVATE"){
+						ant1:DOEVENT("ACTIVATE").
+						conn_Timer["set"]().
 					}
+				}
+			}ELSE{
+				HUDTEXT("NO ANTENNAS DETECTED", 2, 2, 42, RGB(255,60,0), false).
+			}
+		}).
+
+		conn_Timer["ready"](5,{
+			FOR ant IN antennas:VALUES {
+				SET ant1 TO ant:GETMODULE("ModuleRTAntenna").
+				IF ADDONS:RT:HASKSCCONNECTION(SHIP){
+					// copy flight log
+				}else{
+					conn_Timer["delay"](50).
 				}
 			}
-		}
+		}).
 	}//--vacuum, deploy panels and antennas, turn on lights
 	
 	IF root_part:TAG = "COASTING"{
@@ -308,22 +300,22 @@ UNTIL done{
 			//FOR eng IN ship_engines{
 				//eng:SHUTDOWN.
 			//}
-			chronos:CONNECTION:SENDMESSAGE(2).
+			staging_Timer["set"]().
 			HUDTEXT("OUT OF LIQUID FUEL", 1, 2, 42, green, false).
-
-			IF NOT CORE:MESSAGES:EMPTY{
-				SET is_done TO CORE:MESSAGES:POP.
-				IF is_done:CONTENT = "done"{
-					HUDTEXT("SEPARATING...", 1, 2, 42, green, false).
-					SET stg TO doStage().
-					SET done_staging TO stg["done"].
-					SET stg_res TO stg["res"].
-					CLEARSCREEN.
-				}
-			}
+			HUDTEXT("WAITING FOR SEAPRATION", 1, 2, 42, green, false).
+			staging_Timer["ready"](1, {
+				HUDTEXT("SEPARATION IN 1...", 1, 2, 42, green, false).
+			}).
+			staging_Timer["ready"](2, {
+				HUDTEXT("SEPARATING...", 2, 2, 42, green, false).
+				SET stg TO doStage().
+				SET done_staging TO stg["done"].
+				SET stg_res TO stg["res"].
+				CLEARSCREEN.
+			}).
 		}
 		IF STAGE:SOLIDFUEL < 0.1 AND stg_res:HASKEY("SOLIDFUEL"){
-			HUDTEXT("OUT OF SOLID FUEL, STAGING, RESETTING PID", 3, 2, 42, green, false).
+			HUDTEXT("OUT OF SOLID FUEL, STAGING, RESETTING PID", 6, 2, 42, green, false).
 			SET pid_timer TO TIME:SECONDS.
 			PIDC:RESET.
 			pid_1s["reset"]().
