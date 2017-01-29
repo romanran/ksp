@@ -112,7 +112,7 @@ function calcOrbPeriod {
 		SET trgt_body TO BODY(trgt_body_str).
 	}
 	LOCAL grav_param IS CONSTANT:G * trgt_body:MASS. //GM
-	RETURN ROUND(SQRT( (4*CONSTANT:PI^1*trgt_alt^3)/grav_param ), 3).
+	RETURN ROUND(SQRT( (4*CONSTANT:PI^2*trgt_alt^3)/grav_param ), 3).
 }
 function calcTrajectory{
 	PARAMETER alt.

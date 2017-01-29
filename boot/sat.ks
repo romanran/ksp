@@ -46,6 +46,7 @@ LOCAL de_acc_1s IS doOnce().
 LOCAL abort_1s IS doOnce().
 LOCAL stage_1s IS doOnce().
 LOCAL warp_1s IS doOnce().
+LOCAL circ_done_1s IS doOnce().
 LOCAL set_throttle_1s TO doOnce().
 LOCAL ant_Timer IS Timer().
 LOCAL conn_Timer IS Timer().
@@ -351,7 +352,7 @@ UNTIL done{
 	IF root_part:TAG = "COASTING"{
 		IF deploy_1s["get"]() > 0{
 			warp_1s["do"]({
-				QUICKSAVE().
+				KUNIVERSE:QUICKSAVE().
 				HUDTEXT("WARPING", 2, 2, 42, green, false).
 				SET WARPMODE TO "RAILS".
 				WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
@@ -381,8 +382,7 @@ UNTIL done{
 
 		circ_prepare_1s["do"]({
 			SET thrott TO 0.
-			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).
-			SET STEERING TO HEADING (0, -5).		
+			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).	
 			SET dV_change TO calcDeltaV(trgt["altA"]).
 			PRINT "dv change: "+dV_change AT(0,5).
 			SET burn_time TO calcBurnTime(dV_change).
@@ -394,20 +394,22 @@ UNTIL done{
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time/2){
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
-				LOCK thrott TO MIN( TAN( CONSTANT:Radtodeg*( 1-(trgt["period"]/SHIP:ORBIT:PERIOD) )*5 ), 1 ).
+				LOCK thrott TO MAX( 1-(SHIP:ORBIT:PERIOD/trgt["period"])^100,1).//release acceleration at the end
 				LOCK THROTTLE to thrott.
-			}).	
+			}).
 		}
-		IF ROUND(SHIP:ORBIT:PERIOD, 3) = trgt["period"]{
-			UNLOCK thrott.
-			UNLOCK STEERING.
-			SET thrott TO 0.
-			HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
+		IF ROUND(SHIP:ORBIT:PERIOD, 3) >= trgt["period"]{
+			circ_done_1s["do"]({
+				UNLOCK thrott.
+				UNLOCK STEERING.
+				SET thrott TO 0.
+				HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
+			}).
 		}
 		PRINT "THROTTLE: " at(0,1).
 		PRINT thrott at(18,1).
 		PRINT "ORB. PERIOD:" at(0,2).
-		PRINT SHIP:ORBIT:PERIOD at(18,2).
+		PRINT ROUND(SHIP:ORBIT:PERIOD, 3) at(18,2).
 		PRINT "TRGT ORB. PERIOD: " at(0,3).
 		PRINT trgt["period"] at(18,3).
 	}//target orbit injection

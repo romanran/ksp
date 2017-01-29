@@ -5,8 +5,7 @@ function GetTrgtAlt{
 	LOCAL h TO KERBIN:RADIUS+min_h.
 	LOCAL altA TO (h/COS(ang)). //absolute
 	LOCAL altR TO altA-KERBIN:RADIUS. //relative altitude
-	LOCAL comm_r TO SQRT((altA*altA)*2).//range
-	LOCAL comm_r TO ROUND(comm_r).
+	LOCAL comm_r TO ROUND( SQRT((altA*altA)*2) ).//range
 	LOCAL o TO lexicon().
 	LOCAL orb_period TO calcOrbPeriod(altA).
 	o:ADD("r", comm_r).
