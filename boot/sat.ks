@@ -15,11 +15,12 @@ RUNPATH("FUNCTIONS").
 // add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
 // write getNearestPart library for staging purposes 
 // if energy low, start fuel cell
-//rotate craft with pid for maximum sun exposure
-//check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
+// rotate craft with pid for maximum sun exposure
+// check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
 //make program creator, move all of the ifs to function and load them on program checklist.
-//save created programs in json
+// save created programs in json
 // check if start TWR on countdown
+// check if comm range is within max ranges of antennas on board
 
 LOCAL root_part IS SHIP:ROOTPART.
 SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
@@ -32,7 +33,7 @@ SET TERMINAL:HEIGHT TO 25.
 LOCAL trgt IS GetTrgtAlt(3, 100000).
 
 LOCAL done IS false.
-LOCAL done_staging IS false.
+LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to laready staged rocket
 LOCAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true.
 
 LOCAL ship_res IS getResources().
@@ -49,6 +50,8 @@ LOCAL set_throttle_1s TO doOnce().
 LOCAL ant_Timer IS Timer().
 LOCAL conn_Timer IS Timer().
 LOCAL staging_Timer IS Timer().
+LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
+LOCAL nacc_Timer IS Timer(). //for no acceleration test once
 
 LOCAL stg IS LEXICON().
 LOCAL stg_res IS LEXICON().
@@ -61,11 +64,16 @@ LOCAL safe_alt IS 150. //safe altitude to release max thrust during a launch
 LOCAL target_kPa IS 1.
 LOCAL burn_time IS -10. //dont fire until its calculated
 LOCAL dV_change IS 0.
+LOCAL accvec TO 0.
+LOCAL dyn_p TO 0.
+LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS^2.
 
+//--PRELAUNCH
 IF SHIP:STATUS = "PRELAUNCH"{
-	PRINT "V1.3".
+	PRINT "Aurora Space Program V1.3".
 	PRINT "Comm range:"+trgt["r"]+"m.".
 	PRINT "Target altitude:"+trgt["alt"]+"m.".
+	PRINT "Target orbital period:"+trgt["period"]+"s.".
 	LOCAL start IS false.
 	SET done TO true.
 
@@ -114,11 +122,6 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	FROM{ LOCAL i IS 5.} UNTIL i = 0 STEP { SET i TO i-1.} DO{
 		WAIT 1.
 		HUDTEXT(i+"...", 1, 2, 40, green, false).
-
-		IF i = 1{
-			SET root_part:TAG TO "LIFTOFF".
-			SET done TO false.
-		}
 		IF i = 4{
 			LOCK THROTTLE TO 1.
 		}
@@ -128,11 +131,13 @@ IF SHIP:STATUS = "PRELAUNCH"{
 			}
 			reboot.
 		}
-		IF i = 2 {
+		IF i = 1 {
 			HUDTEXT("ENGINE START", 1, 2, 40, green, false).
 			FOR eng IN first_stage_engines{
 				eng:ACTIVATE.
 			}
+			SET root_part:TAG TO "LIFTOFF".
+			SET done TO false.
 		}
 	}
 
@@ -144,6 +149,7 @@ LOCAL pid_timer IS TIME:SECONDS.
 SET stg_res TO getStageResources().
 SET ship_res TO getResources().
 
+//--- MAIN FLIGHT BODY
 UNTIL done{
 	ON AG5{
 		//stage override, just in case
@@ -188,14 +194,14 @@ UNTIL done{
 	}//--staging handler
 	
 	IF root_part:TAG = "LIFTOFF" OR root_part:TAG = "THRUSTING"{
+
 		set_throttle_1s["do"]({
+			LOCK accvec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV.
 			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 			SET pitch_1s TO doOnce().
 			SET pid_1s TO doOnce().
 			SET pid_timer TO TIME:SECONDS.
-			SET printer_timer TO FLOOR(TIME:SECONDS).
 			LOCK THROTTLE TO thrott.
-			LOCK accvec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV.
 			LOCK dyn_p TO ROUND(SHIP:Q*CONSTANT:ATMtokPa, 3).
 			LOCK thrott TO MAX(ROUND(PIDC:UPDATE(TIME:SECONDS-pid_timer, dyn_p), 3), 0.01).
 			SET once_thrott TO false.
@@ -203,9 +209,32 @@ UNTIL done{
 			SET done_staging TO stg["done"].
 			SET stg_res TO stg["res"].
 			SET root_part:TAG TO "THRUSTING".
+			nacc_Timer["set"]().
 			CLEARSCREEN.
 		}).
 		
+		LOCAL nunder_acc TO SHIP:ALTITUDE < 50000 AND accvec:MAG / g_base < 0.1.
+		//if not under accel
+		IF nunder_acc {
+			nacc_Timer["ready"](3, {
+				HUDTEXT("NO ACCELERATION DETECTED,WAITING FOR THRUST 3 SECONDS...", 3, 3, 20, red, false).
+				staging2_Timer["set"]().
+				nacc_Timer["set"]().
+			}).
+		}
+		
+		staging2_Timer["ready"](3, {
+			//if there is still no acceleration, staging must have no engines available, stage again
+			IF nunder_acc{
+				stage_1s["do"]({
+					SET stg TO doStage().
+					SET done_staging TO stg["done"].
+					SET stg_res TO stg["res"].
+					staging_Timer["set"]().
+					staging2_Timer["set"]().
+				}).
+			}
+		}).
 		pitch_1s["do"]({
 			LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
 			LOCK STEERING TO HEADING (0, trgt_pitch).
@@ -230,20 +259,17 @@ UNTIL done{
 		PRINT target_kpa  at(10,3).
 		PRINT "T.kPa:" at(0,4).
 		PRINT dyn_p at(10,4).
-		
-		IF printer_timer + 1 = FLOOR(TIME:SECONDS) {
-			HUDTEXT("THR: "+ROUND(thrott, 3)*100, 1.2, 3, 15, green, false).
-			HUDTEXT("T. kPa: "+ROUND(target_kpa, 3), 1.2, 3, 15, green, false).
-			HUDTEXT("kPa: "+ROUND(dyn_p, 3), 1.2, 3, 15, green, false).
-			HUDTEXT("PITCH: "+ ROUND(90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR), 3), 1.2, 3, 15, green, false).
-			SET printer_timer TO FLOOR(TIME:SECONDS).
-		}
+		PRINT "ACC:" at(0,5).
+		PRINT accvec:MAG / g_base at(10,5).
 			
-		IF ship_p < 0 AND ALTITUDE < 40000{
+		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000{
 			//if ship is off course
 			abort_1s["do"]({
 				LOCK THROTTLE TO 0.
 				HUDTEXT("MALFUNCTION ABORT", 5, 2, 54, red, false).
+				ABORT ON.
+				UNLOCK STEERING.
+				SET done TO true.
 			}).
 		}
 		
@@ -360,15 +386,12 @@ UNTIL done{
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time/2){
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
-				SET pid_timer TO TIME:SECONDS.
-				LOCK thrott TO 1-(APOAPSIS^4/trgt["alt"]^4).
-				SET circ_pid to setPID(trgt["alt"], 0.6).
-				LOCK trgt_pitch TO ROUND(circ_pid:UPDATE(TIME:SECONDS-pid_timer, APOAPSIS), 3).
+				LOCK thrott TO MIN( TAN( CONSTANT:Radtodeg*( 1-(SHIP:ORBIT:PERIOD/trgt["period"]) )*5 ), 1 ).
 				LOCK THROTTLE to thrott.
 				LOCK STEERING TO SHIP:PROGRADE.
 			}).	
 		}
-		IF FLOOR(PERIAPSIS) = FLOOR(APOAPSIS){
+		IF SHIP:ORBIT:PERIOD = trgt["period"]{
 			UNLOCK thrott.
 			UNLOCK STEERING.
 			SET thrott TO 0.
@@ -376,6 +399,10 @@ UNTIL done{
 		}
 		PRINT "THROTTLE: " at(0,1).
 		PRINT thrott at(18,1).
+		PRINT "ORB. PERIOD:" at(0,2).
+		PRINT SHIP:ORBIT:PERIOD at(18,2).
+		PRINT "TRGT ORB. PERIOD: " at(0,3).
+		PRINT trgt["period"] at(18,3).
 	}//target orbit injection
 	
 	WAIT 0.

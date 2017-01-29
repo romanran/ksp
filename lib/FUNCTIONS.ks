@@ -49,7 +49,7 @@ function getResources{
 }
 
 function getModules {
-	parameter m.
+	PARAMETER m.
 	SET partlist TO SHIP:PARTS.
 	SET mA TO LEXICON().
 	FOR item IN partList {
@@ -69,7 +69,7 @@ function getModules {
 
 function calcDeltaV{
 	// Takes target absolute altitude (desired orbit radius) as a parameter
-	LOCAL PARAMETER target_alt.
+	PARAMETER target_alt.
 	PRINT target_alt AT(0,10).
 	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
 	LOCAL v2 IS SQRT( grav_param * (1/target_alt) ).//speed in a circural orbit
@@ -84,7 +84,7 @@ function calcDeltaV{
 }
 function calcBurnTime {
 	// Takes dv as a parameter
-	LOCAL PARAMETER dV.
+	PARAMETER dV.
 	LOCAL f IS 0.
 	LOCAL p IS 0.
 	LIST ENGINES IN en.
@@ -99,13 +99,23 @@ function calcBurnTime {
 	LOCAL kerb_g IS 9.80665.                 // Gravitational acceleration constant (m/s²)
 	IF f > 0 AND p > 0{
 		RETURN kerb_g * m * p * (1 - eul^(-dV/( kerb_g*p))) / f.
-    }else{
-		RETURN 0.
-	}
+    }
+	RETURN 0.
 }
-
+function calcOrbPeriod {
+	// Takes r - circular orbit absolute altitude
+	// Takes celestial body name string
+	PARAMETER trgt_alt.
+	PARAMETER trgt_body_str IS "current".
+	LOCAL trgt_body IS SHIP:ORBIT:BODY.
+	IF trgt_body_str <> "current"{
+		SET trgt_body TO BODY(trgt_body_str).
+	}
+	LOCAL grav_param IS CONSTANT:G * trgt_body:MASS. //GM
+	RETURN ROUND(SQRT( (4*CONSTANT:PI^1*trgt_alt^3)/grav_param ), 3).
+}
 function calcTrajectory{
-	LOCAL PARAMETER alt.
+	PARAMETER alt.
 	DECLARE LOCAL funcx TO ROUND(1-((alt^2)/(70000^2))^0.25,3).
 	RETURN ROUND((SIN(funcx*CONSTANT:RadToDeg))*(90*1.1884),2).
 }

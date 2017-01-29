@@ -1,15 +1,17 @@
 function GetTrgtAlt{
 	parameter sat_num is 3.
-	parameter min_h is 100.
-	set ang to 360/(sat_num*2). 
-	set h to KERBIN:RADIUS+min_h.
-	set altA to (h/COS(ang)). //absolute
-	set altR to altA-KERBIN:RADIUS. //relative altitude
-	set comm_r to SQRT((altA*altA)*2).//range
-	set comm_r to ROUND(comm_r).
-	set o to lexicon().
+	PARAMETER min_h is 100.
+	LOCAL ang TO 360/(sat_num*2). 
+	LOCAL h TO KERBIN:RADIUS+min_h.
+	LOCAL altA TO (h/COS(ang)). //absolute
+	LOCAL altR TO altA-KERBIN:RADIUS. //relative altitude
+	LOCAL comm_r TO SQRT((altA*altA)*2).//range
+	LOCAL comm_r TO ROUND(comm_r).
+	LOCAL o TO lexicon().
+	LOCAL orb_period TO calcOrbPeriod(altA).
 	o:ADD("r", comm_r).
 	o:ADD("altA",  altA).
 	o:ADD("alt", altR).
+	o:ADD("period", orb_period).
 	return o.
 }
