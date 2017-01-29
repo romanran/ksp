@@ -14,10 +14,10 @@ RUNPATH("FUNCTIONS").
 //- set states in root part tag and check status from there
 // add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
 // write getNearestPart library for staging purposes 
-// if energy low, start fuel cell
+// -if energy low, start fuel cell
 // rotate craft with pid for maximum sun exposure
 // check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
-//make program creator, move all of the ifs to function and load them on program checklist.
+// make program creator, move all of the ifs to function and load them on program checklist.
 // save created programs in json
 // check if start TWR on countdown
 // check if comm range is within max ranges of antennas on board
@@ -88,7 +88,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	LIST ENGINES IN ship_engines.
 	//add once objects
 
-	LOCK target_kPa TO MAX(((-ALTITUDE+40000)/40000)*10, 1).
+	LOCK target_kPa TO ROUND(MAX(((-ALTITUDE+40000)/40000)*10, 1), 3).
 	SET PIDC:SETPOINT TO target_kPa.
 
 	LOCAL first_stage_engines IS LIST().
@@ -102,6 +102,12 @@ IF SHIP:STATUS = "PRELAUNCH"{
 		IF eng:STAGE = last_eng_i{
 			first_stage_engines:ADD(eng).
 		}
+	}
+	IF first_stage_engines:LENGTH = 0{
+		PRINT "COULDN'T FIND 1st STAGE ENGINES".
+		PRINT "REBOOT? AG2".
+		WAIT UNTIL AG2. 
+		REBOOT.
 	}
 
 	LOCAL ksc_light TO SHIP:PARTSTAGGED("ksc_light").
@@ -132,7 +138,6 @@ IF SHIP:STATUS = "PRELAUNCH"{
 			reboot.
 		}
 		IF i = 1 {
-			HUDTEXT("ENGINE START", 1, 2, 40, green, false).
 			FOR eng IN first_stage_engines{
 				eng:ACTIVATE.
 			}
@@ -197,7 +202,6 @@ UNTIL done{
 
 		set_throttle_1s["do"]({
 			LOCK accvec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV.
-			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 			SET pitch_1s TO doOnce().
 			SET pid_1s TO doOnce().
 			SET pid_timer TO TIME:SECONDS.
@@ -210,13 +214,14 @@ UNTIL done{
 			SET stg_res TO stg["res"].
 			SET root_part:TAG TO "THRUSTING".
 			nacc_Timer["set"]().
+			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
 			CLEARSCREEN.
 		}).
 		
-		LOCAL nunder_acc TO SHIP:ALTITUDE < 50000 AND accvec:MAG / g_base < 0.1.
+		LOCAL nunder_acc TO SHIP:ALTITUDE < 70000 AND accvec:MAG / g_base < 0.04.
 		//if not under accel
 		IF nunder_acc {
-			nacc_Timer["ready"](3, {
+			nacc_Timer["ready"](4, {
 				HUDTEXT("NO ACCELERATION DETECTED,WAITING FOR THRUST 3 SECONDS...", 3, 3, 20, red, false).
 				staging2_Timer["set"]().
 				nacc_Timer["set"]().
@@ -253,17 +258,19 @@ UNTIL done{
 		SET PIDC:SETPOINT TO target_kpa.
 		PRINT "THR" at(0,1).
 		PRINT thrott at(10,1).
-		PRINT "T.PIT: " at(0,2).
-		PRINT trgt_pitch at(10,2).
-		PRINT "kPa:" at(0,3).
-		PRINT target_kpa  at(10,3).
-		PRINT "T.kPa:" at(0,4).
-		PRINT dyn_p at(10,4).
-		PRINT "ACC:" at(0,5).
-		PRINT accvec:MAG / g_base at(10,5).
+		PRINT "PITCH: " at(0,2).
+		PRINT ROUND(90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR), 3) at(10,2).
+		PRINT "T.PIT: " at(0,3).
+		PRINT trgt_pitch at(10,3).
+		PRINT "kPa:" at(0,4).
+		PRINT ROUND(dyn_p, 3) at(10,4).
+		PRINT "T.kPa:" at(0,5).
+		PRINT target_kpa  at(10,5).
+		PRINT "ACC:" at(0,6).
+		PRINT ROUND(accvec:MAG / g_base, 3) at(10,6).
 			
-		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000{
-			//if ship is off course
+		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 AND nacc_Timer["check"]() < 8 AND nacc_Timer["check"]() > 4{
+			//if ship is off course when not achieved orbital speed yet and the staging wait isnt in progress
 			abort_1s["do"]({
 				LOCK THROTTLE TO 0.
 				HUDTEXT("MALFUNCTION ABORT", 5, 2, 54, red, false).
@@ -296,7 +303,7 @@ UNTIL done{
 			}).
 		}//eject fairing	
 		
-		IF ROUND(APOAPSIS) >= trgt["alt"] AND ALTITUDE>70000{
+		IF ROUND(APOAPSIS,1) >= trgt["alt"] AND ALTITUDE>70000{
 			LOCK THROTTLE TO 0.
 			HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
 			CLEARSCREEN.
@@ -344,6 +351,7 @@ UNTIL done{
 	IF root_part:TAG = "COASTING"{
 		IF deploy_1s["get"]() > 0{
 			warp_1s["do"]({
+				QUICKSAVE().
 				HUDTEXT("WARPING", 2, 2, 42, green, false).
 				SET WARPMODE TO "RAILS".
 				WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
@@ -380,18 +388,17 @@ UNTIL done{
 			SET burn_time TO calcBurnTime(dV_change).
 			PRINT "t: "+burn_time AT(0,6).
 			HUDTEXT(burn_time, 3, 3, 20, green, false).
-			SET STEERING TO SHIP:PROGRADE.
+			LOCK STEERING TO SHIP:PROGRADE.
 		}).
 		
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time/2){
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
-				LOCK thrott TO MIN( TAN( CONSTANT:Radtodeg*( 1-(SHIP:ORBIT:PERIOD/trgt["period"]) )*5 ), 1 ).
+				LOCK thrott TO MIN( TAN( CONSTANT:Radtodeg*( 1-(trgt["period"]/SHIP:ORBIT:PERIOD) )*5 ), 1 ).
 				LOCK THROTTLE to thrott.
-				LOCK STEERING TO SHIP:PROGRADE.
 			}).	
 		}
-		IF SHIP:ORBIT:PERIOD = trgt["period"]{
+		IF ROUND(SHIP:ORBIT:PERIOD, 3) = trgt["period"]{
 			UNLOCK thrott.
 			UNLOCK STEERING.
 			SET thrott TO 0.
