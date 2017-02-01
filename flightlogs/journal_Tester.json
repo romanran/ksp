@@ -1,0 +1,232 @@
+{
+    "entries": [
+        0,
+        {
+            "entries": [
+                "TS",
+                135949.2455100347,
+                "LF_TOTAL",
+                "ALT: Apoapsis=57.5508041752037 Periapsis=-598435.469217499 Radar=0.64889919757843",
+                "SPD",
+                "Tester",
+                "ElectricCharge",
+                3461.46,
+                "DESC",
+                "On launchpad, waiting for countdown.",
+                "RESOURCES_LEFT",
+                {
+                    "entries": [
+                        
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                }
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        },
+        1,
+        {
+            "entries": [
+                "MISSIONTIME",
+                2648,
+                "TIME",
+                135950,
+                "ALT",
+                0.64886945486068726,
+                "APO",
+                58,
+                "PER",
+                -598435,
+                "ORBV",
+                175,
+                "SURV",
+                0,
+                "FACING",
+                "R(315.737,27.801,90.612)",
+                "VERTICALSPEED",
+                0,
+                "RESOURCES_LEFT",
+                {
+                    "entries": [
+                        "ElectricCharge",
+                        1941
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "DESC",
+                "test1"
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        },
+        2,
+        {
+            "entries": [
+                "MISSIONTIME",
+                2648,
+                "TIME",
+                135951,
+                "ALT",
+                0.64889919757843018,
+                "APO",
+                58,
+                "PER",
+                -598435,
+                "ORBV",
+                175,
+                "SURV",
+                0,
+                "FACING",
+                "R(315.737,27.801,90.612)",
+                "VERTICALSPEED",
+                0,
+                "RESOURCES_LEFT",
+                {
+                    "entries": [
+                        "ElectricCharge",
+                        1941
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "DESC",
+                "test2"
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        },
+        3,
+        {
+            "entries": [
+                "MISSIONTIME",
+                2649,
+                "TIME",
+                135951,
+                "ALT",
+                0.64887195825576782,
+                "APO",
+                58,
+                "PER",
+                -598435,
+                "ORBV",
+                175,
+                "SURV",
+                0,
+                "FACING",
+                "R(315.737,27.801,90.612)",
+                "VERTICALSPEED",
+                0,
+                "RESOURCES_LEFT",
+                {
+                    "entries": [
+                        "ElectricCharge",
+                        1940
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "DESC",
+                "test3"
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        },
+        4,
+        {
+            "entries": [
+                "MISSIONTIME",
+                2650,
+                "TIME",
+                135952,
+                "ALT",
+                0.64887195825576782,
+                "APO",
+                58,
+                "PER",
+                -598435,
+                "ORBV",
+                175,
+                "SURV",
+                0,
+                "FACING",
+                "R(315.737,27.801,90.612)",
+                "VERTICALSPEED",
+                0,
+                "RESOURCES_LEFT",
+                {
+                    "entries": [
+                        "ElectricCharge",
+                        1940
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "DESC",
+                "test4"
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        },
+        5,
+        {
+            "entries": [
+                "MISSIONTIME",
+                2650,
+                "TIME",
+                135953,
+                "ALT",
+                0.64888679981231689,
+                "APO",
+                58,
+                "PER",
+                -598435,
+                "ORBV",
+                175,
+                "SURV",
+                0,
+                "FACING",
+                "R(315.738,27.801,90.612)",
+                "VERTICALSPEED",
+                0,
+                "RESOURCES_LEFT",
+                {
+                    "entries": [
+                        "ElectricCharge",
+                        1940
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "DESC",
+                "test5"
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        },
+        6,
+        {
+            "entries": [
+                "MISSIONTIME",
+                2651,
+                "TIME",
+                135953,
+                "ALT",
+                0.64889919757843018,
+                "APO",
+                58,
+                "PER",
+                -598435,
+                "ORBV",
+                175,
+                "SURV",
+                0,
+                "FACING",
+                "R(315.737,27.801,90.612)",
+                "VERTICALSPEED",
+                0,
+                "RESOURCES_LEFT",
+                {
+                    "entries": [
+                        "ElectricCharge",
+                        1939
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "DESC",
+                "test6"
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        }
+    ],
+    "$type": "kOS.Safe.Encapsulation.Lexicon"
+}

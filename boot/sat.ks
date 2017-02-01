@@ -4,12 +4,14 @@ IF ADDONS:RT:HASKSCCONNECTION( SHIP ){
 	COPYPATH("0:lib/DOONCE", "1:").
 	COPYPATH("0:lib/TIMER", "1:").
 	COPYPATH("0:lib/FUNCTIONS", "1:").
+	COPYPATH("0:lib/JOURNAL", "1:").
 }
-RUNPATH("COMSAT_HEIGHT").
-RUNPATH("PID").
-RUNPATH("TIMER").
-RUNPATH("DOONCE").
-RUNPATH("FUNCTIONS").
+RUNONCEPATH("COMSAT_HEIGHT").
+RUNONCEPATH("PID").
+RUNONCEPATH("TIMER").
+RUNONCEPATH("DOONCE").
+RUNONCEPATH("FUNCTIONS").
+RUNONCEPATH("JOURNAL").
 // * TODO*
 //- set states in root part tag and check status from there
 // add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
@@ -30,6 +32,7 @@ SET TERMINAL:CHARWIDTH TO 10.
 SET TERMINAL:CHARHEIGHT TO 12.
 SET TERMINAL:WIDTH TO 37.
 SET TERMINAL:HEIGHT TO 25.
+LOCAL ship_log TO Journal().
 LOCAL trgt IS GetTrgtAlt(3, 100000).
 
 LOCAL done IS false.
@@ -50,6 +53,7 @@ LOCAL circ_done_1s IS doOnce().
 LOCAL set_throttle_1s TO doOnce().
 LOCAL ant_Timer IS Timer().
 LOCAL conn_Timer IS Timer().
+LOCAL journal_Timer IS Timer().
 LOCAL staging_Timer IS Timer().
 LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
 LOCAL nacc_Timer IS Timer(). //for no acceleration test once
@@ -68,6 +72,7 @@ LOCAL dV_change IS 0.
 LOCAL accvec TO 0.
 LOCAL dyn_p TO 0.
 LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS^2.
+
 
 //--PRELAUNCH
 IF SHIP:STATUS = "PRELAUNCH"{
@@ -120,6 +125,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 			ksc_light[0]:GETMODULE("modulelight"):DOACTION("togglelight", true).
 		}
 		SET start TO TRUE.
+		ship_log["add"]("countdown start").
 	}
 	PRINT "ALL SYSTEMS ARE GO.".
 	PRINT "AWAITING LAUNCH CONFIRMATION ON AG1...".
@@ -142,15 +148,14 @@ IF SHIP:STATUS = "PRELAUNCH"{
 			FOR eng IN first_stage_engines{
 				eng:ACTIVATE.
 			}
-			SET root_part:TAG TO "LIFTOFF".
+			SET root_part:TAG TO "TAKEOFF".
 			SET done TO false.
 		}
 	}
 
 	CLEARSCREEN.
 }
-
-LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
+LOCAL ship_p TO 0.
 LOCAL pid_timer IS TIME:SECONDS.
 SET stg_res TO getStageResources().
 SET ship_res TO getResources().
@@ -162,6 +167,7 @@ UNTIL done{
 		SET stg TO doStage().
 		SET done_staging TO stg["done"].
 		SET stg_res TO stg["res"].
+		ship_log["add"]("manually staged").
 	}
 	IF done_staging=false{
 		IF STAGE:LIQUIDFUEL < 1 AND stg_res:HASKEY("LIQUIDFUEL"){
@@ -176,6 +182,7 @@ UNTIL done{
 				SET done_staging TO stg["done"].
 				SET stg_res TO stg["res"].
 				CLEARSCREEN.
+				ship_log["add"]("Stage "+STAGE:NUMBER+" - out of LF").
 			}).
 		}
 		IF STAGE:SOLIDFUEL < 0.1 AND stg_res:HASKEY("SOLIDFUEL"){
@@ -192,6 +199,7 @@ UNTIL done{
 				SET stg TO doStage().
 				SET done_staging TO stg["done"].
 				SET stg_res TO stg["res"].
+				ship_log["add"]("Stage "+STAGE:NUMBER+" - out of SF").
 			}).
 		}
 		staging_Timer["ready"](2, {
@@ -199,7 +207,7 @@ UNTIL done{
 		}).
 	}//--staging handler
 	
-	IF root_part:TAG = "LIFTOFF" OR root_part:TAG = "THRUSTING"{
+	IF root_part:TAG = "TAKEOFF" OR root_part:TAG = "THRUSTING"{
 
 		set_throttle_1s["do"]({
 			LOCK accvec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV.
@@ -207,16 +215,19 @@ UNTIL done{
 			SET pid_1s TO doOnce().
 			SET pid_timer TO TIME:SECONDS.
 			LOCK THROTTLE TO thrott.
+			LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
 			LOCK dyn_p TO ROUND(SHIP:Q*CONSTANT:ATMtokPa, 3).
-			LOCK thrott TO MAX(ROUND(PIDC:UPDATE(TIME:SECONDS-pid_timer, dyn_p), 3), 0.01).
+			LOCK thrott TO MAX(ROUND(PIDC:UPDATE(TIME:SECONDS-pid_timer, dyn_p), 3), 0.1).
 			SET once_thrott TO false.
 			SET stg TO doStage().
 			SET done_staging TO stg["done"].
 			SET stg_res TO stg["res"].
 			SET root_part:TAG TO "THRUSTING".
 			nacc_Timer["set"]().
-			HUDTEXT("LIFTOFF!", 1, 2, 40, green, false).
+			HUDTEXT("TAKEOFF!", 1, 2, 40, green, false).
 			CLEARSCREEN.
+			ship_log["add"]("TAKEOFF").
+			journal_Timer["set"]().
 		}).
 		
 		LOCAL nunder_acc TO SHIP:ALTITUDE < 70000 AND accvec:MAG / g_base < 0.04.
@@ -238,12 +249,13 @@ UNTIL done{
 					SET stg_res TO stg["res"].
 					staging_Timer["set"]().
 					staging2_Timer["set"]().
+					ship_log["add"]("Stage "+STAGE:NUMBER+" - no acceleration detected during the thrusting phase").
 				}).
 			}
 		}).
 		pitch_1s["do"]({
 			LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
-			LOCK STEERING TO HEADING (0, trgt_pitch).
+			LOCK STEERING TO HEADING (90, trgt_pitch).
 		}).
 		
 		IF ALT:RADAR > safe_alt {
@@ -253,6 +265,7 @@ UNTIL done{
 				SET pid_timer TO TIME:SECONDS.
 				SET PIDC:MINOUTPUT TO 0.
 				PIDC:RESET.
+				ship_log["add"]("Reached the safe altitude of "+safe_alt).
 			}).
 		}
 		
@@ -278,6 +291,7 @@ UNTIL done{
 				ABORT ON.
 				UNLOCK STEERING.
 				SET done TO true.
+				ship_log["add"]("Course deviation - malfunction - abort").
 			}).
 		}
 		
@@ -287,7 +301,8 @@ UNTIL done{
 				HUDTEXT("Decreasing acceleration", 2, 2, 42, green, false).
 				UNLOCK PIDC.
 				UNLOCK thrott.
-				LOCK THROTTLE TO MIN( TAN( CONSTANT:Radtodeg*(1-(APOAPSIS/trgt["alt"]))*5 ), 1).
+				LOCK THROTTLE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1-(APOAPSIS/trgt["alt"]))*5 ), 1), 0.1).
+				ship_log["add"]("Deacceleration").
 			}).
 		}
 		
@@ -298,18 +313,20 @@ UNTIL done{
 					FOR fpart IN fairing:VALUES {
 						fpart:GETMODULE("ModuleProceduralFairing"):DOEVENT("DEPLOY").
 					}
+					ship_log["add"]("Fairings jettison").
 				}ELSE{
 					HUDTEXT("NO FAIRINGS DETECTED", 2, 2, 42, RGB(255,60,0), false).
 				}
 			}).
 		}//eject fairing	
 		
-		IF ROUND(APOAPSIS,1) >= trgt["alt"] AND ALTITUDE>70000{
+		IF CEILING(APOAPSIS) >= trgt["alt"] AND ALTITUDE>70000{
 			LOCK THROTTLE TO 0.
 			HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
 			CLEARSCREEN.
 			//leaving thrusting section at that time
 			SET root_part:TAG TO "COASTING".
+			ship_log["add"]("Transition to the coasting phase").
 		}
 	}//--thrusting
 	
@@ -332,20 +349,14 @@ UNTIL done{
 						conn_Timer["set"]().
 					}
 				}
+				ship_log["add"]("Antennas deploy").
 			}ELSE{
 				HUDTEXT("NO ANTENNAS DETECTED", 2, 2, 42, RGB(255,60,0), false).
 			}
 		}).
 
 		conn_Timer["ready"](5,{
-			FOR ant IN antennas:VALUES {
-				SET ant1 TO ant:GETMODULE("ModuleRTAntenna").
-				IF ADDONS:RT:HASKSCCONNECTION(SHIP){
-					// copy flight log
-				}else{
-					conn_Timer["delay"](50).
-				}
-			}
+			ship_log["save"]().
 		}).
 	}//--vacuum, deploy panels and antennas, turn on lights
 	
@@ -378,6 +389,7 @@ UNTIL done{
 	IF root_part:TAG = "KERBINJECTION"{
 		rcs_1s["do"]({
 			RCS ON.
+			ship_log["add"]("RCS on").
 		}).
 
 		circ_prepare_1s["do"]({
@@ -394,16 +406,19 @@ UNTIL done{
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time/2){
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
-				LOCK thrott TO MAX( 1-(SHIP:ORBIT:PERIOD/trgt["period"])^100,1).//release acceleration at the end
+				LOCK thrott TO MAX( 1-(SHIP:ORBIT:PERIOD/trgt["period"])^100, 0.1).//release acceleration at the end
 				LOCK THROTTLE to thrott.
+				ship_log["add"]("CIRCURALISATION BURN").
 			}).
 		}
-		IF ROUND(SHIP:ORBIT:PERIOD, 3) >= trgt["period"]{
+		IF CEILING(SHIP:ORBIT:PERIOD) - 500 >= trgt["period"]{
 			circ_done_1s["do"]({
 				UNLOCK thrott.
-				UNLOCK STEERING.
 				SET thrott TO 0.
-				HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
+				HUDTEXT("CIRCURALISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).
+				ship_log["add"]("CIRCURALISATION PHASE I COMPLETE").
+				ship_log["save"]().
+				SET root_part:TAG TO "CORRECTION_BURN".
 			}).
 		}
 		PRINT "THROTTLE: " at(0,1).
@@ -413,6 +428,23 @@ UNTIL done{
 		PRINT "TRGT ORB. PERIOD: " at(0,3).
 		PRINT trgt["period"] at(18,3).
 	}//target orbit injection
-	
+	IF root_part:TAG = "CORRECTION_BURN"{
+		IF ROUND(SHIP:ORBIT:PERIOD, 3) >= trgt["period"]{
+			SET SHIP:CONTROL:NEUTRALIZE to TRUE.
+			HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
+			ship_log["add"]("CIRCURALISATION COMPLETE").
+			ship_log["save"]().
+			SET root_part:TAG TO "ORBITING".
+		}ELSE{
+			SET SHIP:CONTROL:FORE TO 0.2.	
+		}
+	}
+	IF root_part:TAG = "ORIBITNG"{
+		SET done TO TRUE.
+	}
+	journal_Timer["ready"](5,{
+		ship_log["add"](root_part:TAG +" phase").
+		journal_Timer["reset"]().
+	}).
 	WAIT 0.
 }
