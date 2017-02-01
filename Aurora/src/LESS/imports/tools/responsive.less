@@ -1,0 +1,40 @@
+@phone-size-xs: 375px;
+@phone-size-s: 420px;
+@phone-size: 500px;
+@smart-size: 768px;
+@archaic-size:  992px;
+@large-size:  1006px;
+@tablet-size: 1200px;
+
+@phone-xs: ~"screen and (max-width: "(@phone-size-xs - 1) ~")";
+@phone-xs-up: ~"screen and (min-width: @{phone-size-xs})";
+
+@phone-s: ~"screen and (max-width: "(@phone-size-s - 1) ~")";
+@phone-s-up: ~"screen and (min-width: @{phone-size-s})";
+
+@phone: ~"screen and (max-width: "(@phone-size - 1) ~")";
+@phone-up: ~"screen and (min-width: @{phone-size})";
+
+@smart: ~"screen and (max-width: "(@smart-size - 1) ~")";
+@smart-up: ~"screen and (min-width: @{smart-size})";
+
+@large: ~"screen and (max-width: "(@large-size - 1) ~")";
+@large-up: ~"screen and (min-width: @{large-size})";
+
+@archaic: ~"screen and (max-width: "(@archaic-size - 1) ~")";
+@archaic-up: ~"screen and (min-width: @{archaic-size})";
+
+@tablet: ~"screen and (max-width:"(@tablet-size - 1) ~")";
+@tablet-up: ~"screen and (min-width: @{tablet-size})";
+
+@landscape: ~"screen and (orientation: landscape)";
+@portrait: ~"screen and (orientation: landscape)";
+@1444up: ~"screen and (min-width: 1440px)";
+@1444: ~"screen and (max-width: 1439px)";
+@fullhdup: ~"screen and (min-width: 1920px)";
+
+
+
+@tablet-margin: 18px;
+@smart-margin: 15px;
+@phone-margin: 10px;

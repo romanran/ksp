@@ -1,0 +1,114 @@
+.alert{
+	animation-name: alert1;
+	animation-delay: 1s;
+	animation-duration: 900ms;
+	animation-iteration-count: 2;
+	animation-fill-mode: forwards;
+	animation-timing-function: ease-in;
+	animation-direction: normal;
+	animation-play-state: running;
+	size: 4px;
+	background: red;
+	transform: scale(0);
+	pointer-events: none;
+	position: absolute;
+	border-radius: 100%;
+	z-index:7;
+}
+@keyframes alert1{
+	0%	{opacity: 1;transform: scale(0);}
+	100%	{transform: scale(50) ;opacity:0;}
+}
+
+.zoomIn{
+	animation-duration: 500ms;
+}
+@keyframes zoomIn {
+	0% {
+		opacity: 0;
+		-webkit-transform: scale3d(.3, .3, .3);
+		transform: scale3d(.3, .3, .3);
+	}
+
+	50% {
+		opacity: 1;
+	}
+	100%{ transform: scale3d(1,1,1);}
+}
+
+@loading_size: 50px;
+.loading {
+	border-radius: 50%;
+	size: @loading_size;
+	border: 8px solid fade(black, 10%);
+	border-top-color: orange;
+	animation: spin 1s infinite linear;
+}
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}
+
+@keyframes slideIn {
+	100% {
+		background-position: center 0;
+	}
+}
+@keyframes slideInMobile {
+	100% {
+		background-position: center -55px;
+	}
+}
+//@keyframes slideRightTeam {
+//	0%{
+//		background-position: 0 center;
+//	}
+//	100% {
+//		background-position: -236px center;
+//	}
+//}
+//@keyframes slideLeftTeam {
+//	0%{
+//		background-position: 0 center;
+//	}
+//	100% {
+//		background-position: 236px center;
+//	}
+//}
+
+
+@keyframes flipInY {
+	0% {
+		transform: perspective(400px) rotate3d(0, 1, 0, 90deg);
+		transition-timing-function: ease-in;
+		opacity: 0;
+	}
+	40% {
+
+		transform: perspective(400px) rotate3d(0, 1, 0, -20deg);
+		transition-timing-function: ease-in;
+	}
+	60% {
+		transform: perspective(400px) rotate3d(0, 1, 0, 10deg);
+		opacity: 1;
+	}
+	80% {
+		transform: perspective(400px) rotate3d(0, 1, 0, -5deg);
+	}
+	100% {
+		transform: perspective(400px);
+		opacity: 1;
+	}
+}
+
+.flipInY {
+	backface-visibility: visible !important;
+	animation-name: flipInY;
+	animation-duration: 2s;
+	animation-fill-mode: forwards;
+	animation-iteration-count: 1;
+}
