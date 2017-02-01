@@ -12,6 +12,6 @@ class Tools{
 	}
 	static strToColor(str){
 		let hash = this.hashCode(str);
-		return this.intToRGB(hash);
+		return "#"+this.intToRGB(hash);
 	}
 }
