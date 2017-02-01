@@ -1,0 +1,6 @@
+[submodule "Aurora"]
+	path = Aurora
+	url = git@bitbucket.org:RomanRanniew/tdsoft_aion.git
+[submodule "Aurora/Aion"]
+	path = Aurora/Aion
+	url = git@bitbucket.org:RomanRanniew/tdsoft_aion.git

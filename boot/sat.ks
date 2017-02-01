@@ -363,7 +363,6 @@ UNTIL done{
 	IF root_part:TAG = "COASTING"{
 		IF deploy_1s["get"]() > 0{
 			warp_1s["do"]({
-				KUNIVERSE:QUICKSAVE().
 				HUDTEXT("WARPING", 2, 2, 42, green, false).
 				SET WARPMODE TO "RAILS".
 				WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
@@ -375,13 +374,13 @@ UNTIL done{
 		}
 	}//--coasting
 	
-	IF (ship_res["ELECTRICCHARGE"]:AMOUNT / ship_res["ELECTRICCHARGE"]:CAPACITY)*100 < 10{
+	IF ((ship_res["ELECTRICCHARGE"]:AMOUNT / ship_res["ELECTRICCHARGE"]:CAPACITY)*100 < 20) OR ship_res["ELECTRICCHARGE"]:AMOUNT < 40{
 		//if below 10% of max ships capacity
 		//electic charge saving and generation
-		KUNIVERSE:TIMEWARP:CANCELWARP().
+		//KUNIVERSE:TIMEWARP:CANCELWARP().
 		RCS ON.
 		SAS OFF.
-		UNLOCK STEERING.
+		LOCK STEERING TO UP + R(0,45,0).
 		PANELS ON.
 		FUELCELLS ON.
 	}
@@ -411,7 +410,7 @@ UNTIL done{
 				ship_log["add"]("CIRCURALISATION BURN").
 			}).
 		}
-		IF CEILING(SHIP:ORBIT:PERIOD) - 500 >= trgt["period"]{
+		IF ROUND(SHIP:ORBIT:PERIOD) >= (trgt["period"] - 50){
 			circ_done_1s["do"]({
 				UNLOCK thrott.
 				SET thrott TO 0.
@@ -436,7 +435,11 @@ UNTIL done{
 			ship_log["save"]().
 			SET root_part:TAG TO "ORBITING".
 		}ELSE{
-			SET SHIP:CONTROL:FORE TO 0.2.	
+			SET SHIP:CONTROL:FORE TO 0.5.	
+			PRINT "ORB. PERIOD:" at(0,1).
+			PRINT ROUND(SHIP:ORBIT:PERIOD, 3) at(18,1).
+			PRINT "TRGT ORB. PERIOD: " at(0,2).
+			PRINT trgt["period"] at(18,2).
 		}
 	}
 	IF root_part:TAG = "ORIBITNG"{
