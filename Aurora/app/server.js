@@ -3,6 +3,8 @@ function server(req, res) {
 	let filePath = req.url;
 	if (filePath == '/') {
 		filePath = '../index.html';
+	}else if(filePath.indexOf("log") > 0){
+		filePath = '../../' + req.url;
 	} else {
 		filePath = '../' + req.url;
 	}
@@ -20,7 +22,6 @@ function server(req, res) {
 	}
 
 	fs.exists(filePath, function(exists) {
-
 		if (exists) {
 			fs.readFile(filePath, function(error, content) {
 				if (error) {

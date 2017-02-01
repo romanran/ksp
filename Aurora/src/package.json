@@ -1,0 +1,15 @@
+{
+  "name": "aurora-ksp",
+  "version": "1.0.0",
+  "description": "Flight journal manager",
+  "main": "app/server.js",
+  "scripts": {
+    "test": "test"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "jquery": "^3.1.1",
+    "lodash": "^4.17.4"
+  }
+}

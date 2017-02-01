@@ -1,96 +1,4 @@
-'use strict';
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var dom = function () {
-	function dom() {
-		_classCallCheck(this, dom);
-	}
-
-	_createClass(dom, [{
-		key: 'cache',
-		value: function cache() {
-			var els = this.getElements();
-			_.each(els, this.append.bind(this));
-		}
-	}, {
-		key: 'append',
-		value: function append(val, key) {
-			var _this = this;
-
-			if (this['$' + key] === undefined) {
-				this['$' + key] = $(val.selector);
-			}
-			if (val.children) {
-				_.each(val.children, function (val, key) {
-					if (_this['$' + key] === undefined) {
-						_this['$' + key] = $(val);
-					}
-				});
-			}
-		}
-	}, {
-		key: 'getElements',
-		value: function getElements() {
-			var elements = {
-				content: {
-					selector: "[data-content]",
-					children: {
-						contact: ".sow-contact-form",
-						panels: ".panel-grid"
-					}
-				},
-				header: {
-					selector: "[data-header]",
-					children: {
-						mobile_toggle: "[data-menu-toggle]"
-					}
-
-				}
-			};
-			return elements;
-		}
-	}]);
-
-	return dom;
-}();"use strict";
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Journal = function () {
-	function Journal() {
-		_classCallCheck(this, Journal);
-
-		readJSON();
-	}
-
-	_createClass(Journal, [{
-		key: "write",
-		value: function write() {}
-	}, {
-		key: "readJSON",
-		value: function readJSON() {}
-	}]);
-
-	return Journal;
-}();"use strict";
-
-_TD.prototype.documentReady = function () {
-	this.dom = new dom();
-	this.dom.cache();
-
-	new ContactForm(this.dom.$contact);
-};
-
-$(function () {
-	var TD = new _TD();
-	TD.documentReady();
-	return window.TD = TD;
-});"use strict";
+"use strict";
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -156,4 +64,127 @@ function _TD() {
 	}
 
 	return window.deb = deb;
-})();
+})();'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var dom = function () {
+	function dom() {
+		_classCallCheck(this, dom);
+	}
+
+	_createClass(dom, [{
+		key: 'cache',
+		value: function cache() {
+			var els = this.getElements();
+			_.each(els, this.append.bind(this));
+		}
+	}, {
+		key: 'append',
+		value: function append(val, key) {
+			var _this = this;
+
+			if (this['$' + key] === undefined) {
+				this['$' + key] = $(val.selector);
+			}
+			if (val.children) {
+				_.each(val.children, function (val, key) {
+					if (_this['$' + key] === undefined) {
+						_this['$' + key] = $(val);
+					}
+				});
+			}
+		}
+	}, {
+		key: 'getElements',
+		value: function getElements() {
+			var elements = {
+				graph: {
+					selector: "[graph]"
+				}
+			};
+			return elements;
+		}
+	}]);
+
+	return dom;
+}();"use strict";
+
+_TD.prototype.documentReady = function () {
+	this.dom = new dom();
+	this.dom.cache();
+
+	this.journal1 = new Journal("journal_Sat-1.json");
+	deb(this.journal1);
+};
+
+$(function () {
+	var TD = new _TD();
+	TD.documentReady();
+	return window.TD = TD;
+});"use strict";
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Journal = function () {
+	function Journal(path) {
+		_classCallCheck(this, Journal);
+
+		this.readJSON(path);
+		this.entries = [];
+	}
+
+	_createClass(Journal, [{
+		key: "write",
+		value: function write() {}
+	}, {
+		key: "readJSON",
+		value: function readJSON(path) {
+			$.getJSON("flightlogs/" + path, this.parseJSON.bind(this));
+		}
+	}, {
+		key: "parseJSON",
+		value: function parseJSON(data) {
+			var _this = this;
+
+			var filtered_data = _.filter(data.entries, function (item, i) {
+				return i % 2 == 1;
+			});
+			_.each(filtered_data, function (item, i) {
+				if (i % 2) {
+					if (item.entries) {
+						_this.crawlObject(item.entries, false);
+					}
+				}
+			});
+		}
+	}, {
+		key: "crawlObject",
+		value: function crawlObject(src_obj, nested) {
+			var _this2 = this;
+
+			var obj = {};
+			//		deb(src_obj);
+			_.each(src_obj, function (item, i) {
+				if (i % 2) {
+					if (item.entries) {
+						obj[src_obj[i - 1]] = _this2.crawlObject(item.entries, true);
+					} else {
+						obj[src_obj[i - 1]] = item;
+					}
+				}
+			});
+			if (nested) {
+				return obj;
+			} else {
+				this.entries.push(obj);
+			}
+		}
+	}]);
+
+	return Journal;
+}();
