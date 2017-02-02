@@ -62,6 +62,7 @@ class JournalChart {
 				data: arr,
 				title: key,
 				borderColor: r_colors[ci],
+				backgroundColor: r_colors[ci],
 				chartColors: r_colors,
 				borderWidth: 1,
 				radius: 3,
@@ -77,9 +78,12 @@ class JournalChart {
 				labels: labels,
 				datasets: dataset,
 			},
+			 backgroundColor: "red",
 			options: {
 				title: {
 					display: true,
+					fontColor: 'white',
+					fontSize: 20,
 					text: this.title
 				},
 				hover: {
@@ -91,6 +95,7 @@ class JournalChart {
 				legend:{
 					position:'left',
 					labels:{
+						fontColor: 'white',
 						fontStyle: 'bold',
 					},
 					onHover: (e) =>{
@@ -114,7 +119,11 @@ class JournalChart {
 				},
 				scales: {
 					yAxes: [{
+						gridLines: {
+							color: "rgba(195,235,255,0.15)",
+						},
 						ticks: {
+							fontColor: 'white',
 							beginAtZero:true
 						},
 						scaleLabel: {
@@ -122,9 +131,13 @@ class JournalChart {
 						}
 					}],
 					xAxes: [{
+						gridLines: {
+							color: "rgba(195,235,255,0.05)",
+						},
 						type: 'time',
 						position: 'bottom',
 						ticks: {
+							fontColor: 'white',
 							beginAtZero:true,
 
 						},
@@ -137,6 +150,7 @@ class JournalChart {
 						},
 						scaleLabel: {
 							display: true,
+							fontColor: 'white',
 							labelString: 'MISSION TIME'
 						}
 					}]
@@ -145,3 +159,11 @@ class JournalChart {
 		};
 	}
 };
+
+Chart.plugins.register({
+	beforeDraw: function(chartInstance) {
+		var ctx = chartInstance.chart.ctx;
+		ctx.fillStyle = "#303439";
+		ctx.fillRect(0, 0, chartInstance.chart.width, chartInstance.chart.height);
+	}
+});
