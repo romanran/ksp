@@ -5,6 +5,7 @@ IF ADDONS:RT:HASKSCCONNECTION( SHIP ){
 	COPYPATH("0:lib/TIMER", "1:").
 	COPYPATH("0:lib/FUNCTIONS", "1:").
 	COPYPATH("0:lib/JOURNAL", "1:").
+	COPYPATH("0:lib/PROGRAM", "1:").
 }
 RUNONCEPATH("COMSAT_HEIGHT").
 RUNONCEPATH("PID").
@@ -12,6 +13,7 @@ RUNONCEPATH("TIMER").
 RUNONCEPATH("DOONCE").
 RUNONCEPATH("FUNCTIONS").
 RUNONCEPATH("JOURNAL").
+RUNONCEPATH("PROGRAM").
 // * TODO*
 //- set states in root part tag and check status from there
 // add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
@@ -32,7 +34,9 @@ SET TERMINAL:CHARWIDTH TO 10.
 SET TERMINAL:CHARHEIGHT TO 12.
 SET TERMINAL:WIDTH TO 37.
 SET TERMINAL:HEIGHT TO 25.
+
 LOCAL ship_log TO Journal().
+SET 
 LOCAL trgt IS GetTrgtAlt(3, 100000).
 
 LOCAL done IS false.
@@ -255,7 +259,7 @@ UNTIL done{
 		}).
 		pitch_1s["do"]({
 			LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
-			LOCK STEERING TO HEADING (90, trgt_pitch).
+			LOCK STEERING TO HEADING(90, LOOKDIRUP(HEADING(90, trgt_pitch), FACING:TOPVECTOR)
 		}).
 		
 		IF ALT:RADAR > safe_alt {
@@ -399,7 +403,8 @@ UNTIL done{
 			SET burn_time TO calcBurnTime(dV_change).
 			PRINT "t: "+burn_time AT(0,6).
 			HUDTEXT(burn_time, 3, 3, 20, green, false).
-			LOCK STEERING TO SHIP:PROGRADE.
+			SAS OFF.
+			LOCK STEERING TO LOOKDIRUP(SHIP:PROGRADE, FACING:TOPVECTOR).
 		}).
 		
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time/2){
