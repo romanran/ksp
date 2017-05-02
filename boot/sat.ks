@@ -255,7 +255,7 @@ UNTIL done{
 		}).
 		pitch_1s["do"]({
 			LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
-			LOCK STEERING TO HEADING (90, trgt_pitch).
+			LOCK STEERING TO R(trgt_pitch,0, 0).
 		}).
 		
 		IF ALT:RADAR > safe_alt {
@@ -443,6 +443,8 @@ UNTIL done{
 		}
 	}
 	IF root_part:TAG = "ORIBITNG"{
+		UNLOCK THROTTLE.
+		UNLOCK STEERING.
 		SET done TO TRUE.
 	}
 	journal_Timer["ready"](5,{
