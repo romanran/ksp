@@ -13,7 +13,7 @@ RUNONCEPATH("TIMER").
 RUNONCEPATH("DOONCE").
 RUNONCEPATH("FUNCTIONS").
 RUNONCEPATH("JOURNAL").
-RUNONCEPATH("PROGRAM").
+//RUNONCEPATH("PROGRAM").
 // * TODO*
 //- set states in root part tag and check status from there
 // add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
@@ -36,7 +36,6 @@ SET TERMINAL:WIDTH TO 37.
 SET TERMINAL:HEIGHT TO 25.
 
 LOCAL ship_log TO Journal().
-SET 
 LOCAL trgt IS GetTrgtAlt(3, 100000).
 
 LOCAL done IS false.
@@ -259,7 +258,7 @@ UNTIL done{
 		}).
 		pitch_1s["do"]({
 			LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
-			LOCK STEERING TO HEADING(90, LOOKDIRUP(HEADING(90, trgt_pitch), FACING:TOPVECTOR)
+			LOCK STEERING TO HEADING(90, LOOKDIRUP(HEADING(90, trgt_pitch), SHIP:FACING:TOPVECTOR)).
 		}).
 		
 		IF ALT:RADAR > safe_alt {
@@ -277,7 +276,7 @@ UNTIL done{
 		PRINT "THR" at(0,1).
 		PRINT thrott at(10,1).
 		PRINT "PITCH: " at(0,2).
-		PRINT ROUND(90 - VECTORANGLE(UP:VECTOR, FACING:FOREVECTOR), 3) at(10,2).
+		PRINT ROUND(90 - VECTORANGLE(UP:VECTOR, SHIP:FACING:FOREVECTOR), 3) at(10,2).
 		PRINT "T.PIT: " at(0,3).
 		PRINT trgt_pitch at(10,3).
 		PRINT "kPa:" at(0,4).

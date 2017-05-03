@@ -34,6 +34,7 @@ function Journal{
 			res_lex:add(ship_res[key]:NAME, ROUND(ship_res[key]:AMOUNT)).
 		}
 		row:add("RESOURCES_LEFT", res_lex).
+		row:add("STATUS", SHIP:STATUS).
 		row:add("DESC", description).
 		self:add(row_num, row).
 		WRITEJSON(self, save_path).
