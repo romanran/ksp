@@ -258,7 +258,7 @@ UNTIL done{
 		}).
 		pitch_1s["do"]({
 			LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
-			LOCK STEERING TO HEADING(90, LOOKDIRUP(HEADING(90, trgt_pitch), SHIP:FACING:TOPVECTOR)).
+			LOCK STEERING TO LOOKDIRUP(HEADING(90, trgt_pitch), SHIP:FACING:TOPVECTOR).
 		}).
 		
 		IF ALT:RADAR > safe_alt {
