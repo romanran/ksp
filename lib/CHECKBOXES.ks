@@ -1,4 +1,4 @@
-function Checklist{
+function Checkboxes{
 	PARAMETER msg.
 	PARAMETER choices.
 	LOCAL items_i TO 0.

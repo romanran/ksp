@@ -5,13 +5,14 @@ IF ADDONS:RT:HASKSCCONNECTION( SHIP ){
 	COPYPATH("0:lib/TIMER", "1:").
 	COPYPATH("0:lib/FUNCTIONS", "1:").
 	COPYPATH("0:lib/JOURNAL", "1:").
-	COPYPATH("0:lib/PROGRAM", "1:").
+	COPYPATH("0:lib/DISPLAYER", "1:").
 }
 RUNONCEPATH("COMSAT_HEIGHT").
 RUNONCEPATH("PID").
 RUNONCEPATH("TIMER").
 RUNONCEPATH("DOONCE").
 RUNONCEPATH("FUNCTIONS").
+RUNONCEPATH("DISPLAYER").
 RUNONCEPATH("JOURNAL").
 //RUNONCEPATH("PROGRAM").
 // * TODO*
@@ -32,14 +33,14 @@ SET THROTTLE TO 0. //safety measure for float point values of throttle when load
 CLEARSCREEN.
 SET TERMINAL:CHARWIDTH TO 10.
 SET TERMINAL:CHARHEIGHT TO 12.
-SET TERMINAL:WIDTH TO 37.
+SET TERMINAL:WIDTH TO 39.
 SET TERMINAL:HEIGHT TO 25.
 
 LOCAL ship_log TO Journal().
 LOCAL trgt IS GetTrgtAlt(3, 100000).
 
 LOCAL done IS false.
-LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to laready staged rocket
+LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
 LOCAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true.
 
 LOCAL ship_res IS getResources().
@@ -76,13 +77,14 @@ LOCAL accvec TO 0.
 LOCAL dyn_p TO 0.
 LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS^2.
 
+LOCAL Display TO Displayer().
 
 //--PRELAUNCH
 IF SHIP:STATUS = "PRELAUNCH"{
-	PRINT "Aurora Space Program V1.3".
-	PRINT "Comm range:"+trgt["r"]+"m.".
-	PRINT "Target altitude:"+trgt["alt"]+"m.".
-	PRINT "Target orbital period:"+trgt["period"]+"s.".
+	Display["imprint"]("Aurora Space Program V1.3").
+	Display["imprint"]("Comm range:", trgt["r"]+"m.").
+	Display["imprint"]("Target altitude:", trgt["alt"]+"m.").
+	Display["imprint"]("Target orbital period:", trgt["period"]+"s.").
 	LOCAL start IS false.
 	SET done TO true.
 
@@ -113,8 +115,8 @@ IF SHIP:STATUS = "PRELAUNCH"{
 		}
 	}
 	IF first_stage_engines:LENGTH = 0{
-		PRINT "COULDN'T FIND 1st STAGE ENGINES".
-		PRINT "REBOOT? AG2".
+		Display["print"]("COULDN'T FIND 1st STAGE ENGINES").
+		Display["print"]("REBOOT? AG2").
 		WAIT UNTIL AG2. 
 		REBOOT.
 	}
@@ -130,9 +132,9 @@ IF SHIP:STATUS = "PRELAUNCH"{
 		SET start TO TRUE.
 		ship_log["add"]("countdown start").
 	}
-	PRINT "ALL SYSTEMS ARE GO.".
-	PRINT "AWAITING LAUNCH CONFIRMATION ON AG1...".
-	PRINT "ABORT ON AG3...".
+	Display["print"]("ALL SYSTEMS ARE GO.").
+	Display["print"]("AWAITING LAUNCH CONFIRMATION ON AG1...").
+	Display["print"]("ABORT ON AG3...").
 	WAIT UNTIL start = TRUE.
 
 	FROM{ LOCAL i IS 5.} UNTIL i = 0 STEP { SET i TO i-1.} DO{
@@ -156,7 +158,7 @@ IF SHIP:STATUS = "PRELAUNCH"{
 		}
 	}
 
-	CLEARSCREEN.
+	
 }
 LOCAL ship_p TO 0.
 LOCAL pid_timer IS TIME:SECONDS.
@@ -165,6 +167,7 @@ SET ship_res TO getResources().
 
 //--- MAIN FLIGHT BODY
 UNTIL done{
+	Display["reset"]().
 	ON AG5{
 		//stage override, just in case
 		SET stg TO doStage().
@@ -184,7 +187,7 @@ UNTIL done{
 				SET stg TO doStage().
 				SET done_staging TO stg["done"].
 				SET stg_res TO stg["res"].
-				CLEARSCREEN.
+				
 				ship_log["add"]("Stage "+STAGE:NUMBER+" - out of LF").
 			}).
 		}
@@ -228,7 +231,7 @@ UNTIL done{
 			SET root_part:TAG TO "THRUSTING".
 			nacc_Timer["set"]().
 			HUDTEXT("TAKEOFF!", 1, 2, 40, green, false).
-			CLEARSCREEN.
+			
 			ship_log["add"]("TAKEOFF").
 			journal_Timer["set"]().
 		}).
@@ -258,7 +261,7 @@ UNTIL done{
 		}).
 		pitch_1s["do"]({
 			LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
-			LOCK STEERING TO LOOKDIRUP(HEADING(90, trgt_pitch), SHIP:FACING:TOPVECTOR).
+			LOCK STEERING TO R(0, 0, 0) + HEADING(90, trgt_pitch).
 		}).
 		
 		IF ALT:RADAR > safe_alt {
@@ -273,18 +276,12 @@ UNTIL done{
 		}
 		
 		SET PIDC:SETPOINT TO target_kpa.
-		PRINT "THR" at(0,1).
-		PRINT thrott at(10,1).
-		PRINT "PITCH: " at(0,2).
-		PRINT ROUND(90 - VECTORANGLE(UP:VECTOR, SHIP:FACING:FOREVECTOR), 3) at(10,2).
-		PRINT "T.PIT: " at(0,3).
-		PRINT trgt_pitch at(10,3).
-		PRINT "kPa:" at(0,4).
-		PRINT ROUND(dyn_p, 3) at(10,4).
-		PRINT "T.kPa:" at(0,5).
-		PRINT target_kpa  at(10,5).
-		PRINT "ACC:" at(0,6).
-		PRINT ROUND(accvec:MAG / g_base, 3) at(10,6).
+		Display["print"]("THR", thrott).
+		Display["print"]("PITCH:", ROUND(90 - VECTORANGLE(UP:VECTOR, SHIP:FACING:FOREVECTOR), 3)).
+		Display["print"]("T.PIT:", trgt_pitch).
+		Display["print"]("kPa:", ROUND(dyn_p, 3)).
+		Display["print"]("T.kPa:", target_kpa).
+		Display["print"]("ACC:", ROUND(accvec:MAG / g_base, 3)).
 			
 		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 AND nacc_Timer["check"]() < 8 AND nacc_Timer["check"]() > 4{
 			//if ship is off course when not achieved orbital speed yet and the staging wait isnt in progress
@@ -326,7 +323,7 @@ UNTIL done{
 		IF CEILING(APOAPSIS) >= trgt["alt"] AND ALTITUDE>70000{
 			LOCK THROTTLE TO 0.
 			HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
-			CLEARSCREEN.
+			
 			//leaving thrusting section at that time
 			SET root_part:TAG TO "COASTING".
 			ship_log["add"]("Transition to the coasting phase").

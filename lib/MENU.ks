@@ -6,7 +6,7 @@
 // choices - (list) list of lexicons for checkboxes, takes [name, msg] as before
 //
 
-COPYPATH("0:lib/checklist", "1:").
+COPYPATH("0:lib/CHECKBOXES", "1:").
 function Menu{
 	PARAMETER inputs.
 	LOCAL numbers TO "01234566789.":SPLIT("").
