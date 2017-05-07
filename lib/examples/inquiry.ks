@@ -36,8 +36,8 @@ set prompt to LIST(
 		"name", "test2",
 		"type", "letter", 
 		"msg", "Test str",
-		"filter": {
-			PARAMETER resolve, reject, str
+		"filter", {
+			PARAMETER resolve, reject, str.
 			IF (str:LENGTH > 10) {
 				return reject("String is too long: " + str:LENGTH + " out of 10 characters allowed").
 			} ELSE {

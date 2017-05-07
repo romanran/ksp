@@ -4,6 +4,9 @@
 // type - (string) possible[number, letter, chars(letters and numbers), checkbox]
 // msg - (string) message to show on the input
 // choices - (list) list of lexicons for checkboxes, takes [name, msg] as before
+// choices - (list) list of lexicons for checkboxes, takes [name, msg] as before
+// filter - (function delegate) it needs 3 parameters, 1st - success function, 2nd - failure function, 3rd - input value
+// Return the success(input value) function call or the failure("message to show").
 //
 @LAZYGLOBAL off.
 DECLARE GLOBAL env TO "live".
@@ -70,8 +73,8 @@ function Inquiry{
 		LOCAL done TO false.
 		LOCAL check_list TO false.
 		IF ch_type="checkbox" {
-			RUNONCEPATH("1:Checklist").
-			SET check_list TO Checklist(msg, choices).
+			RUNONCEPATH("1:CHECKBOXES").
+			SET check_list TO Checkboxes(msg, choices).
 		}
 		UNTIL done {
 			IF TERMINAL:INPUT:HASCHAR {
@@ -106,7 +109,7 @@ function Inquiry{
 						Sounds:PLAY(err_s).
 					}
 				}ELSE IF char = TERMINAL:INPUT:ENTER{
-					IF val:LENGTH < 1 {
+					IF NOT ch_type = "checkbox" AND val:LENGTH < 1 {
 						onError("Value can't be empty").
 					} ELSE {
 						IF ch_type = "checkbox"{
