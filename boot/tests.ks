@@ -8,6 +8,8 @@ COPYPATH("0:lib/DOONCE", "1:").
 //COPYPATH("0:lib/TRAJECTORY", "1:").
 COPYPATH("0:lib/FUNCTIONS", "1:").
 COPYPATH("0:lib/JOURNAL", "1:").
+COPYPATH("0:lib/PROGRAM", "1:").
+COPYPATH("0:lib/INQUIRY", "1:").
 //RUNPATH("GETMODULES").
 //RUNPATH("COMSAT_HEIGHT").
 //RUNPATH("PID").
@@ -15,7 +17,9 @@ RUNPATH("DOONCE").
 //RUNPATH("GETRESOURCES").
 //RUNPATH("TRAJECTORY").
 RUNPATH("FUNCTIONS").
-RUNPATH("journal").
+RUNPATH("Journal").
+RUNPATH("INQUIRY").
+RUNPATH("PROGRAM").
 
 SET once_1 TO doOnce().
 SET once_2 TO doOnce().
@@ -32,6 +36,37 @@ function testWParam{
 	parameter param TO 0.
 	print "this function have param passed that is different than 0: " + param[0].
 }
+SET pr TO Program("atts-test").
+PRINT pr["list"]().
+
+LOCAL target_question TO LIST(
+	LEXICON(
+		"name", "sats",
+		"type", "number", 
+		"msg", "number of satellites",
+		"filter", {
+			PARAMETER resolve, reject, val.
+			IF (val < 3 OR val > 6) {
+				return reject("Choose number of sats in range 3 - 6").
+			} ELSE {
+				return resolve(val).
+			}
+		}
+	),
+	LEXICON(
+		"name", "alt",
+		"type", "number", 
+		"msg", "Altitude in km.",
+		"filter", {
+			PARAMETER resolve, reject, val.
+			return resolve(val * 1000).
+		}
+	)
+).
+//pr["create"](Inquiry(target_question)).
+
+pr["add"]().
+PRINT pr["fetch"]().
 
 UNTIL i > loops{
 	PRINT i.

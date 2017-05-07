@@ -40,6 +40,7 @@ SET TERMINAL:WIDTH TO 42.
 SET TERMINAL:HEIGHT TO 30.
 LOCAL Display TO Displayer().
 
+SET SHIP:NAME TO generateID().
 LOCAL ship_log TO Journal().
 
 LOCAL target_question TO LIST(
@@ -374,17 +375,12 @@ UNTIL done{
 					SET ant1 TO ant:GETMODULE("ModuleRTAntenna").
 					IF ant1:HASEVENT("ACTIVATE"){
 						ant1:DOEVENT("ACTIVATE").
-						conn_Timer["set"]().
 					}
 				}
 				ship_log["add"]("Antennas deploy").
 			}ELSE{
 				HUDTEXT("NO ANTENNAS DETECTED", 2, 2, 42, RGB(255,60,0), false).
 			}
-		}).
-
-		conn_Timer["ready"](5,{
-			ship_log["save"]().
 		}).
 	}//--vacuum, deploy panels and antennas, turn on lights
 	
@@ -469,8 +465,14 @@ UNTIL done{
 	IF root_part:TAG = "ORIBITNG"{
 		UNLOCK THROTTLE.
 		UNLOCK STEERING.
+		conn_Timer["set"]().
 		SET done TO TRUE.
 	}
+	conn_Timer["ready"](10,{
+		IF NOT ship_log["save"](){
+			conn_Timer["set"]().
+		}
+	}).
 	journal_Timer["ready"](5,{
 		ship_log["add"](root_part:TAG +" phase").
 		journal_Timer["reset"]().

@@ -42,12 +42,15 @@ function Journal{
 	function dumpAll{
 		PRINT self:DUMP.
 	}
+	
 	function saveToLog{
 		IF ADDONS:RT:HASKSCCONNECTION(SHIP){
 			COPYPATH(save_path, "0:flightlogs/").
-			RETURN 1.
+			HUDTEXT("Flight journal saved!", 3, 2, 40, green, false).
+			RETURN true.
 		}ELSE{
-			PRINT 0.
+			HUDTEXT("Journal can't be send, no connection", 3, 2, 40, red, false).
+			RETURN false.
 		}
 	}
 	

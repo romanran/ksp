@@ -1,0 +1,26 @@
+{
+    "entries": [
+        "type",
+        "atts-test",
+        "id",
+        "atts-test 694",
+        "vessels",
+        {
+            "items": [
+                "Tester"
+            ],
+            "$type": "kOS.Safe.Encapsulation.ListValue"
+        },
+        "attributes",
+        {
+            "entries": [
+                "sats",
+                3,
+                "alt",
+                100000
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        }
+    ],
+    "$type": "kOS.Safe.Encapsulation.Lexicon"
+}
