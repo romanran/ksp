@@ -82,6 +82,7 @@ function calcDeltaV{
 	}
 	RETURN trgtv.
 }
+
 function calcBurnTime {
 	// Takes dv as a parameter
 	PARAMETER dV.
@@ -102,6 +103,7 @@ function calcBurnTime {
     }
 	RETURN 0.
 }
+
 function calcOrbPeriod {
 	// Takes r - circular orbit absolute altitude
 	// Takes celestial body name string
@@ -114,6 +116,7 @@ function calcOrbPeriod {
 	LOCAL grav_param IS CONSTANT:G * trgt_body:MASS. //GM
 	RETURN ROUND(SQRT( (4*CONSTANT:PI^2*trgt_alt^3)/grav_param ), 3).
 }
+
 function calcTrajectory{
 	PARAMETER alt.
 	DECLARE LOCAL funcx TO ROUND(1 - (alt ^ 2 / 70000 ^ 2) ^ 0.25, 3).
@@ -123,4 +126,72 @@ function calcTrajectory{
 function getID {
 	PARAMETER vessel_o IS SHIP.
 	RETURN vessel_o:NAME + " " + FLOOR(RANDOM() * 1000).
+}
+
+function getdV{   
+	//https://www.reddit.com/r/Kos/comments/330yir/calculating_stage_deltav/
+	//only_to_downvote
+    LOCAL fuels IS list().
+    fuels:ADD("LiquidFuel").
+    fuels:ADD("Oxidizer").
+    fuels:ADD("SolidFuel").
+    fuels:ADD("MonoPropellant").
+
+    // fuel density list (order must match name list)
+    LOCAL fuelsDensity IS list().
+    fuelsDensity:ADD(0.005).
+    fuelsDensity:ADD(0.005).
+    fuelsDensity:ADD(0.0075).
+    fuelsDensity:ADD(0.004).
+
+    // initialize fuel mass sums
+    LOCAL fuelMass IS 0.
+	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
+    // thrust weighted average isp
+    LOCAL thrustTotal IS 0.
+    LOCAL mDotTotal IS 0.
+
+    // calculate total fuel mass
+    FOR r IN STAGE:RESOURCES{
+        LOCAL iter is 0.
+        FOR f in fuels{
+            IF f = r:NAME{
+                SET fuelMass TO fuelMass + fuelsDensity[iter]*r:AMOUNT.
+            }
+            SET iter TO iter+1.
+        }
+    }
+
+    LIST ENGINES IN engList. 
+    FOR eng in engList{
+        IF eng:IGNITION{
+            SET thrustTotal TO thrustTotal + eng:maxthrust.
+			SET mDotTotal TO mDotTotal + eng:maxthrust / eng:ISP.
+        }
+    }
+	LOCAL avgIsp IS 0.
+    IF NOT (mDotTotal = 0){
+		SET avgIsp TO thrustTotal / mDotTotal.
+	}
+    // deltaV calculation as Isp*g0*ln(m0/m1).
+    LOCAL deltaV IS avgIsp * 9.82 * LN(SHIP:MASS / (SHIP:MASS - fuelMass)).
+
+    RETURN deltaV.
+}.
+
+function GetTrgtAlt{
+	parameter sat_num is 3.
+	PARAMETER min_h is 100.
+	LOCAL ang TO 360/(sat_num*2). 
+	LOCAL h TO KERBIN:RADIUS+min_h.
+	LOCAL altA TO (h/COS(ang)). //absolute
+	LOCAL altR TO altA-KERBIN:RADIUS. //relative altitude
+	LOCAL comm_r TO ROUND( SQRT((altA*altA)*2) ).//range
+	LOCAL o TO lexicon().
+	LOCAL orb_period TO calcOrbPeriod(altA).
+	o:ADD("r", comm_r).
+	o:ADD("altA",  altA).
+	o:ADD("alt", altR).
+	o:ADD("period", orb_period).
+	return o.
 }

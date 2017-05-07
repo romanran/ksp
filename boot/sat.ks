@@ -1,31 +1,32 @@
 IF ADDONS:RT:HASKSCCONNECTION( SHIP ){
-	COPYPATH("0:lib/COMSAT_HEIGHT", "1:").
 	COPYPATH("0:lib/PID", "1:").
 	COPYPATH("0:lib/DOONCE", "1:").
 	COPYPATH("0:lib/TIMER", "1:").
 	COPYPATH("0:lib/FUNCTIONS", "1:").
 	COPYPATH("0:lib/JOURNAL", "1:").
 	COPYPATH("0:lib/DISPLAYER", "1:").
+	COPYPATH("0:lib/INQUIRY", "1:").
 }
-RUNONCEPATH("COMSAT_HEIGHT").
 RUNONCEPATH("PID").
 RUNONCEPATH("TIMER").
 RUNONCEPATH("DOONCE").
 RUNONCEPATH("FUNCTIONS").
 RUNONCEPATH("DISPLAYER").
 RUNONCEPATH("JOURNAL").
+RUNONCEPATH("INQUIRY").
 //RUNONCEPATH("PROGRAM").
 // * TODO*
 //- set states in root part tag and check status from there
 // add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
 // write getNearestPart library for staging purposes 
 // -if energy low, start fuel cell
-// rotate craft with pid for maximum sun exposure
+//- rotate craft with pid for maximum sun exposure
 // check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
 // make program creator, move all of the ifs to function and load them on program checklist.
 // save created programs in json
 // check if start TWR on countdown
 // check if comm range is within max ranges of antennas on board
+// check different gravity turns slopes by comparing dV and resources used
 
 LOCAL root_part IS SHIP:ROOTPART.
 SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
@@ -37,7 +38,20 @@ SET TERMINAL:WIDTH TO 39.
 SET TERMINAL:HEIGHT TO 25.
 
 LOCAL ship_log TO Journal().
-LOCAL trgt IS GetTrgtAlt(3, 100000).
+LOCAL target_question TO LIST(
+	LEXICON(
+		"name", "sats",
+		"type", "number", 
+		"msg", "number of satellites"
+	),
+	LEXICON(
+		"name", "alt",
+		"type", "number", 
+		"msg", "Altitude in km."
+	),
+).
+LOCAL user_target TO Inquiry(target_question).
+LOCAL trgt IS GetTrgtAlt(user_target["sats"], user_target["alt"]).
 
 LOCAL done IS false.
 LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
@@ -395,9 +409,9 @@ UNTIL done{
 			SET thrott TO 0.
 			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).	
 			SET dV_change TO calcDeltaV(trgt["altA"]).
-			PRINT "dv change: "+dV_change AT(0,5).
+			Display["print"]("dv change: ", dV_change).
 			SET burn_time TO calcBurnTime(dV_change).
-			PRINT "t: "+burn_time AT(0,6).
+			Display["print"]("t: ", burn_time).
 			HUDTEXT(burn_time, 3, 3, 20, green, false).
 			SAS OFF.
 			LOCK STEERING TO LOOKDIRUP(SHIP:PROGRADE, FACING:TOPVECTOR).
@@ -421,12 +435,9 @@ UNTIL done{
 				SET root_part:TAG TO "CORRECTION_BURN".
 			}).
 		}
-		PRINT "THROTTLE: " at(0,1).
-		PRINT thrott at(18,1).
-		PRINT "ORB. PERIOD:" at(0,2).
-		PRINT ROUND(SHIP:ORBIT:PERIOD, 3) at(18,2).
-		PRINT "TRGT ORB. PERIOD: " at(0,3).
-		PRINT trgt["period"] at(18,3).
+		Display["print"]("THROTTLE: ", thrott).
+		Display["print"]("ORB. PERIOD:", ROUND(SHIP:ORBIT:PERIOD, 3)).
+		Display["print"]("TRGT ORB. PERIOD: ", trgt["period"]).
 	}//target orbit injection
 	IF root_part:TAG = "CORRECTION_BURN"{
 		IF ROUND(SHIP:ORBIT:PERIOD, 3) >= trgt["period"]{
@@ -437,10 +448,8 @@ UNTIL done{
 			SET root_part:TAG TO "ORBITING".
 		}ELSE{
 			SET SHIP:CONTROL:FORE TO 0.5.	
-			PRINT "ORB. PERIOD:" at(0,1).
-			PRINT ROUND(SHIP:ORBIT:PERIOD, 3) at(18,1).
-			PRINT "TRGT ORB. PERIOD: " at(0,2).
-			PRINT trgt["period"] at(18,2).
+			Display["print"]("ORB. PERIOD:", ROUND(SHIP:ORBIT:PERIOD, 3)).
+			Display["print"]("TRGT ORB. PERIOD: ", trgt["period"]).
 		}
 	}
 	IF root_part:TAG = "ORIBITNG"{
