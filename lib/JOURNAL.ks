@@ -5,9 +5,8 @@ function Journal{
 	
 	LOCAL row TO LEXICON().
 	LOCAL row_num TO 0.
-	row:add("TS", TIME:SECONDS).
-	row:add("LF_TOTAL", ALT).
-	row:add("SPD", SHIPNAME).
+	row:add("T", TIME:SECONDS).
+	row:add("SHIP", SHIPNAME).
 	LOCAL res_lex TO LEXICON().
 	FOR key IN ship_res:KEYS{
 		res_lex:add(ship_res[key]:NAME, ship_res[key]:CAPACITY).
@@ -23,7 +22,7 @@ function Journal{
 		SET row TO LEXICON().
 		row:add("MISSIONTIME", ROUND(MISSIONTIME)).
 		row:add("TIME", ROUND(TIME:SECONDS)).
-		row:add("ALT", ALT:RADAR).
+		row:add("ALT", ROUND(ALT:RADAR)).
 		row:add("APO", ROUND(ALT:APOAPSIS)).
 		row:add("PER", ROUND(ALT:PERIAPSIS)).
 		row:add("ORBV", ROUND(VELOCITY:ORBIT:MAG)).
@@ -35,6 +34,7 @@ function Journal{
 			res_lex:add(ship_res[key]:NAME, ROUND(ship_res[key]:AMOUNT)).
 		}
 		row:add("RESOURCES_LEFT", res_lex).
+		row:add("STATUS", SHIP:STATUS).
 		row:add("DESC", description).
 		self:add(row_num, row).
 		WRITEJSON(self, save_path).
