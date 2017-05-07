@@ -35,7 +35,7 @@ function testWParam{
 
 UNTIL i > loops{
 	PRINT i.
-	once_1["do"]({ 
+	once_1["do"]({
 		//print "once 1 call on loop: "+i.
 		//SET dV_change TO calcDeltaV(700000).
 		//PRINT dV_change.
