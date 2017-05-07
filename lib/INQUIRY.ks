@@ -5,6 +5,14 @@
 // msg - (string) message to show on the input
 // choices - (list) list of lexicons for checkboxes, takes [name, msg] as before
 //
+@LAZYGLOBAL off.
+DECLARE GLOBAL env TO "live".
+
+function CS{
+	IF NOT (env = "debug") {
+		CLEARSCREEN.
+	}
+}
 
 COPYPATH("0:lib/CHECKBOXES", "1:").
 function Inquiry{
@@ -22,6 +30,11 @@ function Inquiry{
 			IF inp:HASKEY("name") {
 				LOCAL msg TO inp["name"] + " input:".
 				LOCAL itype TO "char".
+				LOCAL choices TO LIST().
+				LOCAL filter IS {
+					PARAMETER res, rej, val.
+					return res(val).
+				}.
 				IF(inp:HASKEY("msg")){
 					SET msg TO inp["msg"].
 				}
@@ -29,10 +42,12 @@ function Inquiry{
 					SET itype TO inp["type"].
 				}
 				IF (inp:HASKEY("choices")) {
-					SET vals[inp["name"]] TO read(msg, itype, inp["choices"]).
-				} ELSE {
-					SET vals[inp["name"]] TO read(msg, itype).
+					SET choices to inp["choices"].
 				}
+				IF (inp:HASKEY("filter")) {
+					SET filter to inp["filter"].
+				}
+				SET vals[inp["name"]] TO read(msg, itype, choices, filter@).
 			}
 		}
 		RETURN vals.
@@ -40,14 +55,16 @@ function Inquiry{
 	
 	function onError{
 		PARAMETER err TO "".
-		PRINT err.
+		PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,1).
+		PRINT err AT (0,1).
 	}
 	
 	function read{
-		CLEARSCREEN.
-		PARAMETER msg TO "Value".
-		PARAMETER ch_type TO "char".
-		PARAMETER choices TO LIST().
+		CS().
+		PARAMETER msg.
+		PARAMETER ch_type.
+		PARAMETER choices.
+		PARAMETER filter.
 		LOCAL val TO "".
 		LOCAL enters TO 0.
 		LOCAL done TO false.
@@ -58,6 +75,7 @@ function Inquiry{
 		}
 		UNTIL done {
 			IF TERMINAL:INPUT:HASCHAR {
+				PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,0).
 				LOCAL char to TERMINAL:INPUT:GETCHAR().
 				IF ch_type="number" AND numbers:CONTAINS(char){
 					SET val TO val+""+char.
@@ -80,19 +98,34 @@ function Inquiry{
 					Sounds:PLAY(err_s).
 				}
 				IF char = TERMINAL:INPUT:BACKSPACE {
-					SET val TO val:SUBSTRING(0, val:LENGTH - 1).
-					PRINT msg+": "+val+"                                " AT (0,0).
-					Sounds:PLAY( NOTE("d5",  0.1, 0, 0.3) ).
+					IF val:LENGTH >= 1 {
+						SET val TO val:SUBSTRING(0, val:LENGTH - 1).
+						PRINT msg+": " + val AT (0,0).
+						Sounds:PLAY( NOTE("d5",  0.1, 0, 0.3) ).
+					} ELSE {
+						Sounds:PLAY(err_s).
+					}
 				}ELSE IF char = TERMINAL:INPUT:ENTER{
-					IF ch_type = "checkbox"{
-						SET val TO check_list["getAnswers"]().
+					IF val:LENGTH < 1 {
+						onError("Value can't be empty").
+					} ELSE {
+						IF ch_type = "checkbox"{
+							SET val TO check_list["getAnswers"]().
+						}
+						IF ch_type="number" AND NOT(val = ""){
+							SET val TO val:TONUMBER(onError).
+						}
+						LOCAL promise IS _promise(filter@, val).
+						SET done TO promise["done"].
+						IF promise["err"] = false {
+							Sounds:PLAY( enter_s ).
+							RETURN promise["val"].
+						} ELSE {
+							SET val TO val + "". //convert back to str
+							onError(promise["val"]).
+							Sounds:PLAY(err_s).
+						}
 					}
-					SET done TO true.
-					IF ch_type="number" AND NOT(val = ""){
-						SET val TO val:TONUMBER(onError).
-					}
-					Sounds:PLAY( enter_s ).
-					RETURN val.
 				}
 			}
 			PRINT msg+": "+val AT (0,0).
@@ -100,5 +133,30 @@ function Inquiry{
 		}
 		RETURN val.
 	}
+	
+	function _promise{
+		PARAMETER filter, val.
+		LOCAL done IS true.
+		LOCAL err IS false.
+		function resolve {
+			PARAMETER val.
+			return val.
+		}
+		function reject {
+			PARAMETER msg.
+			SET err TO true.
+			return msg.
+		}
+		SET val TO filter(resolve@, reject@, val).
+		IF err = true {
+			SET done TO false.
+		}
+		return LEXICON(
+			"val", val,
+			"done", done,
+			"err", err
+		).
+	}
+	
 	RETURN loop().
 }

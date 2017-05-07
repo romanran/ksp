@@ -195,3 +195,16 @@ function GetTrgtAlt{
 	o:ADD("period", orb_period).
 	return o.
 }
+
+function CS{
+	IF NOT (env = "debug") {
+		CLEARSCREEN.
+	}
+}
+
+function deb{
+	PARAMETER str.
+	IF env = "debug" {
+		PRINT str.
+	} 
+}

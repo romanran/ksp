@@ -75,7 +75,7 @@ function Checkboxes{
 	}
 	
 	function init{
-		CLEARSCREEN.
+		CS().
 		listItems().
 	}
 	

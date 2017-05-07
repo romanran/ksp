@@ -1,3 +1,5 @@
+@LAZYGLOBAL on.
+DECLARE GLOBAL env TO "live".
 IF ADDONS:RT:HASKSCCONNECTION( SHIP ){
 	COPYPATH("0:lib/PID", "1:").
 	COPYPATH("0:lib/DOONCE", "1:").
@@ -31,24 +33,38 @@ RUNONCEPATH("INQUIRY").
 LOCAL root_part IS SHIP:ROOTPART.
 SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
-CLEARSCREEN.
+CS().
 SET TERMINAL:CHARWIDTH TO 10.
 SET TERMINAL:CHARHEIGHT TO 12.
-SET TERMINAL:WIDTH TO 39.
-SET TERMINAL:HEIGHT TO 25.
+SET TERMINAL:WIDTH TO 42.
+SET TERMINAL:HEIGHT TO 30.
+LOCAL Display TO Displayer().
 
 LOCAL ship_log TO Journal().
+
 LOCAL target_question TO LIST(
 	LEXICON(
 		"name", "sats",
 		"type", "number", 
-		"msg", "number of satellites"
+		"msg", "number of satellites",
+		"filter", {
+			PARAMETER resolve, reject, val.
+			IF (val < 3 OR val > 6) {
+				return reject("Choose number of sats in range 3 - 6").
+			} ELSE {
+				return resolve(val).
+			}
+		}
 	),
 	LEXICON(
 		"name", "alt",
 		"type", "number", 
-		"msg", "Altitude in km."
-	),
+		"msg", "Altitude in km.",
+		"filter", {
+			PARAMETER resolve, reject, val.
+			return resolve(val * 1000).
+		}
+	)
 ).
 LOCAL user_target TO Inquiry(target_question).
 LOCAL trgt IS GetTrgtAlt(user_target["sats"], user_target["alt"]).
@@ -81,8 +97,8 @@ LOCAL stg_res IS LEXICON().
 LOCAL antennas IS LEXICON().
 LOCAL ship_engines IS LIST().
 
-LOCAL trgt_pitch IS 0.
-LOCAL thrott IS 0. //throttle
+LOCAL trgt_pitch TO 0.
+LOCAL thrott TO 0. //throttle
 LOCAL safe_alt IS 150. //safe altitude to release max thrust during a launch
 LOCAL target_kPa IS 1.
 LOCAL burn_time IS -10. //dont fire until its calculated
@@ -90,8 +106,6 @@ LOCAL dV_change IS 0.
 LOCAL accvec TO 0.
 LOCAL dyn_p TO 0.
 LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS^2.
-
-LOCAL Display TO Displayer().
 
 //--PRELAUNCH
 IF SHIP:STATUS = "PRELAUNCH"{
@@ -107,8 +121,8 @@ IF SHIP:STATUS = "PRELAUNCH"{
 	SET PIDC to setPID(0, 1).
 	SET PIDC:MAXOUTPUT TO 1.
 	SET PIDC:MINOUTPUT TO 1.
-	SET trgt_pitch TO 0.
-	SET thrott TO 1.
+	LOCAL trgt_pitch TO 0.
+	LOCAL thrott TO 1.
 	
 	LIST ENGINES IN ship_engines.
 	//add once objects
