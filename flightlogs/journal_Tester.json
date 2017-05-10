@@ -4,7 +4,7 @@
         {
             "entries": [
                 "T",
-                232588.07060064888,
+                251747.37017240515,
                 "SHIP",
                 "Tester",
                 "DESC",
@@ -24,9 +24,9 @@
         {
             "entries": [
                 "MISSIONTIME",
-                99287,
+                118449,
                 "TIME",
-                232589,
+                251751,
                 "ALT",
                 1,
                 "APO",
@@ -38,14 +38,14 @@
                 "SURV",
                 0,
                 "FACING",
-                "R(314.954,29.009,93.082)",
+                "R(314.928,27.442,91.37)",
                 "VERTICALSPEED",
                 0,
                 "RESOURCES_LEFT",
                 {
                     "entries": [
                         "ElectricCharge",
-                        3461
+                        1763
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
                 },
@@ -60,9 +60,9 @@
         {
             "entries": [
                 "MISSIONTIME",
-                99287,
+                118450,
                 "TIME",
-                232589,
+                251752,
                 "ALT",
                 1,
                 "APO",
@@ -74,14 +74,14 @@
                 "SURV",
                 0,
                 "FACING",
-                "R(314.954,29.009,93.082)",
+                "R(314.928,27.442,91.37)",
                 "VERTICALSPEED",
                 0,
                 "RESOURCES_LEFT",
                 {
                     "entries": [
                         "ElectricCharge",
-                        3461
+                        1762
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
                 },
@@ -96,9 +96,9 @@
         {
             "entries": [
                 "MISSIONTIME",
-                99288,
+                118450,
                 "TIME",
-                232590,
+                251753,
                 "ALT",
                 1,
                 "APO",
@@ -110,14 +110,14 @@
                 "SURV",
                 0,
                 "FACING",
-                "R(314.954,29.009,93.081)",
+                "R(314.928,27.442,91.37)",
                 "VERTICALSPEED",
                 0,
                 "RESOURCES_LEFT",
                 {
                     "entries": [
                         "ElectricCharge",
-                        3461
+                        1762
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
                 },
@@ -132,9 +132,9 @@
         {
             "entries": [
                 "MISSIONTIME",
-                99289,
+                118451,
                 "TIME",
-                232591,
+                251753,
                 "ALT",
                 1,
                 "APO",
@@ -146,14 +146,14 @@
                 "SURV",
                 0,
                 "FACING",
-                "R(314.954,29.009,93.081)",
+                "R(314.928,27.441,91.371)",
                 "VERTICALSPEED",
                 0,
                 "RESOURCES_LEFT",
                 {
                     "entries": [
                         "ElectricCharge",
-                        3461
+                        1761
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
                 },
@@ -161,78 +161,6 @@
                 "LANDED",
                 "DESC",
                 "test4"
-            ],
-            "$type": "kOS.Safe.Encapsulation.Lexicon"
-        },
-        5,
-        {
-            "entries": [
-                "MISSIONTIME",
-                99289,
-                "TIME",
-                232591,
-                "ALT",
-                1,
-                "APO",
-                57,
-                "PER",
-                -598435,
-                "ORBV",
-                175,
-                "SURV",
-                0,
-                "FACING",
-                "R(314.954,29.009,93.081)",
-                "VERTICALSPEED",
-                0,
-                "RESOURCES_LEFT",
-                {
-                    "entries": [
-                        "ElectricCharge",
-                        3461
-                    ],
-                    "$type": "kOS.Safe.Encapsulation.Lexicon"
-                },
-                "STATUS",
-                "LANDED",
-                "DESC",
-                "test5"
-            ],
-            "$type": "kOS.Safe.Encapsulation.Lexicon"
-        },
-        6,
-        {
-            "entries": [
-                "MISSIONTIME",
-                99290,
-                "TIME",
-                232592,
-                "ALT",
-                1,
-                "APO",
-                57,
-                "PER",
-                -598435,
-                "ORBV",
-                175,
-                "SURV",
-                0,
-                "FACING",
-                "R(314.954,29.009,93.081)",
-                "VERTICALSPEED",
-                0,
-                "RESOURCES_LEFT",
-                {
-                    "entries": [
-                        "ElectricCharge",
-                        3461
-                    ],
-                    "$type": "kOS.Safe.Encapsulation.Lexicon"
-                },
-                "STATUS",
-                "LANDED",
-                "DESC",
-                "test6"
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
         }

@@ -1,21 +1,13 @@
 // Pass a list of lexicons:
 // possible attributes of the lexicons
 // name - (string) name of the returned variable
-// type - (string) possible[number, letter, chars(letters and numbers), checkbox]
+// type - (string) possible[number, letter, chars(letters and numbers), checkbox, select]
 // msg - (string) message to show on the input
-// choices - (list) list of lexicons for checkboxes, takes [name, msg] as before
-// choices - (list) list of lexicons for checkboxes, takes [name, msg] as before
+// choices - (list) list of lexicons for checkboxes, takes [name, msg] as before, or a list of strings
 // filter - (function delegate) it needs 3 parameters, 1st - success function, 2nd - failure function, 3rd - input value
 // Return the success(input value) function call or the failure("message to show").
 //
 @LAZYGLOBAL off.
-DECLARE GLOBAL env TO "live".
-
-function CS{
-	IF NOT (env = "debug") {
-		CLEARSCREEN.
-	}
-}
 
 COPYPATH("0:lib/CHECKBOXES", "1:").
 function Inquiry{
@@ -53,6 +45,7 @@ function Inquiry{
 				SET vals[inp["name"]] TO read(msg, itype, choices, filter@).
 			}
 		}
+		CS().
 		RETURN vals.
 	}
 	
@@ -74,7 +67,11 @@ function Inquiry{
 		LOCAL check_list TO false.
 		IF ch_type="checkbox" {
 			RUNONCEPATH("1:CHECKBOXES").
-			SET check_list TO Checkboxes(msg, choices).
+			SET check_list TO Checkboxes(msg, choices, "checkbox").
+		}
+		IF ch_type="select" {
+			RUNONCEPATH("1:CHECKBOXES").
+			SET check_list TO Checkboxes(msg, choices, "select").
 		}
 		UNTIL done {
 			IF TERMINAL:INPUT:HASCHAR {
@@ -91,7 +88,7 @@ function Inquiry{
 				ELSE IF ch_type="char" {
 					SET val TO val+""+char.
 					Sounds:PLAY(correct_s).
-				}ELSE IF ch_type="checkbox" {
+				}ELSE IF ch_type="checkbox" OR "select" {
 					IF check_list["movePointer"](char) {
 						Sounds:PLAY(correct_s).
 					} ELSE {
@@ -112,7 +109,7 @@ function Inquiry{
 					IF NOT ch_type = "checkbox" AND val:LENGTH < 1 {
 						onError("Value can't be empty").
 					} ELSE {
-						IF ch_type = "checkbox"{
+						IF ch_type = "checkbox" OR "select" {
 							SET val TO check_list["getAnswers"]().
 						}
 						IF ch_type="number" AND NOT(val = ""){

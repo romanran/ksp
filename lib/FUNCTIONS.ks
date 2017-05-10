@@ -123,9 +123,17 @@ function calcTrajectory{
 	RETURN ROUND(SIN(funcx*CONSTANT:RadToDeg) * (90 * 1.1884), 2).
 }
 
-function getID {
-	PARAMETER vessel_o IS SHIP.
-	RETURN vessel_o:NAME + " " + FLOOR(RANDOM() * 1000).
+function generateID {
+	PARAMETER default_vessel IS SHIP.
+	LOCAL vessel_name TO default_vessel.
+
+	IF default_vessel:typename() = "Vessel"{
+		SET vessel_name TO default_vessel:NAME. 
+	}
+	IF default_vessel:typename() = "String"{
+		SET vessel_name TO default_vessel. 
+	}
+	RETURN vessel_name + " " + FLOOR(RANDOM() * 1000).
 }
 
 function getdV{   

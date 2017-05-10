@@ -1,0 +1,24 @@
+{
+    "entries": [
+        "type",
+        "commsat3",
+        "id",
+        "commsat3 694",
+        "vessels",
+        {
+            "items": [],
+            "$type": "kOS.Safe.Encapsulation.ListValue"
+        },
+        "attributes",
+        {
+            "entries": [
+                "sats",
+                3,
+                "alt",
+                100000
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        }
+    ],
+    "$type": "kOS.Safe.Encapsulation.Lexicon"
+}
