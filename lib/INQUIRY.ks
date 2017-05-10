@@ -74,7 +74,11 @@ function Inquiry{
 		LOCAL check_list TO false.
 		IF ch_type="checkbox" {
 			RUNONCEPATH("1:CHECKBOXES").
-			SET check_list TO Checkboxes(msg, choices).
+			SET check_list TO Checkboxes(msg, choices, "checkbox").
+		}
+		IF ch_type="select" {
+			RUNONCEPATH("1:CHECKBOXES").
+			SET check_list TO Checkboxes(msg, choices, "select").
 		}
 		UNTIL done {
 			IF TERMINAL:INPUT:HASCHAR {
@@ -91,7 +95,7 @@ function Inquiry{
 				ELSE IF ch_type="char" {
 					SET val TO val+""+char.
 					Sounds:PLAY(correct_s).
-				}ELSE IF ch_type="checkbox" {
+				}ELSE IF ch_type="checkbox" OR "select" {
 					IF check_list["movePointer"](char) {
 						Sounds:PLAY(correct_s).
 					} ELSE {
@@ -112,7 +116,7 @@ function Inquiry{
 					IF NOT ch_type = "checkbox" AND val:LENGTH < 1 {
 						onError("Value can't be empty").
 					} ELSE {
-						IF ch_type = "checkbox"{
+						IF ch_type = "checkbox" OR "select" {
 							SET val TO check_list["getAnswers"]().
 						}
 						IF ch_type="number" AND NOT(val = ""){
