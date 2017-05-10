@@ -1,14 +1,12 @@
 {
     "entries": [
         "type",
-        "atts-test",
+        "commsat3",
         "id",
-        "atts-test 694",
+        "commsat3 694",
         "vessels",
         {
-            "items": [
-                "Tester"
-            ],
+            "items": [],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
         "attributes",

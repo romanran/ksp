@@ -1,6 +1,6 @@
 function Program {
-	PARAMETER ptype IS "undefined".
-	SET ptype TO ptype:REPLACE(".json", "").
+	PARAMETER ptypeb IS "undefined".
+	SET ptype TO ptypeb:REPLACE(".json", "").
 	LOCAL path TO "0:program/" + ptype + ".json".
 	
 	function addVessel {
@@ -17,8 +17,11 @@ function Program {
 	
 	function fetch {
 		PARAMETER npath IS path.
+		IF npath:FIND("json") < 0 {
+			SET npath TO "0:program/" + npath + ".json".
+		}
 		LOCAL obj TO READJSON(npath).
-		RETURN obj["attributes"]:DUMP.
+		RETURN obj.
 	}
 	
 	function dumpAll {
@@ -26,25 +29,28 @@ function Program {
 	}
 	
 	function listPrograms {
+		LOCAL prev_path TO PATH().
 		CD("0:program").
 		LIST FILES IN filelist.
 		LOCAL programs_a IS LIST().
 		FOR file IN filelist {
-			programs_a:ADD(file:NAME:SUBSTRING(0, file:NAME:FIND(".json"))).
+			IF file:ISFILE AND file:EXTENSION = "json" {
+				programs_a:ADD(file:NAME:REPLACE(".json", "")).
+			}
 		}
-		CD("1:").
+		CD(prev_path).
 		RETURN programs_a.
 	}
 	
 	function create {
 		PARAMETER atts IS LEXICON().
-		CD("0:program").
-		LIST FILES IN filelist.
 		
 		IF VOLUME(0):EXISTS("program/" + ptype + ".json") {
-			CD("1:").
 			RETURN PRINT("Program already exists!").
 		}
+		
+		LIST FILES IN filelist.
+		LOCAL prev_path TO PATH().
 
 		SET new_program TO LEXICON(
 			"type", ptype,
@@ -52,8 +58,9 @@ function Program {
 			"vessels", LIST(),
 			"attributes", atts
 		).
+		CD("0:program").
 		WRITEJSON(new_program, path).
-		CD("1:").
+		CD(prev_path).
 	}
 	
 	LOCAL methods TO LEXICON(

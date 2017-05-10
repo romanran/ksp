@@ -8,7 +8,9 @@ IF ADDONS:RT:HASKSCCONNECTION( SHIP ){
 	COPYPATH("0:lib/JOURNAL", "1:").
 	COPYPATH("0:lib/DISPLAYER", "1:").
 	COPYPATH("0:lib/INQUIRY", "1:").
+	COPYPATH("0:lib/PROGRAM", "1:").
 }
+CD("1:").
 RUNONCEPATH("PID").
 RUNONCEPATH("TIMER").
 RUNONCEPATH("DOONCE").
@@ -16,7 +18,7 @@ RUNONCEPATH("FUNCTIONS").
 RUNONCEPATH("DISPLAYER").
 RUNONCEPATH("JOURNAL").
 RUNONCEPATH("INQUIRY").
-//RUNONCEPATH("PROGRAM").
+RUNONCEPATH("PROGRAM").
 // * TODO*
 //- set states in root part tag and check status from there
 // add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
@@ -24,7 +26,8 @@ RUNONCEPATH("INQUIRY").
 // -if energy low, start fuel cell
 //- rotate craft with pid for maximum sun exposure
 // check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
-// make program creator, move all of the ifs to function and load them on program checklist.
+//- make program creator
+// move all of the ifs to function and load them on program checklist.
 // save created programs in json
 // check if start TWR on countdown
 // check if comm range is within max ranges of antennas on board
@@ -43,32 +46,19 @@ LOCAL Display TO Displayer().
 SET SHIP:NAME TO generateID().
 LOCAL ship_log TO Journal().
 
-LOCAL target_question TO LIST(
+LOCAL pr TO Program().
+LOCAL prlist TO pr["list"]().
+LOCAL pr_chooser TO LIST(
 	LEXICON(
-		"name", "sats",
-		"type", "number", 
-		"msg", "number of satellites",
-		"filter", {
-			PARAMETER resolve, reject, val.
-			IF (val < 3 OR val > 6) {
-				return reject("Choose number of sats in range 3 - 6").
-			} ELSE {
-				return resolve(val).
-			}
-		}
-	),
-	LEXICON(
-		"name", "alt",
-		"type", "number", 
-		"msg", "Altitude in km.",
-		"filter", {
-			PARAMETER resolve, reject, val.
-			return resolve(val * 1000).
-		}
+		"name", "program",
+		"type", "select", 
+		"msg", "Choose a program",
+		"choices", prlist
 	)
 ).
-LOCAL user_target TO Inquiry(target_question).
-LOCAL trgt IS GetTrgtAlt(user_target["sats"], user_target["alt"]).
+LOCAL chosen_pr TO Inquiry(pr_chooser).
+LOCAL trgt_pr TO pr["fetch"](chosen_pr["program"]).
+LOCAL trgt IS GetTrgtAlt(trgt_pr["attributes"]["sats"], trgt_pr["attributes"]["alt"]).
 
 LOCAL done IS false.
 LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket

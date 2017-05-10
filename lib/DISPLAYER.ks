@@ -6,17 +6,15 @@ function Displayer{
 	function _print{
 		PARAMETER str.
 		PARAMETER val IS "empty-str".
-		SET pat TO print_i + imprint_i.
+		SET print_sum TO print_i + imprint_i.
 		IF val = "empty-str"{
-			PRINT str AT (0, pat).
+			PRINT str AT (0, print_sum).
 		}ELSE{
 			SET str TO str + "".
 			SET val TO val + "". //convert to str
-			IF str:LENGTH > padd{
-				SET padd TO str:LENGTH + 3.
-			}
-			SET str TO str + val:PADLEFT(40 - padd).
-			PRINT str AT (0, pat).
+			PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0, print_sum).
+			SET str TO str + val:PADLEFT(TERMINAL:WIDTH - str:LENGTH).
+			PRINT str AT (0, print_sum).
 		}
 		SET print_i TO print_i + 1.
 	}
