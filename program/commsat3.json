@@ -6,7 +6,7 @@
         "commsat3 694",
         "vessels",
         {
-            "items": [],
+            "items": ["Sat-1113", "Sat-1412"],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
         "attributes",

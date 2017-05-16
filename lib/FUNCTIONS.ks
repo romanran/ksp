@@ -1,8 +1,8 @@
-function doStage{
+function doStage {
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
 		STAGE.
 		DECLARE LOCAL stg_res TO getStageResources().
-		IF STAGE:NUMBER = 0{
+		IF STAGE:NUMBER = 0 {
 			return lex(
 				"res", stg_res,
 				"done", true
@@ -15,7 +15,7 @@ function doStage{
 		}
 	}
 }
-function checkProperty{
+function checkProperty {
 	PARAMETER prop.
 	LOCAL bool TO false.
 	IF prop{
@@ -26,10 +26,10 @@ function checkProperty{
 	return bool.
 }
 
-function getStageResources{
+function getStageResources {
 	SET res_l TO LEXICON().
 	wait 0.1.
-	FOR res IN STAGE:RESOURCES{
+	FOR res IN STAGE:RESOURCES {
 		IF res:CAPACITY > 0{
 			res_l:ADD(res:NAME, res).
 		}
@@ -40,7 +40,7 @@ function getStageResources{
 function getResources{
 	SET res_l TO LEXICON().
 	wait 0.1.
-	FOR res IN SHIP:RESOURCES{
+	FOR res IN SHIP:RESOURCES {
 		IF res:CAPACITY > 0{
 			res_l:ADD(res:NAME, res).
 		}
@@ -67,7 +67,7 @@ function getModules {
 	RETURN mA.
 }.
 
-function calcDeltaV{
+function calcDeltaV {
 	// Takes target absolute altitude (desired orbit radius) as a parameter
 	PARAMETER target_alt.
 	PRINT target_alt AT(0,10).
@@ -117,7 +117,7 @@ function calcOrbPeriod {
 	RETURN ROUND(SQRT( (4*CONSTANT:PI^2*trgt_alt^3)/grav_param ), 3).
 }
 
-function calcTrajectory{
+function calcTrajectory {
 	PARAMETER alt.
 	DECLARE LOCAL funcx TO ROUND(1 - (alt ^ 2 / 70000 ^ 2) ^ 0.25, 3).
 	RETURN ROUND(SIN(funcx*CONSTANT:RadToDeg) * (90 * 1.1884), 2).
@@ -136,7 +136,7 @@ function generateID {
 	RETURN vessel_name + " " + FLOOR(RANDOM() * 1000).
 }
 
-function getdV{   
+function getdV {   
 	//https://www.reddit.com/r/Kos/comments/330yir/calculating_stage_deltav/
 	//only_to_downvote
     LOCAL fuels IS list().
@@ -160,7 +160,7 @@ function getdV{
     LOCAL mDotTotal IS 0.
 
     // calculate total fuel mass
-    FOR r IN STAGE:RESOURCES{
+    FOR r IN STAGE:RESOURCES {
         LOCAL iter is 0.
         FOR f in fuels{
             IF f = r:NAME{
@@ -172,13 +172,13 @@ function getdV{
 
     LIST ENGINES IN engList. 
     FOR eng in engList{
-        IF eng:IGNITION{
+        IF eng:IGNITION {
             SET thrustTotal TO thrustTotal + eng:maxthrust.
 			SET mDotTotal TO mDotTotal + eng:maxthrust / eng:ISP.
         }
     }
 	LOCAL avgIsp IS 0.
-    IF NOT (mDotTotal = 0){
+    IF NOT mDotTotal = 0 {
 		SET avgIsp TO thrustTotal / mDotTotal.
 	}
     // deltaV calculation as Isp*g0*ln(m0/m1).
@@ -187,7 +187,7 @@ function getdV{
     RETURN deltaV.
 }.
 
-function GetTrgtAlt{
+function GetTrgtAlt {
 	parameter sat_num is 3.
 	PARAMETER min_h is 100.
 	LOCAL ang TO 360/(sat_num*2). 
@@ -204,10 +204,32 @@ function GetTrgtAlt{
 	return o.
 }
 
+function calcOrbitRadius {
+	PARAMETER vsl.
+	LOCAL smaj TO vsl:OBT:SEMIMAJORAXIS.
+	LOCAL smin TO vsl:OBT:SEMIMINORAXIS.
+	LOCAL h TO (smaj - smin)^2/(smaj + smin)^2.
+	RETURN CONSTANT:PI * (smaj + smin) * (1 + (3 * h) / 10 + SQRT(4 - 3 * h)).
+}
+
+function calcPhaseAngle {
+	PARAMETER r1.
+	PARAMETER r2.
+	RETURN 180 * (1 - (r1 / (2 * r2) + 1 / 2) ^ (ROUND(3 / 2, 2))).
+}
+
 function CS{
 	IF NOT (env = "debug") {
 		CLEARSCREEN.
 	}
+}
+
+function calcAngleFromVec {
+	PARAMETER v1.
+	PARAMETER v2.
+	SET v1 TO v1:NORMALIZED.
+	SET v2 TO v2:NORMALIZED.
+	RETURN ARCCOS(v1 * v2).
 }
 
 function deb{

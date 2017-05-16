@@ -402,7 +402,7 @@ UNTIL done{
 	IF root_part:TAG = "KERBINJECTION"{
 		rcs_1s["do"]({
 			RCS ON.
-			ship_log["add"]("RCS on").
+			ship_log["add"]("RCS on, circuralisation").
 		}).
 
 		circ_prepare_1s["do"]({

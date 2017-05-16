@@ -10,6 +10,9 @@ function Displayer{
 		IF val = "empty-str"{
 			PRINT str AT (0, print_sum).
 		}ELSE{
+			IF val:ISTYPE("Scalar") {
+				SET val TO ROUND(val, 2).
+			}
 			SET str TO str + "".
 			SET val TO val + "". //convert to str
 			PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0, print_sum).
