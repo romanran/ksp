@@ -53,25 +53,30 @@ SET chosen_pr TO Inquiry(pr_chooser).
 PRINT chosen_pr["program"].
 SET trgt_pr TO Program(chosen_pr["program"]).
 SET trgt_pr TO trgt_pr["fetch"]().
-SET trgt_vessel TO VESSEL( trgt_pr["vessels"][0]).
+SET trgt_vessel TO VESSEL(trgt_pr["vessels"][0]).
 CS().
+SET last_angle TO 0.
+Display["imprint"](trgt_vessel:NAME).
+Display["imprint"]().
 UNTIL false {
 	Display["reset"]().
-	Display["print"](trgt_vessel:NAME).
-	LOCAL vessel_v IS trgt_vessel:VELOCITY:ORBIT.
-	Display["print"]("Vessel speed:", vessel_v:MAG).
-	LOCAL percent IS ROUND(260 / trgt_vessel:OBT:PERIOD, 3).
-	LOCAL obt_radius IS calcOrbitRadius(trgt_vessel).
-	Display["print"]("Radius:", obt_radius / 1000).
-	Display["print"](percent * 100 + "% of the radius in km:", obt_radius * percent / 1000).
-	Display["print"]("In " + 260 + "s will travel :", (260 * vessel_v:MAG) / 1000).
-	LOCAL radius_percent IS percent.
+	LOCAL radius_percent IS ROUND(260 / trgt_vessel:OBT:PERIOD, 3).
+	LOCAL phase_ang IS calcPhaseAngle(600000 + ALTITUDE, trgt_vessel:ORBIT:SEMIMAJORAXIS / 2).
+	SET curr_angle TO calcAngleFromVec(SHIP:UP:STARVECTOR, trgt_vessel:UP:STARVECTOR).
+	SET ahead TO false.
+	IF curr_angle > last_angle {
+		//target is ahead
+		SET phase_ang TO - phase_ang.
+	} 
+	SET tphase_ang TO 360 / trgt_pr["attributes"]["sats"] + phase_ang.
+	SET last_angle TO curr_angle.
+	
 	Display["print"]("Deegres spread:", 360 / trgt_pr["attributes"]["sats"]).
 	Display["print"]("Deegres travelled:", 360 * radius_percent).
 	Display["print"]("Target separation:", 360 * radius_percent +  360 / trgt_pr["attributes"]["sats"]).
-	LOCAL phase_ang IS calcPhaseAngle(600000 + ALTITUDE, trgt_vessel:ORBIT:SEMIMAJORAXIS / 2).
-	Display["print"]("Target phase angle:", phase_ang).
-	SET curr_angle TO calcAngleFromVec(SHIP:UP:STARVECTOR, trgt_vessel:UP:STARVECTOR).
+	Display["print"]("Est. angle move:", phase_ang).
+	Display["print"]().
+	Display["print"]("Target phase angle:", tphase_ang).
 	Display["print"]("Current phase angle:", curr_angle).
 	WAIT 0.
 }
