@@ -187,7 +187,7 @@ function getdV {
     RETURN deltaV.
 }.
 
-function GetTrgtAlt {
+function getTrgtAlt {
 	parameter sat_num is 3.
 	PARAMETER min_h is 100.
 	LOCAL ang TO 360/(sat_num*2). 
@@ -218,7 +218,7 @@ function calcPhaseAngle {
 	RETURN 180 * (1 - (r1 / (2 * r2) + 1 / 2) ^ (ROUND(3 / 2, 2))).
 }
 
-function CS{
+function CS {
 	IF NOT (env = "debug") {
 		CLEARSCREEN.
 	}
@@ -232,9 +232,46 @@ function calcAngleFromVec {
 	RETURN ARCCOS(v1 * v2).
 }
 
-function deb{
-	PARAMETER str.
+function deb {
+	PARAMETER str1 IS "".
+	PARAMETER str2 IS "".
+	PARAMETER str3 IS "".
+	PARAMETER str4 IS "".
 	IF env = "debug" {
-		PRINT str.
+		IF (str1:LENGTH > 0) {
+			PRINT str1.
+		}
+		IF (str2:LENGTH > 0) {
+			PRINT str2.
+		}
+		IF (str3:LENGTH > 0) {
+			PRINT str3.
+		}
+		IF (str4:LENGTH > 0) {
+			PRINT str4.
+		}
 	} 
+}
+
+function ShipState {
+	LOCAL filename IS "ship-state.json".
+	LOCAL ship_state IS LEXICON().
+	IF (EXISTS(filename)) {
+		SET ship_state TO READJSON(filename).
+	}
+	
+	function setAndSave {
+		PARAMETER key.
+		PARAMETER val.
+		SET ship_state[key] TO val.
+		WRITEJSON(ship_state, filename).
+	}
+
+	LOCAL methods TO LEXICON(
+		"set", setAndSave@,
+		"load", load@,
+		"state", ship_state
+	).
+	
+	RETURN methods.
 }

@@ -38,18 +38,19 @@ function Displayer {
 		IF val = "empty-str" {
 			LOCAL centered IS " ".
 			LOCAL centered2 IS "-".
-			LOCAL sep TO _genDots(sstr2:LENGTH, 0, "-", false).
-			IF (sep + sstr2 + sep):LENGTH = TERMINAL:WIDTH {
+			SET sstr TO " " + sstr + " ".
+			LOCAL sep TO _genDots(sstr:LENGTH, 0, "-", false).
+			IF (sep + sstr + sep):LENGTH = TERMINAL:WIDTH {
 				SET centered TO "".
-				LOCAL centered2 IS "".
+				SET centered2 TO "".
 			}
-			PRINT centered + sep + sstr2 + sep + centered2 AT (0, print_sum).
+			PRINT centered + sep + sstr + sep + centered2 AT (0, print_sum).
 		} ELSE {
 			IF val:ISTYPE("Scalar") {
 				SET val TO ROUND(val, 2).
 			}
-			LOCAL str TO sstr + "".
-			SET val TO val + "". //convert to str
+			LOCAL str TO sstr + " ".
+			SET val TO " " + val. //convert to str
 			LOCAL dots IS _genDots(str:LENGTH, val).
 			SET str TO str + dots + val.
 			PRINT str AT (0, print_sum).

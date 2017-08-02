@@ -29,7 +29,7 @@ function Timer {
 		SET internal_t TO internal_t + delay_t - wait_for.
 	}
 	function checkTimer {
-		RETURN FLOOR(TIME:SECONDS) - (internal_t + wait_for ).
+		RETURN FLOOR(TIME:SECONDS) - (internal_t + wait_for).
 	}
 
 	return lex(
