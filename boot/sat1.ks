@@ -37,14 +37,13 @@ RUNONCEPATH("PROGRAM").
 //- make program creator
 // move all of the ifs to function and load them on program checklist. for example, in altiitude ifs, call a funtion "deployantennas", so the function can be called even from ground.
 // save created programs in json
-// check if start TWR on countdown
 // check if comm range is within max ranges of antennas on board
 // check different gravity turns slopes by comparing dV and resources used
-// if throttle is 0, thrust with RCS
+// - if throttle is 0, thrust with RCS
 // check all for the parts
-// check the programming for the second staging wait under no thrust
+// - check the programming for the second staging wait under no thrust
+// - move journal to a separate volume
 
-LOCAL root_part IS SHIP:ROOTPART.
 SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
 CS().
@@ -55,18 +54,26 @@ LOCAL Display TO Displayer().
 SET SHIP:NAME TO generateID().
 LOCAL ship_log TO Journal().
 
+LOCAL ship_state IS ShipState().
 LOCAL pr TO Program().
 LOCAL prlist TO pr["list"]().
-LOCAL pr_chooser TO LIST(
-	LEXICON(
-		"name", "program",
-		"type", "select", 
-		"msg", "Choose a program",
-		"choices", prlist
-	)
-).
-LOCAL chosen_pr TO Inquiry(pr_chooser).
-LOCAL trgt_pr TO pr["fetch"](chosen_pr["program"]).
+LOCAL chosen_pr TO "".
+IF ship_state["state"]:HASKEY("programme") {
+	SET chosen_pr TO ship_state["state"]["programme"].
+} ELSE {
+	LOCAL pr_chooser TO LIST(
+		LEXICON(
+			"name", "program",
+			"type", "select", 
+			"msg", "Choose a program",
+			"choices", prlist
+		)
+	).
+	SET chosen_pr TO Inquiry(pr_chooser).
+	SET chosen_pr TO chosen_pr["program"].
+	ship_state["set"]("programme", chosen_pr).
+}
+LOCAL trgt_pr TO pr["fetch"](chosen_pr).
 LOCAL trgt IS getTrgtAlt(trgt_pr["attributes"]["sats"], trgt_pr["attributes"]["alt"]).
 
 LOCAL done IS false.
@@ -95,8 +102,8 @@ LOCAL nacc_Timer IS Timer(). //for no acceleration test once
 LOCAL stg IS LEXICON().
 LOCAL stg_res IS LEXICON().
 LOCAL antennas IS LEXICON().
+LOCAL antennasRT IS LEXICON().
 LOCAL ship_engines IS LIST().
-LOCAL ship_state IS ShipState().
 
 LOCAL trgt_pitch TO 0.
 LOCAL thrott TO 0. //throttle
@@ -110,7 +117,7 @@ LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS^2.
 
 //--PRELAUNCH
 IF SHIP:STATUS = "PRELAUNCH" {
-	Display["imprint"]("Aurora Space Program V1.3").
+	Display["imprint"]("Aurora Space Program V0.3.0").
 	Display["imprint"](SHIP:NAME).
 	Display["imprint"]("Comm range:", trgt["r"]+"m.").
 	Display["imprint"]("Target altitude:", trgt["alt"]+"m.").
@@ -155,7 +162,7 @@ IF SHIP:STATUS = "PRELAUNCH" {
 		REBOOT.
 	}
 	
-	IF first_stage_engines:LENGTH = 0{
+	IF first_stage_engines:LENGTH = 0 {
 		preLaunchError("COULDN'T FIND 1st STAGE ENGINES").
 	}
 	LOCAL sensors_list IS LIST().
@@ -187,13 +194,13 @@ IF SHIP:STATUS = "PRELAUNCH" {
 	Display["print"]("ABORT ON AG3.").
 	WAIT UNTIL start = TRUE.
 	Display["print"]("COUNTDOWN START").
-	FROM { LOCAL i IS 5.} UNTIL i = 0 STEP { SET i TO i - 1.} DO {
+	FROM {LOCAL i IS 5.} UNTIL i = 0 STEP {SET i TO i - 1.} DO {
 		WAIT 1.
 		HUDTEXT(i + "...", 1, 2, 40, green, false).
 		IF i = 4{
 			LOCK THROTTLE TO 1.
 		}
-		ON AG3{
+		ON AG3 {
 			if ksc_light:LENGTH > 0 {
 				ksc_light[0]:GETMODULE("modulelight"):DOACTION("togglelight", false).
 			}
@@ -252,7 +259,7 @@ UNTIL done {
 				IF DEFINED PIDC{
 					PIDC:RESET.
 				}
-				IF DEFINED pid_1s{
+				IF DEFINED pid_1s {
 					pid_1s["reset"]().
 				}
 				SET stg TO doStage().
@@ -300,8 +307,12 @@ UNTIL done {
 		}
 		
 		staging2_Timer["ready"](3, {
+			HUDTEXT("Waited 3 SECONDS...", 3, 2, 20, blue, false).
 			//if there is still no acceleration, staging must have no engines available, stage again
+			Display["print"]("Accelerating", nunder_acc).
 			IF nunder_acc {
+				stage_1s["reset"]().
+				HUDTEXT("Reset, do stage.", 3, 2, 20, green, false).
 				stage_1s["do"]({
 					SET stg TO doStage().
 					SET done_staging TO stg["done"].
@@ -335,7 +346,7 @@ UNTIL done {
 		Display["print"]("T.PIT:", trgt_pitch).
 		Display["print"]("kPa:", ROUND(dyn_p, 3)).
 		Display["print"]("T.kPa:", target_kpa).
-		Display["print"]("ACC:", ROUND(accvec:MAG / g_base, 3)) + "G".
+		Display["print"]("ACC:", ROUND(accvec:MAG / g_base, 3) + "G").
 			
 		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 AND nacc_Timer["check"]() < 8 AND nacc_Timer["check"]() > 4{
 			//if ship is off course when not achieved orbital speed yet and the staging wait isnt in progress
@@ -360,15 +371,16 @@ UNTIL done {
 			}).
 		}
 		
-		IF ALTITUDE > 40000 AND STAGE:LIQUIDFUEL < 5 {
+		IF ALTITUDE > 30000 AND dyn_p < 2 {
+			LOCAL fairing IS LEXICON().
 			fairing_1s["do"]({
 				SET fairing TO getModules("ModuleProceduralFairing").
-				IF fairing:LENGTH > 0{
+				IF fairing:LENGTH > 0 {
 					FOR fpart IN fairing:VALUES {
 						fpart:GETMODULE("ModuleProceduralFairing"):DOEVENT("DEPLOY").
 					}
 					ship_log["add"]("Fairings jettison").
-				}ELSE{
+				} ELSE {
 					HUDTEXT("NO FAIRINGS DETECTED", 2, 2, 42, RGB(255,60,0), false).
 				}
 			}).
@@ -385,7 +397,6 @@ UNTIL done {
 	}//--thrusting
 	
 	IF ALTITUDE > 80000 AND from_save = false {
-		LOCAL antennas IS LEXICON().
 		deploy_1s["do"]({
 			PANELS ON.
 			RADIATORS ON.
@@ -396,22 +407,22 @@ UNTIL done {
 		
 		IF ant_Timer["ready"](3, {
 			LIGHTS ON.
-			IF antennas:LENGTH > 0{
-				HUDTEXT("DEPLOYING ANTENNAS", 2, 2, 42, RGB(55,255,0), false).
-				FOR ant IN antennasRT:VALUES {
-					SET ant1 TO ant:GETMODULE("ModuleRTAntenna").
-					IF ant1:HASEVENT("ACTIVATE"){
-						ant1:DOEVENT("ACTIVATE").
-					}
+			HUDTEXT("DEPLOYING ANTENNAS", 2, 2, 42, RGB(55,255,0), false).
+			FOR ant IN antennasRT:VALUES {
+				SET ant1 TO ant:GETMODULE("ModuleRTAntenna").
+				IF ant1:HASEVENT("ACTIVATE") {
+					ant1:DOEVENT("ACTIVATE").
 				}
-				FOR ant IN antennas:VALUES {
-					SET ant1 TO ant:GETMODULE("ModuleDeployableAntenna").
-					IF ant1:HASEVENT("extend atenna"){
-						ant1:DOEVENT("extend atenna").
-					}
+			}
+			FOR ant IN antennas:VALUES {
+				SET ant1 TO ant:GETMODULE("ModuleDeployableAntenna").
+				IF ant1:HASEVENT("extend antenna") {
+					ant1:DOEVENT("extend antenna").
 				}
+			}
+			IF antennas:LENGTH > 0 OR antennasRT:LENGTH > 0 {
 				ship_log["add"]("Antennas deploy").
-			}ELSE{
+			} ELSE {
 				HUDTEXT("NO ANTENNAS DETECTED", 2, 2, 42, RGB(255,60,0), false).
 			}
 		}).
@@ -460,7 +471,7 @@ UNTIL done {
 			LOCK STEERING TO LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
 		}).
 		
-		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time/2){
+		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time / 2) {
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
 				LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD/trgt["period"]) ^ 100, 0.1).//release acceleration at the end
@@ -468,7 +479,7 @@ UNTIL done {
 				ship_log["add"]("CIRCURALISATION BURN").
 			}).
 		}
-		IF ROUND(SHIP:ORBIT:PERIOD) >= (trgt["period"] - 50){
+		IF ROUND(SHIP:ORBIT:PERIOD) >= (trgt["period"] - 50) {
 			circ_done_1s["do"]({
 				UNLOCK thrott.
 				SET thrott TO 0.
@@ -495,14 +506,14 @@ UNTIL done {
 			Display["print"]("TRGT ORB. PERIOD: ", trgt["period"]).
 		}
 	}
-	IF ship_state["state"]["phase"] = "ORIBITNG" {
+	IF ship_state["state"]["phase"] = "ORBITING" {
 		UNLOCK THROTTLE.
 		UNLOCK STEERING.
 		conn_Timer["set"]().
 		SET done TO TRUE.
 	}
 	conn_Timer["ready"](10,{
-		IF NOT ship_log["save"](){
+		IF NOT ship_log["save"]() {
 			conn_Timer["set"]().
 		}
 	}).

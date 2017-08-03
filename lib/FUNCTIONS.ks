@@ -2,28 +2,11 @@ function doStage {
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
 		STAGE.
 		DECLARE LOCAL stg_res TO getStageResources().
-		IF STAGE:NUMBER = 0 {
-			return lex(
-				"res", stg_res,
-				"done", true
-			).
-		}else{
-			return lex(
-				"res", stg_res,
-				"done", false
-			).
-		}
+		return lex(
+			"res", stg_res,
+			"done", STAGE:NUMBER = 0
+		).
 	}
-}
-function checkProperty {
-	PARAMETER prop.
-	LOCAL bool TO false.
-	IF prop{
-		IF prop:LENGTH > 0{
-			SET bool TO true.
-		}
-	}
-	return bool.
 }
 
 function getStageResources {
@@ -49,22 +32,20 @@ function getResources{
 }
 
 function getModules {
-	PARAMETER m.
-	SET partlist TO SHIP:PARTS.
-	SET mA TO LEXICON().
-	FOR item IN partList {
-		LOCAL moduleList TO item:MODULES.
+	PARAMETER search.
+	SET modules_l TO LEXICON().
+	FOR item IN SHIP:PARTS {
 		SET i TO 0.
-		FOR module IN moduleList {
-			IF mA:HASKEY(item:NAME+i){
-				SET i TO i+1.
+		FOR module IN item:MODULES {
+			IF modules_l:HASKEY(item:NAME + i) {
+				SET i TO i + 1.
 			}
-			IF module = M{
-				mA:ADD(item:NAME+i, item).
+			IF module = search{
+				modules_l:ADD(item:NAME + i, item).
 			}
-		}.
-	}.
-	RETURN mA.
+		}
+	}
+	RETURN modules_l.
 }.
 
 function calcDeltaV {
@@ -251,27 +232,4 @@ function deb {
 			PRINT str4.
 		}
 	} 
-}
-
-function ShipState {
-	LOCAL filename IS "ship-state.json".
-	LOCAL ship_state IS LEXICON().
-	IF (EXISTS(filename)) {
-		SET ship_state TO READJSON(filename).
-	}
-	
-	function setAndSave {
-		PARAMETER key.
-		PARAMETER val.
-		SET ship_state[key] TO val.
-		WRITEJSON(ship_state, filename).
-	}
-
-	LOCAL methods TO LEXICON(
-		"set", setAndSave@,
-		"load", load@,
-		"state", ship_state
-	).
-	
-	RETURN methods.
 }
