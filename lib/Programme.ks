@@ -1,4 +1,4 @@
-function Program {
+function Programme {
 	PARAMETER ptypeb IS "undefined".
 	SET ptype TO ptypeb:REPLACE(".json", "").
 	LOCAL path TO "0:program/" + ptype + ".json".

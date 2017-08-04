@@ -1,9 +1,10 @@
+// Flight related functions, ship helpers
 function doStage {
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
 		STAGE.
-		DECLARE LOCAL stg_res TO getStageResources().
+		//LOCAL stg_res TO getStageResources().
 		return lex(
-			"res", stg_res,
+			//"res", stg_res,
 			"done", STAGE:NUMBER = 0
 		).
 	}
@@ -11,7 +12,6 @@ function doStage {
 
 function getStageResources {
 	SET res_l TO LEXICON().
-	wait 0.1.
 	FOR res IN STAGE:RESOURCES {
 		IF res:CAPACITY > 0{
 			res_l:ADD(res:NAME, res).
@@ -22,7 +22,6 @@ function getStageResources {
 
 function getResources{
 	SET res_l TO LEXICON().
-	wait 0.1.
 	FOR res IN SHIP:RESOURCES {
 		IF res:CAPACITY > 0{
 			res_l:ADD(res:NAME, res).
@@ -33,8 +32,9 @@ function getResources{
 
 function getModules {
 	PARAMETER search.
-	SET modules_l TO LEXICON().
-	FOR item IN SHIP:PARTS {
+	PARAMETER s_parts IS SHIP:PARTS.
+	LOCAL modules_l TO LEXICON().
+	FOR item IN s_parts {
 		SET i TO 0.
 		FOR module IN item:MODULES {
 			IF modules_l:HASKEY(item:NAME + i) {
@@ -46,7 +46,35 @@ function getModules {
 		}
 	}
 	RETURN modules_l.
-}.
+}
+function doModuleEvent {
+	PARAMETER module.
+	PARAMETER action_name.
+	PARAMETER action_param.
+	PARAMETER s_parts IS SHIP:PARTS.
+	LOCAL parts_list TO getModules(module).
+	FOR _part IN parts_list:VALUES {
+		SET _part TO _part:GETMODULE(module).
+		IF fpart:HASACTION(action_name) {
+			fpart:DOACTION(action_name, action_param).
+		}
+	}
+	return parts_list:LENGTH > 0.
+}
+
+function doModuleEvent {
+	PARAMETER module.
+	PARAMETER event.
+	PARAMETER s_parts IS SHIP:PARTS.
+	LOCAL parts_list TO getModules(module).
+	FOR _part IN parts_list:VALUES {
+		SET _part TO _part:GETMODULE(module).
+		IF fpart:HASEVENT(event) {
+			fpart:DOEVENT(event).
+		}
+	}
+	return parts_list:LENGTH > 0.
+}
 
 function calcDeltaV {
 	// Takes target absolute altitude (desired orbit radius) as a parameter
@@ -100,21 +128,9 @@ function calcOrbPeriod {
 
 function calcTrajectory {
 	PARAMETER alt.
-	DECLARE LOCAL funcx TO ROUND(1 - (alt ^ 2 / 70000 ^ 2) ^ 0.25, 3).
+	PARAMETER target_alt IS 70000.
+	LOCAL funcx TO ROUND(1 - (alt ^ 2 / target_alt ^ 2) ^ 0.25, 3).
 	RETURN ROUND(SIN(funcx*CONSTANT:RadToDeg) * (90 * 1.1884), 2).
-}
-
-function generateID {
-	PARAMETER default_vessel IS SHIP.
-	LOCAL vessel_name TO default_vessel.
-
-	IF default_vessel:typename() = "Vessel"{
-		SET vessel_name TO default_vessel:NAME. 
-	}
-	IF default_vessel:typename() = "String"{
-		SET vessel_name TO default_vessel. 
-	}
-	RETURN vessel_name + " " + FLOOR(RANDOM() * 1000).
 }
 
 function getdV {   
@@ -199,37 +215,10 @@ function calcPhaseAngle {
 	RETURN 180 * (1 - (r1 / (2 * r2) + 1 / 2) ^ (ROUND(3 / 2, 2))).
 }
 
-function CS {
-	IF NOT (env = "debug") {
-		CLEARSCREEN.
-	}
-}
-
 function calcAngleFromVec {
 	PARAMETER v1.
 	PARAMETER v2.
 	SET v1 TO v1:NORMALIZED.
 	SET v2 TO v2:NORMALIZED.
 	RETURN ARCCOS(v1 * v2).
-}
-
-function deb {
-	PARAMETER str1 IS "".
-	PARAMETER str2 IS "".
-	PARAMETER str3 IS "".
-	PARAMETER str4 IS "".
-	IF env = "debug" {
-		IF (str1:LENGTH > 0) {
-			PRINT str1.
-		}
-		IF (str2:LENGTH > 0) {
-			PRINT str2.
-		}
-		IF (str3:LENGTH > 0) {
-			PRINT str3.
-		}
-		IF (str4:LENGTH > 0) {
-			PRINT str4.
-		}
-	} 
 }

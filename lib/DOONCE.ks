@@ -1,30 +1,30 @@
-function doOnce {
-	DECLARE LOCAL calls_num TO 0.
+function DoOnce {
+	LOCAL is_ready TO 1.
 	function call {
-		PARAMETER fun IS 0.
+		PARAMETER func IS 0.
 		PARAMETER params IS "empty".
-		IF (fun <> 0) AND (calls_num = 0){
+		IF (func <> 0) AND is_ready {
 			if( params <> "empty" ){
-				fun(params).//pass arguments as a list
-			}else{
-				fun().
+				return func(params).//pass arguments as a list
+			} else {
+				return func().
 			}
-			SET calls_num TO 1.
-		}ELSE{
-			SET calls_num TO calls_num + 1.
+			SET is_ready TO 0.
+		} ELSE {
+			return 0.
 		}
 	}
 
 	function resetIt {
-		SET calls_num TO 0.
+		SET is_ready TO 1.
 	}
-	function getcalls_num{
-		return calls_num.
+	function isReady {
+		return is_ready.
 	}
 
 	return lex(
 		"do", call@,
-		"get", getcalls_num@,
+		"ready", isReady@,
 		"reset", resetIt@
 	).
 }

@@ -9,7 +9,7 @@
 //
 @LAZYGLOBAL off.
 
-COPYPATH("0:lib/CHECKBOXES", "1:").
+COPYPATH("0:lib/Checkboxes", "1:").
 function Inquiry{
 	PARAMETER inputs.
 	LOCAL numbers TO "01234566789.":SPLIT("").
@@ -66,11 +66,11 @@ function Inquiry{
 		LOCAL done TO false.
 		LOCAL check_list TO false.
 		IF ch_type="checkbox" {
-			RUNONCEPATH("1:CHECKBOXES").
+			RUNONCEPATH("1:Checkboxes").
 			SET check_list TO Checkboxes(msg, choices, "checkbox").
 		}
 		IF ch_type="select" {
-			RUNONCEPATH("1:CHECKBOXES").
+			RUNONCEPATH("1:Checkboxes").
 			SET check_list TO Checkboxes(msg, choices, "select").
 		}
 		UNTIL done {

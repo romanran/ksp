@@ -1,0 +1,17 @@
+- set states in root part tag and check status from there
+ add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period
+ write getNearestPart library for staging purposes 
+ -if energy low, start fuel cell
+- rotate craft with pid for maximum sun exposure
+ check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
+- make program creator
+- move all of the ifs to function and load them on program checklist. for example, in altiitude ifs, call a funtion "deployantennas", so the function can be called even from ground.
+ save created programs in json
+ check if comm range is within max ranges of antennas on board
+ check different gravity turns slopes by comparing dV and resources used
+ - if throttle is 0, thrust with RCS
+ check all for the parts
+ - check the programming for the second staging wait under no thrust
+ - move journal to a separate volume
+ 
+ move Aurora phase modules loading to a program selector

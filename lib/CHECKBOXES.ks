@@ -1,4 +1,4 @@
-function Checkboxes{
+function Checkboxes {
 	PARAMETER msg.
 	PARAMETER choices.
 	PARAMETER chtype IS "checkbox".
