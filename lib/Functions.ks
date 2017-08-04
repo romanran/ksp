@@ -79,7 +79,7 @@ function calcDeltaV {
 	PARAMETER target_alt.
 	PRINT target_alt AT(0,10).
 	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
-	LOCAL v2 IS SQRT( grav_param * (1/target_alt) ).//speed in a circural orbit
+	LOCAL v2 IS SQRT( grav_param * (1 / target_alt) ).//speed in a circural orbit
 	LOCAL trgtv IS 0.
 	//return speed difference
 	IF v2 > SHIP:VELOCITY:ORBIT:MAG {
@@ -96,8 +96,8 @@ function calcBurnTime {
 	LOCAL f IS 0.
 	LOCAL p IS 0.
 	LIST ENGINES IN en.
-	FOR eng IN en{
-		IF eng:STAGE = STAGE:NUMBER{
+	FOR eng IN en {
+		IF eng:STAGE = STAGE:NUMBER {
 			SET f TO f + eng:MAXTHRUST * 1000.  // Engine Thrust (kg * m/s²)
 			SET p TO eng:ISP.               // Engine ISP (s)
 		}
@@ -105,8 +105,8 @@ function calcBurnTime {
 	LOCAL m IS SHIP:MASS * 1000.        // Starting mass (kg)
 	LOCAL eul IS CONSTANT:E.            // Base of natural log
 	LOCAL kerb_g IS 9.80665.                 // Gravitational acceleration constant (m/s²)
-	IF f > 0 AND p > 0{
-		RETURN kerb_g * m * p * (1 - eul^(-dV/( kerb_g*p))) / f.
+	IF f > 0 AND p > 0 {
+		RETURN kerb_g * m * p * (1 - eul ^ (-dV / ( kerb_g * p))) / f.
     }
 	RETURN 0.
 }
@@ -117,11 +117,11 @@ function calcOrbPeriod {
 	PARAMETER trgt_alt.
 	PARAMETER trgt_body_str IS "current".
 	LOCAL trgt_body IS SHIP:ORBIT:BODY.
-	IF trgt_body_str <> "current"{
+	IF trgt_body_str <> "current" {
 		SET trgt_body TO BODY(trgt_body_str).
 	}
 	LOCAL grav_param IS CONSTANT:G * trgt_body:MASS. //GM
-	RETURN ROUND(SQRT( (4*CONSTANT:PI^2*trgt_alt^3)/grav_param ), 3).
+	RETURN ROUND(SQRT((4 * CONSTANT:PI ^ 2 * trgt_alt ^ 3) / grav_param), 3).
 }
 
 function calcTrajectory {
@@ -158,7 +158,7 @@ function getdV {
     FOR res IN STAGE:RESOURCES {
         LOCAL iter is 0.
         FOR fuel in fuels {
-            IF fuel = res:NAME{
+            IF fuel = res:NAME {
                 SET fuelMass TO fuelMass + fuelsDensity[iter] * res:AMOUNT.
             }
             SET iter TO iter + 1.
@@ -166,7 +166,7 @@ function getdV {
     }
 
     LIST ENGINES IN eng_list. 
-    FOR eng in eng_list{
+    FOR eng in eng_list {
         IF eng:IGNITION {
             SET thrustTotal TO thrustTotal + eng:maxthrust.
 			SET mDotTotal TO mDotTotal + eng:maxthrust / eng:ISP.
@@ -185,12 +185,12 @@ function getdV {
 function getTrgtAlt {
 	PARAMETER sat_num is 3.
 	PARAMETER min_h is 100.
-	LOCAL ang TO 360/(sat_num * 2). 
-	LOCAL h TO KERBIN:RADIUS+min_h.
-	LOCAL altA TO (h/COS(ang)). //absolute
-	LOCAL altR TO altA-KERBIN:RADIUS. //relative altitude
-	LOCAL comm_r TO ROUND(SQRT((altA*altA) * 2)).//range
-	LOCAL o TO lexicon().
+	LOCAL ang TO 360 / (sat_num * 2). 
+	LOCAL h TO KERBIN:RADIUS + min_h.
+	LOCAL altA TO (h / COS(ang)). //absolute
+	LOCAL altR TO altA - KERBIN:RADIUS. //relative altitude
+	LOCAL comm_r TO ROUND(SQRT((altA * altA) * 2)).//range
+	LOCAL o TO LEXICON().
 	LOCAL orb_period TO calcOrbPeriod(altA).
 	o:ADD("r", comm_r).
 	o:ADD("altA",  altA).

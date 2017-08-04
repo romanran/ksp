@@ -30,7 +30,7 @@ function Journal {
 		row:add("FACING", FACING).
 		row:add("VERTICALSPEED", ROUND(VERTICALSPEED)).
 		SET res_lex TO LEXICON().
-		FOR key IN ship_res:KEYS{
+		FOR key IN ship_res:KEYS {
 			res_lex:add(ship_res[key]:NAME, ROUND(ship_res[key]:AMOUNT)).
 		}
 		row:add("RESOURCES_LEFT", res_lex).

@@ -4,7 +4,7 @@ function ExposePanels {
 	DECLARE LOCAL timer TO 0.
 	function init {
 		PARAMETER setp IS "err1".
-		IF setp = "err1"{
+		IF setp = "err1" {
 			PRINT "No setpoint value specified"
 			return false.
 		}
