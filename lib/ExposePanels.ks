@@ -14,7 +14,7 @@ function ExposePanels {
 	}
 	
 	function refresh {
-		return panels_PID:UPDATE(TIME:SECONDS-timer, LIGHT).
+		return panels_PID:UPDATE(TIME:SECONDS-timer, LIGHT). 
 	}
 	
 	LOCAL methods TO LEXICON(
