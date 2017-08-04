@@ -1,13 +1,14 @@
 require("../Aion/bin/base.js")();
 function server(req, res) {
-	let filePath = req.url;
+	let filePath = decodeURI(req.url);
 	if (filePath == '/') {
 		filePath = '../index.html';
 	}else if(filePath.indexOf("log") > 0){
-		filePath = '../../' + req.url;
+		filePath = '../../' + filePath;
 	} else {
-		filePath = '../' + req.url;
+		filePath = '../' + filePath;
 	}
+	console.log(filePath);
 
 	let extname = path.extname(filePath);
 	let content_type = 'text/html';

@@ -1,5 +1,5 @@
+DECLARE GLOBAL env TO "live".
 PRINT "TEST START...".
-
 //COPYPATH("0:lib/GETMODULES", "1:").
 //COPYPATH("0:lib/COMSAT_HEIGHT", "1:").
 //COPYPATH("0:lib/PID", "1:").
@@ -10,6 +10,7 @@ COPYPATH("0:lib/FUNCTIONS", "1:").
 COPYPATH("0:lib/JOURNAL", "1:").
 COPYPATH("0:lib/PROGRAM", "1:").
 COPYPATH("0:lib/INQUIRY", "1:").
+COPYPATH("0:lib/DISPLAYER", "1:").
 //RUNPATH("GETMODULES").
 //RUNPATH("COMSAT_HEIGHT").
 //RUNPATH("PID").
@@ -20,7 +21,9 @@ RUNPATH("FUNCTIONS").
 RUNPATH("Journal").
 RUNPATH("INQUIRY").
 RUNPATH("PROGRAM").
+RUNPATH("DISPLAYER").
 
+LOCAL Display TO Displayer().
 SET once_1 TO doOnce().
 SET once_2 TO doOnce().
 SET once_3 TO doOnce().
@@ -49,32 +52,34 @@ LOCAL pr_chooser TO LIST(
 SET chosen_pr TO Inquiry(pr_chooser).
 PRINT chosen_pr["program"].
 SET trgt_pr TO Program(chosen_pr["program"]).
-PRINT trgt_pr["fetch"]().
-LOCAL target_question TO LIST(
-	LEXICON(
-		"name", "sats",
-		"type", "number", 
-		"msg", "number of satellites",
-		"filter", {
-			PARAMETER resolve, reject, val.
-			IF (val < 3 OR val > 6) {
-				return reject("Choose number of sats in range 3 - 6").
-			} ELSE {
-				return resolve(val).
-			}
-		}
-	),
-	LEXICON(
-		"name", "alt",
-		"type", "number", 
-		"msg", "Altitude in km.",
-		"filter", {
-			PARAMETER resolve, reject, val.
-			return resolve(val * 1000).
-		}
-	)
-).
-//pr["create"](Inquiry(target_question)).
+SET trgt_pr TO trgt_pr["fetch"]().
+SET trgt_vessel TO VESSEL(trgt_pr["vessels"][0]).
+CS().
+SET last_angle TO 0.
+Display["imprint"](trgt_vessel:NAME).
+Display["imprint"]().
+UNTIL false {
+	Display["reset"]().
+	LOCAL radius_percent IS ROUND(260 / trgt_vessel:OBT:PERIOD, 3).
+	LOCAL phase_ang IS calcPhaseAngle(600000 + ALTITUDE, trgt_vessel:ORBIT:SEMIMAJORAXIS / 2).
+	SET curr_angle TO calcAngleFromVec(SHIP:UP:STARVECTOR, trgt_vessel:UP:STARVECTOR).
+	SET ahead TO false.
+	IF curr_angle > last_angle {
+		//target is ahead
+		SET phase_ang TO - phase_ang.
+	} 
+	SET tphase_ang TO 360 / trgt_pr["attributes"]["sats"] + phase_ang.
+	SET last_angle TO curr_angle.
+	
+	Display["print"]("Deegres spread:", 360 / trgt_pr["attributes"]["sats"]).
+	Display["print"]("Deegres travelled:", 360 * radius_percent).
+	Display["print"]("Target separation:", 360 * radius_percent +  360 / trgt_pr["attributes"]["sats"]).
+	Display["print"]("Est. angle move:", phase_ang).
+	Display["print"]().
+	Display["print"]("Target phase angle:", tphase_ang).
+	Display["print"]("Current phase angle:", curr_angle).
+	WAIT 0.
+}
 
 //pr["add"]().
 //PRINT pr["fetch"]().

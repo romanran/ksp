@@ -1,21 +1,21 @@
-function Journal{
+function Journal {
 	LOCAL self TO LEXICON().
 	LOCAL ship_res TO getResources().
-	LOCAL save_path TO "flightlogs/journal_"+SHIPNAME+".json".
+	LOCAL save_path TO "2:flightlogs/journal_" + SHIPNAME + ".json".
 	
 	LOCAL row TO LEXICON().
 	LOCAL row_num TO 0.
 	row:add("T", TIME:SECONDS).
 	row:add("SHIP", SHIPNAME).
 	LOCAL res_lex TO LEXICON().
-	FOR key IN ship_res:KEYS{
+	FOR key IN ship_res:KEYS {
 		res_lex:add(ship_res[key]:NAME, ship_res[key]:CAPACITY).
 	}
 	row:add("DESC", "On launchpad, waiting for countdown.").
 	row:add("RESOURCES", res_lex).
 	self:add(row_num, row).
 	
-	function addEntry{
+	function addEntry {
 		PARAMETER description IS "NC".
 		SET row_num TO row_num + 1.
 		LOCAL ship_res TO getResources().
@@ -39,16 +39,20 @@ function Journal{
 		self:add(row_num, row).
 		WRITEJSON(self, save_path).
 	}
-	function dumpAll{
+	function dumpAll {
 		PRINT self:DUMP.
 	}
 	
-	function saveToLog{
-		IF ADDONS:RT:HASKSCCONNECTION(SHIP){
+	function saveToLog {
+		IF ADDONS:RT:HASKSCCONNECTION(SHIP) {
 			COPYPATH(save_path, "0:flightlogs/").
 			HUDTEXT("Flight journal saved!", 3, 2, 40, green, false).
 			RETURN true.
-		}ELSE{
+		} ELSE IF HOMECONNECTION:ISCONNECTED { 
+			COPYPATH(save_path, "0:flightlogs/").
+			HUDTEXT("Flight journal saved!", 3, 2, 40, green, false).
+			RETURN true.
+		} ELSE {
 			HUDTEXT("Journal can't be send, no connection", 3, 2, 40, red, false).
 			RETURN false.
 		}

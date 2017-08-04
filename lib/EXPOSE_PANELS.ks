@@ -1,4 +1,4 @@
-function exposePanels{
+function exposePanels {
 	//dependency - PID
 	DECLARE LOCAL panels_PID TO 0.
 	DECLARE LOCAL timer TO 0.
@@ -12,7 +12,8 @@ function exposePanels{
 		SET timer TO TIME:SECONDS.
 		SET panels_PID TO setPID( setp, prop ).
 	}
-	function refresh{
+	
+	function refresh {
 		return panels_PID:UPDATE(TIME:SECONDS-timer, LIGHT).
 	}
 }

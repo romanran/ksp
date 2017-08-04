@@ -138,7 +138,7 @@ _TD.prototype.documentReady = function () {
 	$.getJSON("flightlogs/", function (e) {
 		deb(e);
 	});
-	this.journal1 = new Journal("journal_Sat-1.json");
+	this.journal1 = new Journal(encodeURI('journal_Sat-1 202 311.json'));
 	this.journal1.q.then(function () {
 		_this.journals.push(_this.journal1);
 		_this.createCharts();
