@@ -7,6 +7,7 @@ function P_Thrusting {
 	LOCAL pid_1s TO DoOnce().
 	LOCAL abort_1s IS DoOnce().
 	LOCAL de_acc_1s IS DoOnce().
+	LOCAL no_acc_Timer IS Timer().
 	LOCAL ship_p TO 0.
 	LOCAL accvec TO 0.
 	LOCAL trgt_pitch TO 0.
@@ -29,13 +30,14 @@ function P_Thrusting {
 		LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, q_pressure), 3), 0.1).
 		SET stg TO doStage().
 		SET done_staging TO stg["done"].
-		//SET stg_res TO stg["res"].
 		ship_state["set"]("phase", "THRUSTING").
 		nacc_Timer["set"]().
 		HUDTEXT("TAKEOFF!", 1, 2, 40, green, false).
-		
-		ship_log["add"]("TAKEOFF").
-		journal_Timer["set"]().
+
+		IF DEFINED journal_Timer {
+			journal_Timer["set"]().
+		}
+		RETURN "Take off".
 	}
 	
 	function handleFlight {
@@ -64,7 +66,7 @@ function P_Thrusting {
 		Display["print"]("T.kPa:", target_kpa).
 		Display["print"]("ACC:", ROUND(accvec:MAG / g_base, 3) + "G").
 			
-		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 AND nacc_Timer["check"]() < 8 AND nacc_Timer["check"]() > 4{
+		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 AND no_acc_Timer["check"]() < 8 AND no_acc_Timer["check"]() > 4{
 			//if ship is off course when not achieved orbital speed yet and the staging wait isnt in progress
 			abort_1s["do"]({
 				LOCK THROTTLE TO 0.
@@ -72,7 +74,7 @@ function P_Thrusting {
 				ABORT ON.
 				UNLOCK STEERING.
 				SET done TO true.
-				ship_log["add"]("Course deviation - malfunction - abort").
+				logJ("Course deviation - malfunction - abort").
 			}).
 		}
 	}
@@ -84,7 +86,7 @@ function P_Thrusting {
 			UNLOCK throttle_PID.
 			UNLOCK thrott.
 			LOCK THROTTLE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt["alt"])) * 5 ), 1), 0.1).
-			ship_log["add"]("Deacceleration").
+			logJ("Deacceleration").
 		}).
 	}
 	

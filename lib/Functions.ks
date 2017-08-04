@@ -2,9 +2,7 @@
 function doStage {
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
 		STAGE.
-		//LOCAL stg_res TO getStageResources().
 		return lex(
-			//"res", stg_res,
 			"done", STAGE:NUMBER = 0
 		).
 	}
@@ -134,8 +132,8 @@ function calcTrajectory {
 }
 
 function getdV {   
-	//https://www.reddit.com/r/Kos/comments/330yir/calculating_stage_deltav/
-	//only_to_downvote
+	// https://www.reddit.com/r/Kos/comments/330yir/calculating_stage_deltav/
+	// cc: only_to_downvote
     LOCAL fuels IS list().
     fuels:ADD("LiquidFuel").
     fuels:ADD("Oxidizer").
@@ -157,18 +155,18 @@ function getdV {
     LOCAL mDotTotal IS 0.
 
     // calculate total fuel mass
-    FOR r IN STAGE:RESOURCES {
+    FOR res IN STAGE:RESOURCES {
         LOCAL iter is 0.
-        FOR f in fuels{
-            IF f = r:NAME{
-                SET fuelMass TO fuelMass + fuelsDensity[iter]*r:AMOUNT.
+        FOR fuel in fuels {
+            IF fuel = res:NAME{
+                SET fuelMass TO fuelMass + fuelsDensity[iter] * res:AMOUNT.
             }
-            SET iter TO iter+1.
+            SET iter TO iter + 1.
         }
     }
 
-    LIST ENGINES IN engList. 
-    FOR eng in engList{
+    LIST ENGINES IN eng_list. 
+    FOR eng in eng_list{
         IF eng:IGNITION {
             SET thrustTotal TO thrustTotal + eng:maxthrust.
 			SET mDotTotal TO mDotTotal + eng:maxthrust / eng:ISP.
@@ -179,19 +177,19 @@ function getdV {
 		SET avgIsp TO thrustTotal / mDotTotal.
 	}
     // deltaV calculation as Isp*g0*ln(m0/m1).
-    LOCAL deltaV IS avgIsp * 9.82 * LN(SHIP:MASS / (SHIP:MASS - fuelMass)).
+    LOCAL dV IS avgIsp * 9.82 * LN(SHIP:MASS / (SHIP:MASS - fuelMass)).
 
-    RETURN deltaV.
+    RETURN dV.
 }.
 
 function getTrgtAlt {
-	parameter sat_num is 3.
+	PARAMETER sat_num is 3.
 	PARAMETER min_h is 100.
-	LOCAL ang TO 360/(sat_num*2). 
+	LOCAL ang TO 360/(sat_num * 2). 
 	LOCAL h TO KERBIN:RADIUS+min_h.
 	LOCAL altA TO (h/COS(ang)). //absolute
 	LOCAL altR TO altA-KERBIN:RADIUS. //relative altitude
-	LOCAL comm_r TO ROUND( SQRT((altA*altA)*2) ).//range
+	LOCAL comm_r TO ROUND(SQRT((altA*altA) * 2)).//range
 	LOCAL o TO lexicon().
 	LOCAL orb_period TO calcOrbPeriod(altA).
 	o:ADD("r", comm_r).
@@ -205,7 +203,7 @@ function calcOrbitRadius {
 	PARAMETER vsl.
 	LOCAL smaj TO vsl:OBT:SEMIMAJORAXIS.
 	LOCAL smin TO vsl:OBT:SEMIMINORAXIS.
-	LOCAL h TO (smaj - smin)^2/(smaj + smin)^2.
+	LOCAL h TO (smaj - smin) ^ 2 / (smaj + smin) ^ 2.
 	RETURN CONSTANT:PI * (smaj + smin) * (1 + (3 * h) / 10 + SQRT(4 - 3 * h)).
 }
 

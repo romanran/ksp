@@ -56,10 +56,12 @@ function P_PreLaunch {
 		IF ksc_light:LENGTH > 0{
 			SET ksc_m_light TO ksc_light[0]:GETMODULE("modulelight").
 		}
-		ON AG1{
+		ON AG1 {
 			doModuleAction("modulelight", "togglelight", true, ksc_light).
 			SET start TO TRUE.
-			ship_log["add"]("countdown start").
+			IF DEFINED ship_log {
+				ship_log["add"]("Countdown start").
+			}
 		}
 		Display["print"]("ALL SYSTEMS ARE GO.").
 		Display["print"]("AWAITING LAUNCH CONFIRMATION ON AG1").

@@ -21,11 +21,12 @@ function Aurora {
 	GLOBAL ship_log TO Journal().
 	function logJ {
 		PARAMETER str.
-		if (DEFINED ship_log AND ship_log:HASKEY("add")) {
+		IF DEFINED ship_log AND ship_log:HASKEY("add") AND str {
 			ship_log["add"](str).
 		}
 	}
 	
+	// Get programme name from ship state or inquiry
 	GLOBAL ship_state IS ShipState().
 	LOCAL programme TO Programme().
 	LOCAL prlist TO programme["list"]().
@@ -45,32 +46,46 @@ function Aurora {
 		SET chosen_prog TO chosen_prog["program"].
 		ship_state["set"]("programme", chosen_prog).
 	}
-	
+	// load the programme
 	GLOBAL trgt_prog TO programme["fetch"](chosen_prog).
 	GLOBAL trgt_orbit IS getTrgtAlt(trgt_prog["attributes"]["sats"], trgt_prog["attributes"]["alt"]).
 	
 	GLOBAL done IS false.
 	GLOBAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
-	GLOBAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true.
+	GLOBAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 
 	// Onces
 	LOCAL warp_1s IS doOnce().
-	LOCAL takeoff_1s TO doOnce().
 
 	// Timers
 	LOCAL conn_Timer IS Timer(). // retry connection to KSC timer
 	LOCAL journal_Timer IS Timer(). // save to journal in this time
 
 	// Global/ Aurora scopre variables
-	LOCAL stg IS LEXICON(). // stage resouces, taken from doStage
 	GLOBAL LOCK stg_res TO getStageResources().
 	LOCAL LOCK q_pressure TO ROUND(SHIP:Q * CONSTANT:ATMtokPa, 3).
 	
 	// Load the modules after all of the global variables are set
-	LOCAL phase_modules IS LIST("PreLaunch", "HandleStaging", "Thrusting", "Deployables", "Injection", "CorrectionBurn", "CheckCraftCondition").
+	LOCAL phase_modules IS LIST(
+		"PreLaunch", 
+		"HandleStaging", 
+		"Thrusting", 
+		"Deployables", 
+		"Injection", 
+		"CorrectionBurn", 
+		"CheckCraftCondition"
+	).
 	loadDeps(phase_modules, "modules").
 	
-	LOCAL thisCraft IS LEXICON("PreLaunch", P_PreLaunch(), "HandleStaging", P_HandleStaging(), "Thrusting", P_Thrusting(), "Deployables", P_Deployables(), "Injection", P_Injection(), "CorrectionBurn", P_CorrectionBurn(), "CheckCraftCondition", P_CheckCraftCondition()).
+	LOCAL thisCraft IS LEXICON(
+		"PreLaunch", P_PreLaunch(), 
+		"HandleStaging", P_HandleStaging(), 
+		"Thrusting", P_Thrusting(), 
+		"Deployables", P_Deployables(), 
+		"Injection", P_Injection(), 
+		"CorrectionBurn", P_CorrectionBurn(), 
+		"CheckCraftCondition", P_CheckCraftCondition()
+	).
 	
 	IF SHIP:STATUS = "PRELAUNCH" {
 		thisCraft["PreLaunch"]["init"]().
@@ -81,7 +96,10 @@ function Aurora {
 		Display["reset"]().
 		Display["print"]("Current phase", ship_state["state"]["phase"]).
 		
-		thisCraft["HandleStaging"]["refresh"]().
+		LOCAL stage_response IS  thisCraft["HandleStaging"]["refresh"]().
+		IF stage_response {
+			logJ(stage_response).
+		}
 		
 		IF ship_state["state"]["phase"] = "TAKEOFF" {
 			thisCraft["Thrusting"]["takeOff"]().
@@ -106,8 +124,8 @@ function Aurora {
 		} //eject fairing	
 		IF ALTITUDE > 80000 AND from_save = false {
 			//--vacuum, deploy panels and antennas, turn on lights
-			thisCraft["Deployables"]["antennas"](). 
-			thisCraft["Deployables"]["panels"](). 
+			logJ(thisCraft["Deployables"]["antennas"]()). 
+			logJ(thisCraft["Deployables"]["panels"]()). 
 		}
 		
 		IF ship_state["state"]["phase"] = "COASTING" {
@@ -127,9 +145,11 @@ function Aurora {
 		thisCraft["CheckCraftCondition"]["refresh"]().
 			
 		IF ship_state["state"]["phase"] = "KERBINJECTION" {
-			thisCraft["Injection"]["init"]().
-			IF thisCraft["Injection"]["burn"]() {
-				ship_log["add"]("CIRCURALISATION PHASE I COMPLETE").
+			LOCAL iinit IS thisCraft["Injection"]["init"](). // initialize and get the response
+			logJ(iinit). // log the response
+			LOCAL iburn IS thisCraft["Injection"]["burn"]().
+			logJ(iburn).
+			IF thisCraft["Injection"]["done"] {
 				ship_log["save"]().
 				ship_state["set"]("phase", "CORRECTION_BURN").
 			}
@@ -151,7 +171,7 @@ function Aurora {
 			} ELSE {
 				LOCAL margin IS -(ROUND(SHIP:ORBIT:PERIOD, 3) / trgt_orbit["period"] - 1).
 				IF NOT thisCraft["CorrectionBurn"]["fore"](margin) {
-					HUDTEXT("CNLY 10% OF MONOPROP LEFT!", 3, 2, 42, RED, false).
+					HUDTEXT("ONLY 10% OF MONOPROP LEFT!", 3, 2, 42, RED, false).
 				}
 				Display["print"]("ORB. PERIOD:", ROUND(SHIP:ORBIT:PERIOD, 3)).
 				Display["print"]("TRGT ORB. PERIOD: ", trgt_orbit["period"]).
