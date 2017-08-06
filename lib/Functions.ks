@@ -2,10 +2,8 @@
 function doStage {
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
 		STAGE.
-		return lex(
-			"done", STAGE:NUMBER = 0
-		).
 	}
+	return NOT STAGE:NUMBER = 0.
 }
 
 function getStageResources {
@@ -45,7 +43,8 @@ function getModules {
 	}
 	RETURN modules_l.
 }
-function doModuleEvent {
+
+function doModuleAction {
 	PARAMETER module.
 	PARAMETER action_name.
 	PARAMETER action_param.
@@ -53,8 +52,8 @@ function doModuleEvent {
 	LOCAL parts_list TO getModules(module).
 	FOR _part IN parts_list:VALUES {
 		SET _part TO _part:GETMODULE(module).
-		IF fpart:HASACTION(action_name) {
-			fpart:DOACTION(action_name, action_param).
+		IF _part:HASACTION(action_name) {
+			_part:DOACTION(action_name, action_param).
 		}
 	}
 	return parts_list:LENGTH > 0.
@@ -67,8 +66,8 @@ function doModuleEvent {
 	LOCAL parts_list TO getModules(module).
 	FOR _part IN parts_list:VALUES {
 		SET _part TO _part:GETMODULE(module).
-		IF fpart:HASEVENT(event) {
-			fpart:DOEVENT(event).
+		IF _part:HASEVENT(event) {
+			_part:DOEVENT(event).
 		}
 	}
 	return parts_list:LENGTH > 0.

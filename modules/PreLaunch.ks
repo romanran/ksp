@@ -1,11 +1,12 @@
+COPYPATH("0:lib/Utils", "1:").
+RUNONCEPATH("UTILS").
+LOCAL dependencies IS LIST("Functions", "ShipGlobals").
+loadDeps(dependencies).
+
+
 function P_PreLaunch {
 	//--PRELAUNCH
 	function init {
-		Display["imprint"]("Aurora Space Program V1.3.1").
-		Display["imprint"](SHIP:NAME).
-		Display["imprint"]("Comm range:", trgt["r"]+"m.").
-		Display["imprint"]("Target altitude:", trgt["alt"]+"m.").
-		Display["imprint"]("Target orbital period:", trgt["period"]+"s.").
 		LOCAL start IS false.
 		GLOBAL done TO true.
 		GLOBAL from_save TO false.
@@ -59,9 +60,7 @@ function P_PreLaunch {
 		ON AG1 {
 			doModuleAction("modulelight", "togglelight", true, ksc_light).
 			SET start TO TRUE.
-			IF DEFINED ship_log {
-				ship_log["add"]("Countdown start").
-			}
+			logJ("Countdown start").
 		}
 		Display["print"]("ALL SYSTEMS ARE GO.").
 		Display["print"]("AWAITING LAUNCH CONFIRMATION ON AG1").
@@ -84,7 +83,9 @@ function P_PreLaunch {
 					eng:ACTIVATE.
 				}
 				HUDTEXT("Engines ingnition", 1, 2, 40, green, false).
-
+			}
+			
+			IF i = 0 {
 				ship_state["set"]("phase", "TAKEOFF").
 				SET done TO false.
 			}

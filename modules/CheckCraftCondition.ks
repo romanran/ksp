@@ -1,9 +1,16 @@
+COPYPATH("0:lib/Utils", "1:").
+RUNONCEPATH("UTILS").
+LOCAL dependencies IS LIST("Functions", "ShipGlobals").
+loadDeps(dependencies).
+
 function P_CheckCraftCondition {
-	LOCAL LOCK ec TO (DEFINED stg_res AND (stg_res["ELECTRICCHARGE"]:AMOUNT / stg_res["ELECTRICCHARGE"]:CAPACITY) * 100 < 20) OR stg_res["ELECTRICCHARGE"]:AMOUNT < 40.
-	LOCAL LOCK mp TO (DEFINED stg_res AND (stg_res["MonoPropellant"]:AMOUNT / stg_res["MonoPropellant"]:CAPACITY) * 100 < 1) OR stg_res["MonoPropellant"]:AMOUNT < 1.
+	LOCAL ship_res TO getResources().
+	LOCAL LOCK ec TO ((ship_res["ELECTRICCHARGE"]:AMOUNT / ship_res["ELECTRICCHARGE"]:CAPACITY) * 100 < 20) OR ship_res["ELECTRICCHARGE"]:AMOUNT < 40.
+	LOCAL LOCK mp TO ((ship_res["MonoPropellant"]:AMOUNT / ship_res["MonoPropellant"]:CAPACITY) * 100 < 1) OR ship_res["MonoPropellant"]:AMOUNT < 1.
 	LOCAL override IS 0.
 	
 	function refresh {
+		SET ship_res TO getResources().
 		IF ec {
 			//if below 20% of max ships capacity or 40 units
 			//electic charge saving and generation

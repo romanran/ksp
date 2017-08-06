@@ -1,3 +1,8 @@
+COPYPATH("0:lib/Utils", "1:").
+RUNONCEPATH("UTILS").
+LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "ShipGlobals").
+loadDeps(dependencies).
+
 function P_Thrusting {
 	PARAMETER safe_alt IS 150. //safe altitude to release max thrust during a launch
 	LOCAL pid_timer TO TIME:SECONDS.
@@ -9,7 +14,6 @@ function P_Thrusting {
 	LOCAL de_acc_1s IS DoOnce().
 	LOCAL no_acc_Timer IS Timer().
 	LOCAL ship_p TO 0.
-	LOCAL accvec TO 0.
 	LOCAL trgt_pitch TO 0.
 	LOCAL thrott TO 1.
 	LOCAL target_kPa IS 1.
@@ -21,22 +25,15 @@ function P_Thrusting {
 		SET throttle_PID:MINOUTPUT TO 1.
 
 		LOCK target_kPa TO ROUND(MAX(((-ALTITUDE + 40000) / 40000) * 10, 1), 3).
-		SET PIDC:SETPOINT TO target_kPa.
+		SET throttle_PID:SETPOINT TO target_kPa.
 	
-		LOCK accvec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV.
 		SET pid_timer TO TIME:SECONDS.
 		LOCK THROTTLE TO thrott.
 		LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
 		LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, q_pressure), 3), 0.1).
-		SET stg TO doStage().
-		SET done_staging TO stg["done"].
-		ship_state["set"]("phase", "THRUSTING").
-		nacc_Timer["set"]().
+		SET done_staging TO doStage().
+		no_acc_Timer["set"]().
 		HUDTEXT("TAKEOFF!", 1, 2, 40, green, false).
-
-		IF DEFINED journal_Timer {
-			journal_Timer["set"]().
-		}
 		RETURN "Take off".
 	}
 	
@@ -62,9 +59,9 @@ function P_Thrusting {
 		Display["print"]("THR", thrott).
 		Display["print"]("PITCH:", ROUND(90 - VECTORANGLE(UP:VECTOR, SHIP:FACING:FOREVECTOR), 3)).
 		Display["print"]("T.PIT:", trgt_pitch).
-		Display["print"]("kPa:", ROUND(dyn_p, 3)).
+		Display["print"]("kPa:", ROUND(q_pressure, 3)).
 		Display["print"]("T.kPa:", target_kpa).
-		Display["print"]("ACC:", ROUND(accvec:MAG / g_base, 3) + "G").
+		Display["print"]("ACC:", ROUND(acc_vec:MAG / g_base, 3) + "G").
 			
 		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 AND no_acc_Timer["check"]() < 8 AND no_acc_Timer["check"]() > 4{
 			//if ship is off course when not achieved orbital speed yet and the staging wait isnt in progress
@@ -90,10 +87,17 @@ function P_Thrusting {
 		}).
 	}
 	
+	function resetPID {
+		SET pid_timer TO TIME:SECONDS.
+		throttle_PID:RESET.
+		pid_1s["reset"]().
+	}
+	
 	LOCAL methods TO LEXICON(
 		"takeOff", takeOff@,
 		"handleFlight", handleFlight@,
-		"decelerate", decelerate@
+		"decelerate", decelerate@,
+		"resetPID", resetPID@
 	).
 	
 	RETURN methods.

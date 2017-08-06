@@ -1,3 +1,8 @@
+COPYPATH("0:lib/Utils", "1:").
+RUNONCEPATH("UTILS").
+LOCAL dependencies IS LIST("Timer", "DoOnce", "Functions", "ShipGlobals").
+loadDeps(dependencies).
+
 function P_Deployables {
 	LOCAL fairing_1s IS doOnce().
 	LOCAL deploy_1s IS doOnce().

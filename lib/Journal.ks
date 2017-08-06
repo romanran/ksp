@@ -1,7 +1,7 @@
 function Journal {
 	LOCAL self TO LEXICON().
 	LOCAL ship_res TO getResources().
-	LOCAL save_path TO "2:flightlogs/journal_" + SHIPNAME + ".json".
+	LOCAL save_path TO "1:flightlogs/journal_" + SHIPNAME + ".json".
 	
 	LOCAL row TO LEXICON().
 	LOCAL row_num TO 0.

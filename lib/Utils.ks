@@ -2,14 +2,18 @@
 function loadDeps {
 	PARAMETER libs.
 	PARAMETER path IS "lib".
-	FOR lib IN libs {
-		LOCAL trgt_path IS "0:" + path + "/" + lib.
-		IF EXISTS(trgt_path) {
-			COPYPATH(trgt_path, "1:").
-			RUNONCEPATH(lib).
-		} ELSE {
-			deb("Path " + trgt_path + " not found").
+	IF (ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED {
+		FOR lib IN libs {
+			LOCAL trgt_path IS "0:" + path + "/" + lib.
+			IF EXISTS(trgt_path) {
+				COPYPATH(trgt_path, "1:").
+				RUNONCEPATH(lib).
+			} ELSE {
+				deb("Path " + trgt_path + " not found").
+			}
 		}
+	} ELSE {
+		RETURN 0.
 	}
 }
 	
@@ -51,4 +55,11 @@ function generateID {
 		SET vessel_name TO default_vessel. 
 	}
 	RETURN vessel_name + " " + FLOOR(RANDOM() * 1000).
+}
+
+function logJ {
+	PARAMETER str.
+	IF DEFINED ship_log AND ship_log:HASKEY("add") AND str {
+		ship_log["add"](str).
+	}
 }

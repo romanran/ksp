@@ -1,14 +1,26 @@
-function P_CorrectionBurn {	
+COPYPATH("0:lib/Utils", "1:").
+RUNONCEPATH("UTILS").
+LOCAL dependencies IS LIST("ShipGlobals").
+loadDeps(dependencies).
 
-	function neutrilize {
+function P_CorrectionBurn {	
+	LOCAL get_stg_res TO NOT (DEFINED str_res).
+	IF get_stg_res {
+		LOCAL stg_res TO getStageResources().
+	}
+	
+	function neutralizeControls {
 		RCS OFF.
 		SET SHIP:CONTROL:NEUTRALIZE TO TRUE.
 		RETURN 1.
 	}
 	
-	function move_fore {
+	function moveFore {
 		PARAMETER val.
-		IF ((DEFINED stg_res AND stg_res["MonoPropellant"]:AMOUNT / stg_res["MonoPropellant"]:CAPACITY) * 100 < 10) {
+		IF get_stg_res {
+			SET stg_res TO getStageResources().
+		}
+		IF (stg_res["MonoPropellant"]:AMOUNT / stg_res["MonoPropellant"]:CAPACITY) * 100 < 10 {
 			SET val TO MAX(-1, MIN(val, 1)).
 			SET SHIP:CONTROL:FORE TO val.	
 			RETURN 1.
@@ -18,8 +30,8 @@ function P_CorrectionBurn {
 	}
 		
 	LOCAL methods TO LEXICON(
-		"fore", move_fore@,
-		"neutrilize", neutrilize@
+		"fore", moveFore@,
+		"neutralize", neutralizeControls@
 	).
 	
 	RETURN methods.
