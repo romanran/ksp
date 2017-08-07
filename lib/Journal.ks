@@ -1,3 +1,5 @@
+@LAZYGLOBAL off.
+
 function Journal {
 	LOCAL self TO LEXICON().
 	LOCAL ship_res TO getResources().

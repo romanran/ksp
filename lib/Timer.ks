@@ -1,3 +1,5 @@
+@LAZYGLOBAL off.
+
 function Timer {
 	LOCAL internal_t TO 999999999.
 	LOCAL invokes TO 0.

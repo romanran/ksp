@@ -1,5 +1,5 @@
 @LAZYGLOBAL off.
-DECLARE GLOBAL env TO "live".
+GLOBAL env TO "live".
 COPYPATH("0:lib/Utils", "1:").
 RUNONCEPATH("UTILS").
 
@@ -7,6 +7,12 @@ function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Inquiry", "Programme", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
+	IF NOT(DEFINED globals) {
+		GLOBAL globals TO setGlobal().
+	}
+	IF NOT(DEFINED ship_state) LOCAL ship_state TO globals["ship_state"].
+	IF NOT(DEFINED Display) LOCAL Display TO globals["Display"].
+	IF NOT(DEFINED ship_log) LOCAL ship_log TO globals["ship_log"].
 
 	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
@@ -17,8 +23,8 @@ function Aurora {
 	SET SHIP:NAME TO generateID().
 
 	// Get programme name from ship state or inquiry
-	LOCAL programme TO Programme().
-	LOCAL prlist TO programme["list"]().
+	LOCAL my_programme TO Programme().
+	LOCAL prlist TO my_programme["list"]().
 	LOCAL chosen_prog TO "".
 	IF ship_state["state"]:HASKEY("programme") {
 		SET chosen_prog TO ship_state["state"]["programme"].
@@ -36,12 +42,11 @@ function Aurora {
 		ship_state["set"]("programme", chosen_prog).
 	}
 	// load the programme
-	GLOBAL trgt_prog TO programme["fetch"](chosen_prog).
-	GLOBAL trgt_orbit IS getTrgtAlt(trgt_prog["attributes"]["sats"], trgt_prog["attributes"]["alt"]).
+	LOCAL trgt_prog TO my_programme["fetch"](chosen_prog).
+	LOCAL trgt_orbit IS getTrgtAlt(trgt_prog["attributes"]["sats"], trgt_prog["attributes"]["alt"]).
 
-	GLOBAL done IS false.
-	GLOBAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
-	GLOBAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
+	LOCAL done IS false.
+	LOCAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 
 	// Onces
 	LOCAL warp_1s IS doOnce().
@@ -80,28 +85,41 @@ function Aurora {
 		Display["imprint"]("Comm range:", trgt_orbit["r"] + "m.").
 		Display["imprint"]("Target altitude:", trgt_orbit["alt"] + "m.").
 		Display["imprint"]("Target orbital period:", trgt_orbit["period"] + "s.").
-		this_craft["PreLaunch"]["init"]().
+		this_craft["PreLaunch"]["init"](). // waits for user input, then countdowns, then on 0 it return and the script goes forward
+		ship_state["set"]("phase", "TAKEOFF").
 	}
+	SET done TO 0.
+	SET from_save TO this_craft["PreLaunch"]["from_save"].
+	Display["imprint"]("is done", from_save).
 
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
-		GLOBAL stg_res TO getStageResources().
+
 		Display["reset"]().
 		Display["print"]("Current phase", ship_state["state"]["phase"]).
 		this_craft["CheckCraftCondition"]["refresh"]().
-
+		
 		LOCAL stage_response IS  this_craft["HandleStaging"]["refresh"]().
 		IF stage_response {
 			logJ(stage_response).
 		}
 
 		IF ship_state["state"]["phase"] = "TAKEOFF" {
+			this_craft["HandleStaging"]["takeOff"]().
 			this_craft["Thrusting"]["takeOff"]().
 			journal_Timer["set"]().
 			ship_state["set"]("phase", "THRUSTING").
 		}
 		
 		IF ship_state["state"]["phase"] = "THRUSTING" {
+			LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
+			Display["print"]("THR", this_craft["Thrusting"]["thrott"]).
+			Display["print"]("PITCH:", ROUND(90 - VECTORANGLE(UP:VECTOR, SHIP:FACING:FOREVECTOR), 3)).
+			Display["print"]("T.PIT:", this_craft["Thrusting"]["trgt_pitch"]).
+			Display["print"]("kPa:", ROUND(globals["q_pressure"], 3)).
+			Display["print"]("T.kPa:", this_craft["Thrusting"]["target_kpa"]).
+			Display["print"]("ACC:", ROUND(globals["acc_vec"]:MAG / g_base, 3) + "G").
+			
 			this_craft["Thrusting"]["handleFlight"]().
 			IF (ROUND(APOAPSIS) > trgt_orbit["alt"] - 200000) AND ALTITUDE > 50000 {
 				this_craft["Thrusting"]["decelerate"]().
@@ -116,7 +134,7 @@ function Aurora {
 			}
 		}//--thrusting
 
-		IF ALTITUDE > 30000 AND q_pressure < 2 {
+		IF ALTITUDE > 30000 AND globals["q_pressure"] < 2 {
 			this_craft["Deployables"]["fairing"]().
 		} //eject fairing
 		IF ALTITUDE > 80000 AND from_save = false {

@@ -1,7 +1,10 @@
+@LAZYGLOBAL off.
+
 function Programme {
 	PARAMETER ptypeb IS "undefined".
-	SET ptype TO ptypeb:REPLACE(".json", "").
+	LOCAL ptype TO ptypeb:REPLACE(".json", "").
 	LOCAL path TO "0:program/" + ptype + ".json".
+	LOCAL filelist IS LIST().
 	
 	function addVessel {
 		LOCAL obj TO READJSON(path).

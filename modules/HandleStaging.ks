@@ -1,18 +1,21 @@
+@LAZYGLOBAL off.
 COPYPATH("0:lib/Utils", "1:").
 RUNONCEPATH("UTILS").
 LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "ShipGlobals").
 loadDeps(dependencies).
 
 function P_HandleStaging {
+	
+	IF NOT(DEFINED globals) {
+		GLOBAL globals TO setGlobal().
+	}
+	LOCAL LOCK stg_res TO globals["stg_res"].
 	LOCAL staging_Timer IS Timer().
 	LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
 	LOCAL nacc_Timer IS Timer(). //for no acceleration test once
 	LOCAL stage_1s IS DoOnce().
 	LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
-	LOCAL get_stg_res TO NOT (DEFINED str_res).
-	IF get_stg_res {
-		LOCAL stg_res TO getStageResources().
-	}
+	LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
 	
 	ON AG5 {
 		//stage override, just in case
@@ -20,10 +23,16 @@ function P_HandleStaging {
 		SET done_staging TO doStage().
 	}
 	
+	IF NOT(DEFINED globals) {
+		GLOBAL globals TO setGlobal().
+	}
+	IF NOT(DEFINED ship_state) LOCAL ship_state TO globals["ship_state"].
+	
+	function takeOff {
+		SET done_staging TO doStage().
+	}	
+	
 	function refresh {
-		IF get_stg_res {
-			SET stg_res TO getStageResources().
-		}
 		IF NOT done_staging {
 			IF STAGE:LIQUIDFUEL < 1 AND stg_res:HASKEY("LIQUIDFUEL") {
 				//FOR eng IN ship_engines{
@@ -54,7 +63,7 @@ function P_HandleStaging {
 		}
 		
 		IF ship_state["state"]:HASKEY("phase") AND (ship_state["state"]["phase"] = "TAKEOFF" OR ship_state["state"]["phase"] = "THRUSTING") {
-			LOCAL no_acceleration TO SHIP:ALTITUDE < 70000 AND acc_vec:MAG / g_base < 0.04.
+			LOCAL no_acceleration TO SHIP:ALTITUDE < 70000 AND globals["acc_vec"]:MAG / g_base < 0.04.
 			//if not under accel
 			IF no_acceleration {
 				RETURN nacc_Timer["ready"](4, {
@@ -84,6 +93,7 @@ function P_HandleStaging {
 	
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
+		"takeOff", takeOff@,
 		"is_done", done_staging
 	).
 	

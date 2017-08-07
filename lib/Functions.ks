@@ -1,3 +1,4 @@
+@LAZYGLOBAL off.
 // Flight related functions, ship helpers
 function doStage {
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
@@ -7,7 +8,7 @@ function doStage {
 }
 
 function getStageResources {
-	SET res_l TO LEXICON().
+	LOCAL res_l TO LEXICON().
 	FOR res IN STAGE:RESOURCES {
 		IF res:CAPACITY > 0{
 			res_l:ADD(res:NAME, res).
@@ -17,7 +18,7 @@ function getStageResources {
 }
 
 function getResources{
-	SET res_l TO LEXICON().
+	LOCAL res_l TO LEXICON().
 	FOR res IN SHIP:RESOURCES {
 		IF res:CAPACITY > 0{
 			res_l:ADD(res:NAME, res).
@@ -31,7 +32,7 @@ function getModules {
 	PARAMETER s_parts IS SHIP:PARTS.
 	LOCAL modules_l TO LEXICON().
 	FOR item IN s_parts {
-		SET i TO 0.
+		LOCAL i TO 0.
 		FOR module IN item:MODULES {
 			IF modules_l:HASKEY(item:NAME + i) {
 				SET i TO i + 1.
@@ -94,8 +95,9 @@ function calcBurnTime {
 	PARAMETER dV.
 	LOCAL f IS 0.
 	LOCAL p IS 0.
-	LIST ENGINES IN en.
-	FOR eng IN en {
+	LOCAL engs IS LIST().
+	LIST ENGINES IN eng_list.
+	FOR eng IN eng_list {
 		IF eng:STAGE = STAGE:NUMBER {
 			SET f TO f + eng:MAXTHRUST * 1000.  // Engine Thrust (kg * m/s²)
 			SET p TO eng:ISP.               // Engine ISP (s)
@@ -147,7 +149,7 @@ function getdV {
     fuelsDensity:ADD(0.004).
 
     // initialize fuel mass sums
-    LOCAL fuelMass IS 0.
+    LOCAL fuel_mass IS 0.
 	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
     // thrust weighted average isp
     LOCAL thrustTotal IS 0.
@@ -158,12 +160,12 @@ function getdV {
         LOCAL iter is 0.
         FOR fuel in fuels {
             IF fuel = res:NAME {
-                SET fuelMass TO fuelMass + fuelsDensity[iter] * res:AMOUNT.
+                SET fuel_mass TO fuel_mass + fuelsDensity[iter] * res:AMOUNT.
             }
             SET iter TO iter + 1.
         }
     }
-
+	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
     FOR eng in eng_list {
         IF eng:IGNITION {
@@ -176,7 +178,7 @@ function getdV {
 		SET avgIsp TO thrustTotal / mDotTotal.
 	}
     // deltaV calculation as Isp*g0*ln(m0/m1).
-    LOCAL dV IS avgIsp * 9.82 * LN(SHIP:MASS / (SHIP:MASS - fuelMass)).
+    LOCAL dV IS avgIsp * 9.82 * LN(SHIP:MASS / (SHIP:MASS - fuel_mass)).
 
     RETURN dV.
 }.

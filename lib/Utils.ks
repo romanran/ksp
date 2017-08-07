@@ -1,3 +1,4 @@
+@LAZYGLOBAL off.
 // Helper functions and utilities
 function loadDeps {
 	PARAMETER libs.
@@ -6,7 +7,9 @@ function loadDeps {
 		FOR lib IN libs {
 			LOCAL trgt_path IS "0:" + path + "/" + lib.
 			IF EXISTS(trgt_path) {
-				COPYPATH(trgt_path, "1:").
+				IF NOT(EXISTS("1:" + lib)) {
+					COPYPATH(trgt_path, "1:").
+				}
 				RUNONCEPATH(lib).
 			} ELSE {
 				deb("Path " + trgt_path + " not found").

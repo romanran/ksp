@@ -5,11 +5,15 @@ loadDeps(dependencies).
 
 
 function P_PreLaunch {
+	LOCAL from_save TO true.
+	IF NOT(DEFINED globals) {
+		GLOBAL globals TO setGlobal().
+	}
+	IF NOT(DEFINED Display) LOCAL Display TO globals["Display"].
 	//--PRELAUNCH
 	function init {
+		LOCAL from_save TO false.
 		LOCAL start IS false.
-		GLOBAL done TO true.
-		GLOBAL from_save TO false.
 		
 		LOCAL ship_engines IS LIST().
 		LIST ENGINES IN ship_engines.
@@ -68,9 +72,8 @@ function P_PreLaunch {
 		WAIT UNTIL start = TRUE.
 		
 		Display["print"]("COUNTDOWN START").
-		FROM {LOCAL i IS 5.} UNTIL i = 0 STEP {SET i TO i - 1.} DO {
+		FROM {LOCAL i IS 5.} UNTIL i = -1 STEP {SET i TO i - 1.} DO {
 			WAIT 1.
-			HUDTEXT(i + "...", 1, 2, 40, green, false).
 			IF i = 4{
 				LOCK THROTTLE TO 1.
 			}
@@ -84,16 +87,15 @@ function P_PreLaunch {
 				}
 				HUDTEXT("Engines ingnition", 1, 2, 40, green, false).
 			}
-			
-			IF i = 0 {
-				ship_state["set"]("phase", "TAKEOFF").
-				SET done TO false.
+			IF i > 0 { 
+				HUDTEXT(i + "...", 1, 2, 40, green, false).
 			}
-		}	
+		}
 	}
 	
 	LOCAL methods TO LEXICON(
-		"init", init@
+		"init", init@,
+		"from_save", from_save
 	).
 	
 	RETURN methods.

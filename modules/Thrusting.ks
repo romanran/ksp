@@ -1,3 +1,4 @@
+@LAZYGLOBAL off.
 COPYPATH("0:lib/Utils", "1:").
 RUNONCEPATH("UTILS").
 LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "ShipGlobals").
@@ -17,7 +18,10 @@ function P_Thrusting {
 	LOCAL trgt_pitch TO 0.
 	LOCAL thrott TO 1.
 	LOCAL target_kPa IS 1.
-	LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
+
+	IF NOT(DEFINED globals) {
+		GLOBAL globals TO setGlobal().
+	}
 	
 	function takeOff {
 		SET throttle_PID to setPID(0, 1).
@@ -30,10 +34,8 @@ function P_Thrusting {
 		SET pid_timer TO TIME:SECONDS.
 		LOCK THROTTLE TO thrott.
 		LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
-		LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, q_pressure), 3), 0.1).
-		SET done_staging TO doStage().
+		LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]), 3), 0.1).
 		no_acc_Timer["set"]().
-		HUDTEXT("TAKEOFF!", 1, 2, 40, green, false).
 		RETURN "Take off".
 	}
 	
@@ -56,14 +58,8 @@ function P_Thrusting {
 		}
 		
 		SET throttle_PID:SETPOINT TO target_kpa.
-		Display["print"]("THR", thrott).
-		Display["print"]("PITCH:", ROUND(90 - VECTORANGLE(UP:VECTOR, SHIP:FACING:FOREVECTOR), 3)).
-		Display["print"]("T.PIT:", trgt_pitch).
-		Display["print"]("kPa:", ROUND(q_pressure, 3)).
-		Display["print"]("T.kPa:", target_kpa).
-		Display["print"]("ACC:", ROUND(acc_vec:MAG / g_base, 3) + "G").
 			
-		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 AND no_acc_Timer["check"]() < 8 AND no_acc_Timer["check"]() > 4{
+		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 OR no_acc_Timer["check"]() > 6 {
 			//if ship is off course when not achieved orbital speed yet and the staging wait isnt in progress
 			abort_1s["do"]({
 				LOCK THROTTLE TO 0.
@@ -97,7 +93,10 @@ function P_Thrusting {
 		"takeOff", takeOff@,
 		"handleFlight", handleFlight@,
 		"decelerate", decelerate@,
-		"resetPID", resetPID@
+		"resetPID", resetPID@,
+		"trgt_pitch", trgt_pitch,
+		"target_kpa", target_kpa,
+		"thrott", thrott
 	).
 	
 	RETURN methods.
