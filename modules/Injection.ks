@@ -6,7 +6,7 @@ loadDeps(dependencies).
 function P_Injection {
 	PARAMETER trgt_orbit.
 	LOCAL burn_time IS -9999. //dont fire until its calculated
-	LOCAL thrott IS 0.
+	LOCAL LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD / trgt_orbit["period"]) ^ 100, 0.1). //release acceleration at the end
 	LOCAL dV_change IS 0.
 	LOCAL circ_burn_1s IS doOnce().
 	LOCAL initialized TO 0.
@@ -15,7 +15,7 @@ function P_Injection {
 	function init {
 		IF NOT initialized {
 			RCS ON.
-			SET thrott TO 0.
+			LOCK THROTTLE TO 0.
 			HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).	
 			SET dV_change TO calcDeltaV(trgt_orbit["altA"]).
 			SET burn_time TO calcBurnTime(dV_change).
@@ -31,15 +31,13 @@ function P_Injection {
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time / 2) {
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
-				LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD / trgt_orbit["period"]) ^ 100, 0.1). //release acceleration at the end
-				LOCK THROTTLE to thrott.
+				LOCK THROTTLE TO thrott.
 				RETURN "Circuralisation burn".
 			}).
 		}
 		
 		IF ROUND(SHIP:ORBIT:PERIOD) >= trgt_orbit["period"] - 50 {
-			UNLOCK thrott.
-			SET thrott TO 0.
+			LOCK THROTTLE TO 0.
 			SET done TO 1.
 			HUDTEXT("CIRCURALISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).
 			RETURN "Circuralisation Phase I complete".

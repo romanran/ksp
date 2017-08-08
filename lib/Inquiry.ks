@@ -77,24 +77,22 @@ function Inquiry {
 			IF TERMINAL:INPUT:HASCHAR {
 				PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,0).
 				LOCAL char to TERMINAL:INPUT:GETCHAR().
-				IF ch_type="number" AND numbers:CONTAINS(char){
+				IF ch_type="number" AND numbers:CONTAINS(char) {
 					SET val TO val+""+char.
 					Sounds:PLAY(correct_s).
-				}
-				ELSE IF ch_type="letter" AND letters:CONTAINS(char){
+				} ELSE IF ch_type="letter" AND letters:CONTAINS(char) {
 					SET val TO val+""+char.
 					Sounds:PLAY(correct_s).
-				}
-				ELSE IF ch_type="char" {
+				} ELSE IF ch_type="char" {
 					SET val TO val+""+char.
 					Sounds:PLAY(correct_s).
-				}ELSE IF ch_type="checkbox" OR "select" {
+				} ELSE IF ch_type="checkbox" OR "select" {
 					IF check_list["movePointer"](char) {
 						Sounds:PLAY(correct_s).
 					} ELSE {
 						Sounds:PLAY(err_s).
 					}
-				}ELSE{
+				} ELSE {
 					Sounds:PLAY(err_s).
 				}
 				IF char = TERMINAL:INPUT:BACKSPACE {

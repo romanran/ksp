@@ -7,7 +7,7 @@ function P_CorrectionBurn {
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
 	}
-	LOCAL LOCK stg_res TO globals["stg_res"].
+	LOCAL LOCK stg_res TO globals["stg_res"]().
 	
 	function neutralizeControls {
 		RCS OFF.

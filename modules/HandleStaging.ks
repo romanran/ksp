@@ -9,7 +9,7 @@ function P_HandleStaging {
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
 	}
-	LOCAL LOCK stg_res TO globals["stg_res"].
+	LOCAL LOCK stg_res TO globals["stg_res"]().
 	LOCAL staging_Timer IS Timer().
 	LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
 	LOCAL nacc_Timer IS Timer(). //for no acceleration test once
@@ -63,7 +63,7 @@ function P_HandleStaging {
 		}
 		
 		IF ship_state["state"]:HASKEY("phase") AND (ship_state["state"]["phase"] = "TAKEOFF" OR ship_state["state"]["phase"] = "THRUSTING") {
-			LOCAL no_acceleration TO SHIP:ALTITUDE < 70000 AND globals["acc_vec"]:MAG / g_base < 0.04.
+			LOCAL no_acceleration TO SHIP:ALTITUDE < 70000 AND globals["acc_vec"]():MAG / g_base < 0.04.
 			//if not under accel
 			IF no_acceleration {
 				RETURN nacc_Timer["ready"](4, {
@@ -90,11 +90,11 @@ function P_HandleStaging {
 			}).
 		}
 	}
-	
+
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
 		"takeOff", takeOff@,
-		"is_done", done_staging
+		"done_staging", done_staging
 	).
 	
 	RETURN methods.

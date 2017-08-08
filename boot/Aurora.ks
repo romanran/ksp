@@ -1,18 +1,19 @@
 @LAZYGLOBAL off.
 GLOBAL env TO "live".
-COPYPATH("0:lib/Utils", "1:").
-RUNONCEPATH("UTILS").
+
+IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
+	COPYPATH("0:lib/Utils", "1:").
+	RUNONCEPATH("Utils").
+}
 
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Inquiry", "Programme", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
-	IF NOT(DEFINED globals) {
-		GLOBAL globals TO setGlobal().
-	}
-	IF NOT(DEFINED ship_state) LOCAL ship_state TO globals["ship_state"].
-	IF NOT(DEFINED Display) LOCAL Display TO globals["Display"].
-	IF NOT(DEFINED ship_log) LOCAL ship_log TO globals["ship_log"].
+	GLOBAL globals TO setGlobal().
+	LOCAL ship_state TO globals["ship_state"].
+	LOCAL Display TO globals["Display"].
+	LOCAL ship_log TO globals["ship_log"].
 
 	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
@@ -71,7 +72,7 @@ function Aurora {
 	GLOBAL this_craft IS LEXICON(
 		"PreLaunch", P_PreLaunch(),
 		"HandleStaging", P_HandleStaging(),
-		"Thrusting", P_Thrusting(),
+		"Thrusting", P_Thrusting(trgt_orbit),
 		"Deployables", P_Deployables(),
 		"Injection", P_Injection(trgt_orbit),
 		"CorrectionBurn", P_CorrectionBurn(),
@@ -100,6 +101,7 @@ function Aurora {
 		this_craft["CheckCraftCondition"]["refresh"]().
 		
 		LOCAL stage_response IS  this_craft["HandleStaging"]["refresh"]().
+
 		IF stage_response {
 			logJ(stage_response).
 		}
@@ -113,12 +115,12 @@ function Aurora {
 		
 		IF ship_state["state"]["phase"] = "THRUSTING" {
 			LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
-			Display["print"]("THR", this_craft["Thrusting"]["thrott"]).
-			Display["print"]("PITCH:", ROUND(90 - VECTORANGLE(UP:VECTOR, SHIP:FACING:FOREVECTOR), 3)).
-			Display["print"]("T.PIT:", this_craft["Thrusting"]["trgt_pitch"]).
-			Display["print"]("kPa:", ROUND(globals["q_pressure"], 3)).
-			Display["print"]("T.kPa:", this_craft["Thrusting"]["target_kpa"]).
-			Display["print"]("ACC:", ROUND(globals["acc_vec"]:MAG / g_base, 3) + "G").
+			Display["print"]("THR", this_craft["Thrusting"]["thrott"]()).
+			Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
+			Display["print"]("T.PIT:", this_craft["Thrusting"]["trgt_pitch"]()).
+			Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)).
+			Display["print"]("T.kPa:", this_craft["Thrusting"]["target_kpa"]()).
+			Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
 			
 			this_craft["Thrusting"]["handleFlight"]().
 			IF (ROUND(APOAPSIS) > trgt_orbit["alt"] - 200000) AND ALTITUDE > 50000 {
@@ -134,7 +136,7 @@ function Aurora {
 			}
 		}//--thrusting
 
-		IF ALTITUDE > 30000 AND globals["q_pressure"] < 2 {
+		IF ALTITUDE > 30000 AND globals["q_pressure"]() < 2 {
 			this_craft["Deployables"]["fairing"]().
 		} //eject fairing
 		IF ALTITUDE > 80000 AND from_save = false {

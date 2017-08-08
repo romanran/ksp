@@ -4,7 +4,7 @@ function doStage {
 	IF STAGE:NUMBER > 0 AND STAGE:READY {
 		STAGE.
 	}
-	return NOT STAGE:NUMBER = 0.
+	return STAGE:NUMBER = 0.
 }
 
 function getStageResources {
