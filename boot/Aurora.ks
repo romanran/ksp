@@ -92,7 +92,6 @@ function Aurora {
 	}
 	SET done TO 0.
 	SET from_save TO this_craft["PreLaunch"]["from_save"].
-	Display["imprint"]("is done", from_save).
 
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
@@ -142,8 +141,8 @@ function Aurora {
 		} //eject fairing
 		IF ALTITUDE > 80000 AND from_save = false {
 			//--vacuum, deploy panels and antennas, turn on lights
-			logJ(this_craft["Deployables"]["antennas"]()).
 			logJ(this_craft["Deployables"]["panels"]()).
+			logJ(this_craft["Deployables"]["antennas"]()).
 		}
 
 		IF ship_state["state"]["phase"] = "COASTING" {

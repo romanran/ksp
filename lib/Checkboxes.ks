@@ -14,7 +14,7 @@ function Checkboxes {
 	}
 	function getAnswers {
 		IF chtype = "select" {
-			return answers[pointer-1]["name"].
+			return answers[pointer - 1]["name"].
 		}
 		return answers.
 	}
@@ -26,6 +26,7 @@ function Checkboxes {
 				PRINT " " AT (5, pointer).
 				SET pointer TO pointer - 1.
 				PRINT "<" AT (5, pointer).
+				IF chtype = "select" togglePos().
 				return true.
 			}ELSE{	
 				RETURN false.
@@ -36,6 +37,7 @@ function Checkboxes {
 				PRINT " " AT (5, pointer).
 				SET pointer TO pointer + 1.
 				PRINT "<" AT (5, pointer).
+				IF chtype = "select" togglePos().
 				RETURN true.
 			} ELSE {
 				RETURN false.
@@ -55,11 +57,11 @@ function Checkboxes {
 				PRINT " " AT (3, i + 1).
 				SET i TO i + 1.
 			}
-			SET answers[pointer-1]["value"] TO true.
+			SET answers[pointer - 1]["value"] TO true.
 		} ELSE {
-			SET answers[pointer-1]["value"] TO NOT answers[pointer-1]["value"].
+			SET answers[pointer - 1]["value"] TO NOT answers[pointer - 1]["value"].
 		}
-		IF answers[pointer-1]["value"] {
+		IF answers[pointer - 1]["value"] {
 			PRINT "x" AT (3, pointer).
 		}ELSE{
 			PRINT " " AT (3, pointer).
@@ -79,9 +81,9 @@ function Checkboxes {
 				IF choice:HASKEY["name"] {
 					answers:ADD(LEXICON("name", choice["name"], "value", FALSE)).
 					IF choice:HASKEY["msg"] {
-						PRINT choice["msg"] AT (10, items_i +1).
+						PRINT choice["msg"] AT (10, items_i + 1).
 					} ELSE {
-						PRINT choice["name"] AT (10, items_i +1).
+						PRINT choice["name"] AT (10, items_i + 1).
 					}
 				}
 			} ELSE {
@@ -98,12 +100,12 @@ function Checkboxes {
 				}
 				IF items_i = default {
 					SET answers[items_i]["value"] TO true.
-					PRINT ".(x) - " AT (1, items_i +1).
+					PRINT ".(x) - " AT (1, items_i + 1).
 				} ELSE {
-					PRINT ".( ) - " AT (1, items_i +1).
+					PRINT ".( ) - " AT (1, items_i + 1).
 				}
 			} ELSE {
-				PRINT ".[ ] - " AT (1, items_i +1).
+				PRINT ".[ ] - " AT (1, items_i + 1).
 			}
 			SET items_i TO items_i + 1.
 			SET print_i TO print_i + 1.

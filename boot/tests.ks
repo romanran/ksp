@@ -50,7 +50,6 @@ LOCAL pr_chooser TO LIST(
 	)
 ).
 SET chosen_pr TO Inquiry(pr_chooser).
-PRINT chosen_pr["program"].
 SET trgt_pr TO Program(chosen_pr["program"]).
 SET trgt_pr TO trgt_pr["fetch"]().
 SET trgt_vessel TO VESSEL(trgt_pr["vessels"][0]).

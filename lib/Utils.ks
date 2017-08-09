@@ -61,7 +61,6 @@ function generateID {
 		SET vessel_name TO default_vessel. 
 	}
 	LOCAL vessel_name_A TO vessel_name:SPLIT(" ").
-	PRINT vessel_name_A[vessel_name_A:LENGTH - 1]:TONUMBER(catch):TYPENAME().
 	IF NOT(NOT(vessel_name_A[vessel_name_A:LENGTH - 1]:TONUMBER(catch))) { 
 		// remove the last number
 		vessel_name_A:REMOVE(vessel_name_A:LENGTH - 1).

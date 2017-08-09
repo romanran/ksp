@@ -6,10 +6,10 @@ loadDeps(dependencies).
 function P_Deployables {
 	LOCAL fairing_1s IS doOnce().
 	LOCAL deploy_1s IS doOnce().
-	LOCAL antenna_Timer IS Timer().
+	LOCAL antenna_1s IS doOnce().
 	
 	function jettisonFairing {
-		fairing_1s["do"]({
+		return fairing_1s["do"]({
 			IF doModuleEvent("ModuleProceduralFairing", "DEPLOY") {
 				RETURN "Fairings jettison".
 			} ELSE {
@@ -17,11 +17,10 @@ function P_Deployables {
 				RETURN "No fairings detected".
 			}
 		}).
-		return fairing_1s.
 	} //eject fairing	
 	
 	function deployAntennas {
-		RETURN antenna_Timer["ready"](3, {
+		return antenna_1s["do"]({
 			IF doModuleEvent("ModuleRTAntenna", "ACTIVATE")  OR doModuleEvent("ModuleDeployableAntenna", "extend antenna") {
 				HUDTEXT("DEPLOYING ANTENNAS", 2, 2, 42, RGB(55,255,0), false).
 				RETURN "Antennas deploy".
@@ -33,20 +32,25 @@ function P_Deployables {
 	}
 	
 	function deployPanels {
-		deploy_1s["do"]({
+		return deploy_1s["do"]({
 			PANELS ON.
 			RADIATORS ON.
 			LIGHTS ON.
-			antenna_Timer["set"]().
-			RETURN "Panels ON Radiators ON Light ON".
+			RETURN "Panels ON Radiators ON Lights ON".
 		}).
-		return deploy_1s.
+	}
+	
+	function resetAll {
+		deploy_1s["reset"]().
+		fairing_1s["reset"]().
+		antenna_1s["reset"]().
 	}
 	
 	LOCAL methods TO LEXICON(
 		"fairing", jettisonFairing@,
 		"antennas", deployAntennas@,
-		"panels", deployPanels@
+		"panels", deployPanels@,
+		"reset", resetAll@
 	).
 	
 	RETURN methods.

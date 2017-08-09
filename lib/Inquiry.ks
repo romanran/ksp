@@ -10,6 +10,8 @@
 @LAZYGLOBAL off.
 
 COPYPATH("0:lib/Checkboxes", "1:").
+RUNONCEPATH("1:Checkboxes").
+
 function Inquiry {
 	PARAMETER inputs.
 	LOCAL numbers TO "01234566789.":SPLIT("").
@@ -21,15 +23,16 @@ function Inquiry {
 	
 	function loop {
 		LOCAL vals TO LEXICON().
-		FOR inp IN inputs{
+		FOR inp IN inputs {
 			IF inp:HASKEY("name") {
 				LOCAL msg TO inp["name"] + " input:".
 				LOCAL itype TO "char".
 				LOCAL choices TO LIST().
-				LOCAL filter IS {
+				function filterDelegate {
 					PARAMETER res, rej, val.
 					return res(val).
-				}.
+				}
+				LOCAL filter TO filterDelegate@.
 				IF inp:HASKEY("msg") {
 					SET msg TO inp["msg"].
 				}
@@ -45,7 +48,6 @@ function Inquiry {
 				SET vals[inp["name"]] TO read(msg, itype, choices, filter@).
 			}
 		}
-		CS().
 		RETURN vals.
 	}
 	
@@ -58,35 +60,33 @@ function Inquiry {
 	function read {
 		CS().
 		PARAMETER msg.
-		PARAMETER ch_type.
+		PARAMETER i_type.
 		PARAMETER choices.
 		PARAMETER filter.
 		LOCAL val TO "".
 		LOCAL enters TO 0.
 		LOCAL done TO false.
 		LOCAL check_list TO false.
-		IF ch_type="checkbox" {
-			RUNONCEPATH("1:Checkboxes").
+		IF i_type = "checkbox" {
 			SET check_list TO Checkboxes(msg, choices, "checkbox").
 		}
-		IF ch_type="select" {
-			RUNONCEPATH("1:Checkboxes").
+		IF i_type = "select" {
 			SET check_list TO Checkboxes(msg, choices, "select").
 		}
 		UNTIL done {
 			IF TERMINAL:INPUT:HASCHAR {
 				PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,0).
 				LOCAL char to TERMINAL:INPUT:GETCHAR().
-				IF ch_type="number" AND numbers:CONTAINS(char) {
-					SET val TO val+""+char.
+				IF i_type = "number" AND numbers:CONTAINS(char) {
+					SET val TO val + "" + char.
 					Sounds:PLAY(correct_s).
-				} ELSE IF ch_type="letter" AND letters:CONTAINS(char) {
-					SET val TO val+""+char.
+				} ELSE IF i_type = "letter" AND letters:CONTAINS(char) {
+					SET val TO val + "" + char.
 					Sounds:PLAY(correct_s).
-				} ELSE IF ch_type="char" {
-					SET val TO val+""+char.
+				} ELSE IF i_type = "char" {
+					SET val TO val + "" + char.
 					Sounds:PLAY(correct_s).
-				} ELSE IF ch_type="checkbox" OR "select" {
+				} ELSE IF i_type = "checkbox" OR "select" {
 					IF check_list["movePointer"](char) {
 						Sounds:PLAY(correct_s).
 					} ELSE {
@@ -104,13 +104,13 @@ function Inquiry {
 						Sounds:PLAY(err_s).
 					}
 				} ELSE IF char = TERMINAL:INPUT:ENTER {
-					IF NOT ch_type = "checkbox" AND val:LENGTH < 1 {
+					IF NOT i_type = "checkbox" AND val:LENGTH < 1 {
 						onError("Value can't be empty").
 					} ELSE {
-						IF ch_type = "checkbox" OR "select" {
+						IF i_type = "checkbox" OR "select" {
 							SET val TO check_list["getAnswers"]().
 						}
-						IF ch_type="number" AND NOT(val = "") {
+						IF i_type = "number" AND NOT(val = "") {
 							SET val TO val:TONUMBER(onError).
 						}
 						LOCAL promise IS _promise(filter@, val).
@@ -127,7 +127,7 @@ function Inquiry {
 				}
 			}
 			PRINT msg+": "+val AT (0,0).
-			WAIT 0.1.
+			WAIT 0.
 		}
 		RETURN val.
 	}
@@ -145,12 +145,12 @@ function Inquiry {
 			SET err TO true.
 			return msg.
 		}
-		SET val TO filter(resolve@, reject@, val).
+		LOCAL filtered_val TO filter(resolve@, reject@, val).
 		IF err = true {
 			SET done TO false.
 		}
 		return LEXICON(
-			"val", val,
+			"val", filtered_val,
 			"done", done,
 			"err", err
 		).

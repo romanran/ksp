@@ -77,7 +77,6 @@ function doModuleEvent {
 function calcDeltaV {
 	// Takes target absolute altitude (desired orbit radius) as a parameter
 	PARAMETER target_alt.
-	PRINT target_alt AT(0,10).
 	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
 	LOCAL v2 IS SQRT( grav_param * (1 / target_alt) ).//speed in a circural orbit
 	LOCAL trgtv IS 0.
