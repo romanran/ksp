@@ -1,4 +1,5 @@
 function Displayer {
+	LOCAL line_height TO 2.
 	LOCAL print_i TO 0.
 	LOCAL imprint_i TO 0.
 	LOCAL padd TO 0.
@@ -47,7 +48,7 @@ function Displayer {
 			PRINT centered + sep + sstr + sep + centered2 AT (0, print_sum).
 		} ELSE {
 			IF val:ISTYPE("Scalar") {
-				SET val TO ROUND(val, 2).
+				SET val TO ROUND(val, 3).
 			}
 			LOCAL str TO sstr + " ".
 			SET val TO " " + val. //convert to str
@@ -55,7 +56,7 @@ function Displayer {
 			SET str TO str + dots + val.
 			PRINT str AT (0, print_sum).
 		}
-		SET print_i TO print_i + 2.
+		SET print_i TO print_i + line_height.
 	}
 	function _separator {
 		LOCAL sep IS _genDots(0, 0, "-").
@@ -70,8 +71,8 @@ function Displayer {
 		PARAMETER str IS _separator().
 		PARAMETER val IS "empty-str".
 		_print(str, val).
-		SET imprint_i TO imprint_i + 2.
-		SET print_i TO print_i - 2.
+		SET imprint_i TO imprint_i + line_height.
+		SET print_i TO print_i - line_height.
 	}
 	
 	LOCAL methods TO LEXICON(

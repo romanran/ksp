@@ -1,3 +1,4 @@
+@LAZYGLOBAL off.
 function ShipState {
 	LOCAL filename IS "1:ship-state.json".
 	LOCAL ship_state IS LEXICON().

@@ -1,12 +1,15 @@
-function Program {
+@LAZYGLOBAL off.
+
+function Programme {
 	PARAMETER ptypeb IS "undefined".
-	SET ptype TO ptypeb:REPLACE(".json", "").
+	LOCAL ptype TO ptypeb:REPLACE(".json", "").
 	LOCAL path TO "0:program/" + ptype + ".json".
+	LOCAL filelist IS LIST().
 	
 	function addVessel {
 		LOCAL obj TO READJSON(path).
 		FOR vsl IN obj["vessels"] {
-			IF vsl = SHIPNAME{
+			IF vsl = SHIPNAME {
 				RETURN HUDTEXT(SHIPNAME + " already exists inside the " + ptype + "program", 4, 2, 40, red, false).
 			}
 		}

@@ -1,4 +1,4 @@
-function Checkboxes{
+function Checkboxes {
 	PARAMETER msg.
 	PARAMETER choices.
 	PARAMETER chtype IS "checkbox".
@@ -7,21 +7,21 @@ function Checkboxes{
 	LOCAL pointer TO 1.
 	LOCAL answers TO LIST().
 
-	function _print{
+	function _print {
 		PARAMETER str.
 		PRINT str AT (0, print_i).
 		SET print_i TO print_i + 1.
 	}
-	function getAnswers{
+	function getAnswers {
 		IF chtype = "select" {
 			return answers[pointer-1]["name"].
 		}
 		return answers.
 	}
 
-	function movePointer{
+	function movePointer {
 		PARAMETER char.
-		IF char = TERMINAL:INPUT:UPCURSORONE{
+		IF char = TERMINAL:INPUT:UPCURSORONE {
 			IF pointer > 1{
 				PRINT " " AT (5, pointer).
 				SET pointer TO pointer - 1.
@@ -31,26 +31,26 @@ function Checkboxes{
 				RETURN false.
 			}
 		}
-		IF char = TERMINAL:INPUT:DOWNCURSORONE{
-			IF pointer < items_i{
+		IF char = TERMINAL:INPUT:DOWNCURSORONE {
+			IF pointer < items_i {
 				PRINT " " AT (5, pointer).
 				SET pointer TO pointer + 1.
 				PRINT "<" AT (5, pointer).
 				RETURN true.
-			}ELSE{
+			} ELSE {
 				RETURN false.
 			}
 		}
-		IF char = " "{
+		IF char = " " {
 			togglePos().
 			RETURN true.
 		}
 	}
 	
-	function togglePos{
+	function togglePos {
 		IF chtype = "select" {
 			LOCAL i IS 0.
-			UNTIL i = answers:LENGTH  {
+			UNTIL i = answers:LENGTH {
 				SET answers[i]["value"] TO false.
 				PRINT " " AT (3, i + 1).
 				SET i TO i + 1.
@@ -59,19 +59,19 @@ function Checkboxes{
 		} ELSE {
 			SET answers[pointer-1]["value"] TO NOT answers[pointer-1]["value"].
 		}
-		IF answers[pointer-1]["value"]{
+		IF answers[pointer-1]["value"] {
 			PRINT "x" AT (3, pointer).
 		}ELSE{
 			PRINT " " AT (3, pointer).
 		}
 	}
 	
-	function _reset{
+	function _reset {
 		SET items_i TO 0.
 		SET print_i TO 0.
 	}
 
-	function listItems{
+	function listItems {
 		_print(msg).
 		SET pos TO 1.
 		FOR choice IN choices {
@@ -89,7 +89,7 @@ function Checkboxes{
 				PRINT choice AT (10, items_i +1).
 			}
 			PRINT pos AT (0, items_i +1).
-			IF chtype = "select"{
+			IF chtype = "select" {
 				LOCAL default TO 0. 
 				IF choice:ISTYPE("LEXICON") {
 					IF choice:HASKEY["default"] {
