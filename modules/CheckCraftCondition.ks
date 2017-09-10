@@ -27,7 +27,7 @@ function P_CheckCraftCondition {
 			KUNIVERSE:TIMEWARP:CANCELWARP().
 			RCS ON.
 			SAS OFF.
-			LOCK STEERING TO UP + R(0,45,0).
+			LOCK STEERING TO UP + R(0, 45, 0).
 			PANELS ON.
 			FUELCELLS ON.
 		}

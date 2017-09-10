@@ -102,12 +102,14 @@ function Tester {
 		LOCAL action_name TO Inquiry(a_chooser)["action"].
 		IF NOT(action_name = "Go Back") {
 			IF this_craft[page][action_name]:TYPENAME = "UserDelegate" {
-				this_craft[page][action_name]:TYPENAME.
+				CS().
+				Display["print"](action_name + " returned", this_craft[page][action_name]()).
 			} ELSE {
 				CS().
-				Display["print"](this_craft[page][action_name]).
-				WAIT 2.
+				Display["print"](action_name, this_craft[page][action_name]).
 			}
+			WAIT 2.
+			Display["reset"]().
 			RETURN showPage(page).
 		} ELSE {
 			RETURN showHomePage().
@@ -143,4 +145,5 @@ function Tester {
 	}
 	showHomePage().
 }
+
 Tester().

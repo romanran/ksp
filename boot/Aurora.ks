@@ -3,25 +3,27 @@ GLOBAL env TO "live".
 
 IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
 	COPYPATH("0:lib/Utils", "1:").
-	RUNONCEPATH("Utils").
 }
+RUNONCEPATH("Utils").
 
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Inquiry", "Programme", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
+	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
+	
+	CS().
+	SET TERMINAL:WIDTH TO 42.
+	SET TERMINAL:HEIGHT TO 30.
+	IF SHIP:STATUS = "PRELAUNCH" {
+		SET SHIP:NAME TO generateID().
+	}
+	
 	GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
 	LOCAL ship_log TO globals["ship_log"].
 
-	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
-
-	CS().
-	SET TERMINAL:WIDTH TO 42.
-	SET TERMINAL:HEIGHT TO 30.
-
-	SET SHIP:NAME TO generateID().
 
 	// Get programme name from ship state or inquiry
 	LOCAL my_programme TO Programme().
@@ -41,7 +43,9 @@ function Aurora {
 		SET chosen_prog TO Inquiry(pr_chooser).
 		SET chosen_prog TO chosen_prog["program"].
 		ship_state["set"]("programme", chosen_prog).
-		my_programme["addVessel"]().
+		my_programme["set"](chosen_prog).
+		my_programme["add"]().
+		CS().
 	}
 	// load the programme
 	LOCAL trgt_prog TO my_programme["fetch"](chosen_prog).
@@ -52,10 +56,12 @@ function Aurora {
 
 	// Onces
 	LOCAL warp_1s IS doOnce().
+	LOCAL inject_init_1s IS doOnce().
 
 	// Timers
 	LOCAL conn_Timer IS Timer(). // retry connection to KSC timer
 	LOCAL journal_Timer IS Timer(). // save to journal in this time
+	LOCAL warp_delay IS Timer(). // save to journal in this time
 
 	// Load the modules after all of the global variables are set
 	LOCAL phase_modules IS LIST(
@@ -69,7 +75,7 @@ function Aurora {
 	).
 	
 	loadDeps(phase_modules, "modules").
-
+	d(trgt_orbit).
 	GLOBAL this_craft IS LEXICON(
 		"PreLaunch", P_PreLaunch(),
 		"HandleStaging", P_HandleStaging(),
@@ -129,10 +135,9 @@ function Aurora {
 			IF CEILING(APOAPSIS) >= trgt_orbit["alt"] AND ALTITUDE > 70000 {
 				LOCK THROTTLE TO 0.
 				HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
-
 				//leaving thrusting section at that time
 				ship_state["set"]("phase", "COASTING").
-				ship_log["add"]("Transition to the coasting phase").
+				ship_log["add"]("COAST TRANSITION phase").
 			}
 		}//--thrusting
 
@@ -146,31 +151,37 @@ function Aurora {
 		}
 
 		IF ship_state["state"]["phase"] = "COASTING" {
-			IF NOT deploy_1s["ready"]() {
-				warp_1s["do"]({
-					HUDTEXT("WARPING", 2, 2, 42, green, false).
-					SET WARPMODE TO "RAILS".
-					WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
-				}).
-			}
-			IF ETA:APOAPSIS < 60 AND ETA:APOAPSIS <> 0{
+			warp_1s["do"]({
+				HUDTEXT("WARPING", 2, 2, 42, green, false).
+				SET WARPMODE TO "RAILS".
+				WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
+			}).
+			IF ETA:APOAPSIS < 120 AND ETA:APOAPSIS <> 0{
 				KUNIVERSE:TIMEWARP:CANCELWARP().
-				ship_state["set"]("phase", "KERBINJECTION").
+				warp_delay["set"]().
 			}
+			warp_delay["ready"](1, {
+				ship_state["set"]("phase", "KERBINJECTION").
+				ship_log["add"]("KERBINJECTION phase").
+			}).
 		} //--coasting
 
 		IF ship_state["state"]["phase"] = "KERBINJECTION" {
-			LOCAL iinit IS this_craft["Injection"]["init"](). // initialize and get the response
-			logJ(iinit). // log the response
-			LOCAL iburn IS this_craft["Injection"]["burn"]().
-			logJ(iburn).
+			inject_init_1s["do"]({
+				logJ(this_craft["Injection"]["init"]()). // initialize and get the response
+			}).
+			//logJ(iinit). // log the response
+			this_craft["Injection"]["burn"]().
+			//logJ(iburn).
 			IF this_craft["Injection"]["done"] {
+				ship_log["add"]("Injection complete").
 				ship_log["save"]().
 				ship_state["set"]("phase", "CORRECTION_BURN").
 			}
-			Display["print"]("Est. dV: ", dV_change).
-			Display["print"]("BURN T: ", burn_time).
-			Display["print"]("THROTTLE: ", thrott).
+			Display["print"]("THROTTLE: ", this_craft["Injection"]["throttle"]()).
+			Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
+			Display["print"]("initialized: ", this_craft["Injection"]["initialized"]).
+			Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 			Display["print"]("ORB. PERIOD:", ROUND(SHIP:ORBIT:PERIOD, 3)).
 			Display["print"]("TRGT ORB. PERIOD: ", trgt_orbit["period"]).
 		} //target orbit injection
