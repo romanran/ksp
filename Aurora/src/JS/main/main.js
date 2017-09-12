@@ -1,26 +1,25 @@
-(()=>{
-	class _TD {
-		//	console.log("If this error: \"www-embed-player.js:628 cast_sender.js net::ERR_\" appears here, it's normal. visit: http://stackoverflow.com/questions/25814914/chrome-youtube-cast-sender-js-console-error for the explanation.");
-		constructor() {
-			this.is_local = window.location.hostname == "localhost" ? true : false;
-			this.breakpoints = {
-				full_hd: 1920 - 1,
-				tablet: 1200 - 1,
-				large: 1024 - 1,
-				archaic: 992 - 1,
-				smart: 768 - 1,
-				phone: 465 - 1,
-				phones: 420 - 1,
-				phonexs: 375 - 1
-			};
-			this.dom_loaded = false;
-			this.regx = {
-				email: new RegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}$")
-			};
-		}
-	};
-	return window._TD = _TD;
-})();
+class _TD {
+	//	console.log("If this error: \"www-embed-player.js:628 cast_sender.js net::ERR_\" appears here, it's normal. visit: http://stackoverflow.com/questions/25814914/chrome-youtube-cast-sender-js-console-error for the explanation.");
+	constructor() {
+		this.is_local = window.location.hostname == "localhost" ? true : false;
+		this.breakpoints = {
+			full_hd: 1920 - 1, 
+			desktop: 1440 - 1,
+			tablet: 1200 - 1,
+			large: 1006 - 1,
+			archaic: 992 - 1,
+			smart: 768 - 1,
+			phone: 465 - 1,
+			phones: 420 - 1,
+			phonexs: 375 - 1
+		};
+		this.dom_loaded = false;
+		this.regx = {
+			email: new RegExp("^[a-z0-9._%+-]+@[a-z0-9.-]+.[a-z]{2,4}$")
+		};
+	}
+};
+
 //-- Service
 (function () {
 	function platform() {
@@ -52,11 +51,14 @@
 		}
 	}
 
-	function deb() {
-		if (window.location.hostname == "localhost" || window.location.href.indexOf("dev")>0) {
+	function deb(s) {
+		if(window.location.hostname == "localhost" || window.location.href.indexOf("dev")>0 || window.location.href.indexOf(":3000")>0){
 			console.log.apply(console, arguments);
 		}
 	}
+
+	window._TD = _TD;
+	require('./documentReady');
 
 	return window.deb = deb;
 })();

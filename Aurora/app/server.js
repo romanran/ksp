@@ -1,9 +1,11 @@
-require("../Aion/bin/base.js")();
-function server(req, res) {
+const fs = require('fs-extra');
+const path = require('path');
+
+function Server(req, res) {
 	let filePath = decodeURI(req.url);
 	if (filePath == '/') {
 		filePath = '../index.html';
-	}else if(filePath.indexOf("log") > 0){
+	} else if (filePath.indexOf("log") > 0) {
 		filePath = '../../' + filePath;
 	} else {
 		filePath = '../' + filePath;
@@ -22,25 +24,26 @@ function server(req, res) {
 			break;
 	}
 
-	fs.exists(filePath, function(exists) {
+	fs.exists(filePath, function (exists) {
 		if (exists) {
-			fs.readFile(filePath, function(error, content) {
+			fs.readFile(filePath, function (error, content) {
 				if (error) {
 					res.writeHead(500);
 					res.end();
-				}
-				else {
-					res.writeHead(200, { 'Content-Type': content_type });
+				} else {
+					res.writeHead(200, {
+						'Content-Type': content_type
+					});
 					res.end(content, 'utf-8');
 				}
 			});
-		}
-		else {
+		} else {
 			res.writeHead(404);
 			res.end();
 		}
 	});
 };
-module.exports = {
-	server : server
-};
+
+const http = require('http'); 
+const server = http.createServer(Server); 
+server.listen(8000); 

@@ -1,0 +1,1 @@
+{"name":"aurora","path":"../app","proxy":"localhost:8000","builders":[{"css":true},{"js":true},{"font":true},{"svg":true},{"img":true}],"bs":true,"server":true}

@@ -1,41 +1,60 @@
 class dom {
-	constructor(){
+	constructor($parent) {
+		this.$parent = $parent;
 	}
-	//Cache elements here
+	//--cache elements here
 	getElements() {
-		let elements ={
-			canvas_wrap:{
-				selector: "[charts]",
-			},
-		};
-		return elements;
+		return this.elements;
 	}
-	//--
+	setElements(elements) {
+		if (!_.isEmpty(this.$parent)) {
+			elements = {
+				parent: {
+					selector: "",
+					children: elements
+				}
+			};
+		}
+		this.elements = elements;
+
+	}
+
 	//caching script
-	cache(){
-		let els = this.getElements();
-		_.each(els, this.append.bind(this));
+	cache(elements) {
+		if (elements) {
+			this.setElements(elements);
+		}
+		_.each(this.getElements(), (val, key) => {
+			this.append(val, key, this.$parent);
+		});
 	}
-	append(val, key){
-		if( this['$' + key] === undefined){
-			if( val.selector.indexOf('[') >=0 ){
-				val.selector = val.selector.replace('[', '[data-');
-				this['$' + key] = $(val.selector);
-			}else{
-				this['$' + key] = $(val.selector);
+	append(val, key, $parent) {
+
+		if (this['$' + key] === undefined) {
+			if (val.hasOwnProperty('selector')) {
+				val.selector = this._checkVal(val.selector);
+				this._add(val.selector, key, $parent);
+			} else {
+				val = this._checkVal(val);
+				this._add(val, key, $parent);
 			}
 		}
+
 		if (val.children) {
-			_.each(val.children, (val, key)=>{
-				if( this['$' + key] === undefined){
-					if( val.indexOf('[') >=0 ){
-						val = val.replace('[', '[data-');
-						this['$' + key] = $(val);
-					}else{
-						this['$' + key] = $(val);
-					}
-				}
+
+			_.each(val.children, (cval, ckey) => {
+
+				this.append(cval, ckey, this['$' + key]);
+
 			});
 		}
 	}
+	_add(val, key, $parent) {
+		this['$' + key] = _.isEmpty($parent) ? $(val) : $parent.find(val);
+	}
+	_checkVal(val) {
+		return val.indexOf('[') >= 0 ? val.replace('[d-', '[data-') : val;
+	}
 }
+
+module.exports = dom;
