@@ -221,11 +221,11 @@ function calcAngleFromVec {
 	RETURN ARCCOS(v1 * v2).
 }
 
-function delay {
+function delayCall {
 	PARAMETER func.
 	PARAMETER sec_delay.
 	PARAMETER start IS FLOOR(TIME:SECONDS).
-	LOCAL temp.
+	LOCAL temp IS "".
 	
 	IF NOT func:TYPENAME = "UserDelegate" {
 		SET temp TO func.
@@ -236,6 +236,6 @@ function delay {
 	IF FLOOR(TIME:SECONDS) > FLOOR(TIME:SECONDS) + sec_delay {
 		RETURN func().
 	} ELSE {
-		RETURN delay(func, sec_delay, start).
+		RETURN delayCall(func, sec_delay, start).
 	}
 }
