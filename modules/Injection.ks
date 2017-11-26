@@ -6,8 +6,8 @@ loadDeps(dependencies).
 function P_Injection {
 	PARAMETER trgt_orbit.
 	LOCAL LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD / trgt_orbit["period"]) ^ 100, 0.1). //release acceleration at the end
-	LOCAL dV_change TO calcDeltaV(trgt_orbit["altA"]).
-	LOCAL burn_time TO calcBurnTime(dV_change).
+	LOCAL LOCK dV_change TO calcDeltaV(trgt_orbit["altA"]).
+	LOCAL LOCK burn_time TO calcBurnTime(dV_change).
 	LOCAL circ_burn_1s IS doOnce().
 	LOCAL init_1s IS doOnce().
 	LOCAL initialized TO 0.
@@ -19,8 +19,6 @@ function P_Injection {
 		UNLOCK STEERING.
 		SET THROTTLE TO 0.
 		HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).	
-		LOCK dV_change TO calcDeltaV(trgt_orbit["altA"]).
-		LOCK burn_time TO calcBurnTime(dV_change).
 		SAS OFF.
 		LOCAL trgt_vector TO LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
 		SET trgt_vector:X TO ROUND(trgt_vector:X, 4).

@@ -21,6 +21,9 @@ function P_Deployables {
 	
 	function deployAntennas {
 		PARAMETER t_on TO 1.
+		IF NOT antenna_1s["ready"]() {
+			RETURN "Already called".
+		}
 		return antenna_1s["do"]({
 			IF t_on {
 				IF doModuleEvent("ModuleRTAntenna", "ACTIVATE")  OR doModuleEvent("ModuleDeployableAntenna", "extend antenna") {

@@ -18,6 +18,7 @@ function Tester {
 	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
 	CS().
+	
 	//SET TERMINAL:WIDTH TO 42.
 	//SET TERMINAL:HEIGHT TO 30.
 
@@ -108,7 +109,9 @@ function Tester {
 				CS().
 				Display["print"](action_name, this_craft[page][action_name]).
 			}
+			PRINT "after".
 			WAIT 2.
+			PRINT "waiter".
 			Display["reset"]().
 			RETURN showPage(page).
 		} ELSE {

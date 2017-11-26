@@ -3,21 +3,20 @@
 function loadDeps {
 	PARAMETER libs.
 	PARAMETER path IS "lib".
-	IF (ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED {
-		FOR lib IN libs {
-			LOCAL trgt_path IS "0:" + path + "/" + lib.
-			IF EXISTS(trgt_path) {
-				IF EXISTS("1:" + lib) {
-					DELETEPATH("1:" + lib).
-				}
-				COPYPATH(trgt_path, "1:").
-				RUNONCEPATH(lib).
-			} ELSE {
-				deb("Path " + trgt_path + " not found").
-			}
-		}
-	} ELSE {
+	IF NOT ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
 		RETURN 0.
+	}
+	FOR lib IN libs {
+		LOCAL trgt_path IS "0:" + path + "/" + lib.
+		IF EXISTS(trgt_path) {
+			IF EXISTS("1:" + lib) {
+				DELETEPATH("1:" + lib).
+			}
+			COPYPATH(trgt_path, "1:").
+			RUNONCEPATH(lib).
+		} ELSE {
+			deb("Path " + trgt_path + " not found").
+		}
 	}
 }
 	
@@ -33,16 +32,16 @@ function deb {
 	PARAMETER str3 IS "".
 	PARAMETER str4 IS "".
 	IF env = "debug" {
-		IF (str1:LENGTH > 0) {
+		IF (str1) {
 			PRINT str1.
 		}
-		IF (str2:LENGTH > 0) {
+		IF (str2) {
 			PRINT str2.
 		}
-		IF (str3:LENGTH > 0) {
+		IF (str3) {
 			PRINT str3.
 		}
-		IF (str4:LENGTH > 0) {
+		IF (str4) {
 			PRINT str4.
 		}
 	} 

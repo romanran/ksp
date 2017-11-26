@@ -43,7 +43,6 @@ function Aurora {
 		SET chosen_prog TO Inquiry(pr_chooser).
 		SET chosen_prog TO chosen_prog["program"].
 		ship_state["set"]("programme", chosen_prog).
-		my_programme["set"](chosen_prog).
 		my_programme["add"]().
 		CS().
 	}
@@ -75,7 +74,7 @@ function Aurora {
 	).
 	
 	loadDeps(phase_modules, "modules").
-	d(trgt_orbit).
+	deb(trgt_orbit).
 	GLOBAL this_craft IS LEXICON(
 		"PreLaunch", P_PreLaunch(),
 		"HandleStaging", P_HandleStaging(),

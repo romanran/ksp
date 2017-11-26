@@ -94,7 +94,7 @@ function calcBurnTime {
 	PARAMETER dV.
 	LOCAL f IS 0.
 	LOCAL p IS 0.
-	LOCAL engs IS LIST().
+	LOCAL eng_list IS LIST().
 	LIST ENGINES IN eng_list.
 	FOR eng IN eng_list {
 		IF eng:STAGE = STAGE:NUMBER {
@@ -219,4 +219,23 @@ function calcAngleFromVec {
 	SET v1 TO v1:NORMALIZED.
 	SET v2 TO v2:NORMALIZED.
 	RETURN ARCCOS(v1 * v2).
+}
+
+function delay {
+	PARAMETER func.
+	PARAMETER sec_delay.
+	PARAMETER start IS FLOOR(TIME:SECONDS).
+	LOCAL temp.
+	
+	IF NOT func:TYPENAME = "UserDelegate" {
+		SET temp TO func.
+		SET func TO sec_delay.
+		SET sec_delay TO temp.
+	}
+	
+	IF FLOOR(TIME:SECONDS) > FLOOR(TIME:SECONDS) + sec_delay {
+		RETURN func().
+	} ELSE {
+		RETURN delay(func, sec_delay, start).
+	}
 }

@@ -28,41 +28,48 @@ function P_HandleStaging {
 	}
 	IF NOT(DEFINED ship_state) LOCAL ship_state TO globals["ship_state"].
 	
+	// --- METHODS
+	
 	function takeOff {
 		SET done_staging TO doStage().
-	}	
+	}
+	
+	function check {
+		PARAMETER res_type.
+		IF res_type <> 0 {
+			RETURN -1.
+		}
+		
+		IF STAGE:(res_type + "") < 1 AND stg_res:HASKEY(res_type) {
+			//FOR eng IN ship_engines{
+				//eng:SHUTDOWN.
+			//}
+						RETURN stage_1s["do"]({
+				staging_Timer["set"]().
+				HUDTEXT("OUT OF " + res_type + ", STAGING, RESETTING PID", 6, 2, 42, green, false).
+				HUDTEXT("SEPARATING...", 2, 2, 42, green, false).
+				IF DEFINED this_craft {
+					this_craft["Thrusting"]["resetPID"]().
+				}
+				SET done_staging TO doStage().
+				RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
+			}).
+		}
+		staging_Timer["ready"](2, {
+			stage_1s["reset"]().
+		}).
+	}
 	
 	function refresh {
 		IF NOT done_staging {
-			IF STAGE:LIQUIDFUEL < 1 AND stg_res:HASKEY("LIQUIDFUEL") {
-				//FOR eng IN ship_engines{
-					//eng:SHUTDOWN.
-				//}
-				RETURN stage_1s["do"]({
-					staging_Timer["set"]().
-					HUDTEXT("OUT OF LIQUID FUEL", 1, 2, 42, green, false).
-					HUDTEXT("SEPARATING...", 2, 2, 42, green, false).
-					SET done_staging TO doStage().
-					RETURN "Stage " + STAGE:NUMBER + " - out of LF".
-				}).
-			}
-			IF STAGE:SOLIDFUEL < 0.1 AND stg_res:HASKEY("SOLIDFUEL") {
-				RETURN stage_1s["do"]({
-					staging_Timer["set"]().
-					HUDTEXT("OUT OF SOLID FUEL, STAGING, RESETTING PID", 6, 2, 42, green, false).
-					IF DEFINED this_craft {
-						this_craft["Thrusting"]["resetPID"]().
-					}
-					SET done_staging TO doStage().
-					RETURN "Stage " + STAGE:NUMBER + " - out of SF".
-				}).
-			}
-			staging_Timer["ready"](2, {
-				stage_1s["reset"]().
-			}).
+			check("LIQUIDFUEL").
+			check("SOLIDFUEL").
 		}
+		LOCAL valid_phase IS ship_state["state"]:HASKEY("phase") 
+		AND (ship_state["state"]["phase"] = "TAKEOFF" 
+		OR ship_state["state"]["phase"] = "THRUSTING").
 		
-		IF ship_state["state"]:HASKEY("phase") AND (ship_state["state"]["phase"] = "TAKEOFF" OR ship_state["state"]["phase"] = "THRUSTING") {
+		IF valid_phase {
 			LOCAL no_acceleration TO SHIP:ALTITUDE < 70000 AND globals["acc_vec"]():MAG / g_base < 0.04.
 			//if not under accel
 			IF no_acceleration {
