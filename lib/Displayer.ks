@@ -33,10 +33,13 @@ function Displayer {
 	}
 	
 	function _print {
-		PARAMETER sstr IS _separator().
+		PARAMETER sstr IS "empty-str".
 		PARAMETER val IS "empty-str".
 		LOCAL print_sum TO print_i + imprint_i.
-		IF val = "empty-str" {
+		
+		IF sstr = "empty-str" {
+			PRINT _separator() AT (0, print_sum).
+		} ELSE IF val = "empty-str" {
 			LOCAL centered IS " ".
 			LOCAL centered2 IS "-".
 			SET sstr TO " " + sstr + " ".

@@ -134,18 +134,10 @@ function calcTrajectory {
 function getdV {   
 	// https://www.reddit.com/r/Kos/comments/330yir/calculating_stage_deltav/
 	// cc: only_to_downvote
-    LOCAL fuels IS list().
-    fuels:ADD("LiquidFuel").
-    fuels:ADD("Oxidizer").
-    fuels:ADD("SolidFuel").
-    fuels:ADD("MonoPropellant").
+    LOCAL fuels IS LIST("LiquidFuel", "Oxidizer", "SolidFuel", "MonoPropellant").
 
     // fuel density list (order must match name list)
-    LOCAL fuelsDensity IS list().
-    fuelsDensity:ADD(0.005).
-    fuelsDensity:ADD(0.005).
-    fuelsDensity:ADD(0.0075).
-    fuelsDensity:ADD(0.004).
+    LOCAL fuelsDensity IS list(0.005, 0.005, 0.0075, 0.004).
 
     // initialize fuel mass sums
     LOCAL fuel_mass IS 0.
@@ -180,7 +172,7 @@ function getdV {
     LOCAL dV IS avgIsp * 9.82 * LN(SHIP:MASS / (SHIP:MASS - fuel_mass)).
 
     RETURN dV.
-}.
+}
 
 function getTrgtAlt {
 	PARAMETER sat_num is 3.
@@ -190,13 +182,13 @@ function getTrgtAlt {
 	LOCAL altA TO (h / COS(ang)). //absolute
 	LOCAL altR TO altA - KERBIN:RADIUS. //relative altitude
 	LOCAL comm_r TO ROUND(SQRT((altA * altA) * 2)).//range
-	LOCAL o TO LEXICON().
 	LOCAL orb_period TO calcOrbPeriod(altA).
-	o:ADD("r", comm_r).
-	o:ADD("altA",  altA).
-	o:ADD("alt", altR).
-	o:ADD("period", orb_period).
-	return o.
+	RETURN LEXICON(
+		"r", comm_r,
+		"altA",  altA,
+		"alt", altR,
+		"period", orb_period
+	).
 }
 
 function calcOrbitRadius {
@@ -224,7 +216,7 @@ function calcAngleFromVec {
 function delayCall {
 	PARAMETER func.
 	PARAMETER sec_delay.
-	PARAMETER start IS FLOOR(TIME:SECONDS).
+	PARAMETER _start IS FLOOR(TIME:SECONDS).
 	LOCAL temp IS "".
 	
 	IF NOT func:TYPENAME = "UserDelegate" {
@@ -236,6 +228,38 @@ function delayCall {
 	IF FLOOR(TIME:SECONDS) > FLOOR(TIME:SECONDS) + sec_delay {
 		RETURN func().
 	} ELSE {
-		RETURN delayCall(func, sec_delay, start).
+		WAIT 0.01.
+		RETURN delayCall(func, sec_delay, _start).
 	}
+}
+
+function getPhaseAngle {
+	PARAMETER no_of_sats.
+	PARAMETER trgt_vessel.
+	PARAMETER last_angle IS 0.
+	
+	IF NOT trgt_vessel:ISTYPE("VESSEL") {
+		RETURN 0.
+	}
+	
+	LOCAL radius_percent IS ROUND(260 / trgt_vessel:OBT:PERIOD, 3).
+	LOCAL phase_ang IS calcPhaseAngle(600000 + ALTITUDE, trgt_vessel:ORBIT:SEMIMAJORAXIS / 2).
+	LOCAL curr_angle IS calcAngleFromVec(SHIP:UP:STARVECTOR, trgt_vessel:UP:STARVECTOR).
+	LOCAL ahead IS false.
+	IF curr_angle > last_angle {
+		//target is ahead
+		SET phase_ang TO - phase_ang.
+	} 
+	LOCAL tphase_ang TO 360 / no_of_sats + phase_ang.
+	LOCAL last_angle TO curr_angle.
+
+	RETURN LEXICON(
+		"spread", 360 / no_of_sats,
+		"travelled", 360 * radius_percent,
+		"separation", 360 * radius_percent +  360 / no_of_sats,
+		"move", phase_ang,
+		"target", tphase_ang,
+		"current", curr_angle
+	).
+
 }

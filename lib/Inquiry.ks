@@ -58,7 +58,7 @@ function Inquiry {
 	}
 	
 	function read {
-		CS().
+		//CS().
 		PARAMETER msg.
 		PARAMETER i_type.
 		PARAMETER choices.
@@ -98,8 +98,8 @@ function Inquiry {
 				IF char = TERMINAL:INPUT:BACKSPACE {
 					IF val:LENGTH >= 1 {
 						SET val TO val:SUBSTRING(0, val:LENGTH - 1).
-						PRINT msg+": " + val AT (0,0).
-						Sounds:PLAY( NOTE("d5",  0.1, 0, 0.3) ).
+						PRINT msg + ": " + val AT (0,0).
+						Sounds:PLAY(NOTE("d5",  0.1, 0, 0.3)).
 					} ELSE {
 						Sounds:PLAY(err_s).
 					}

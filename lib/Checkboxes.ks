@@ -2,8 +2,8 @@ function Checkboxes {
 	PARAMETER msg.
 	PARAMETER choices.
 	PARAMETER chtype IS "checkbox".
-	LOCAL items_i TO 0.
 	LOCAL print_i TO 0.
+	LOCAL items_i TO 0.
 	LOCAL pointer TO 1.
 	LOCAL answers TO LIST().
 
@@ -12,6 +12,7 @@ function Checkboxes {
 		PRINT str AT (0, print_i).
 		SET print_i TO print_i + 1.
 	}
+	
 	function getAnswers {
 		IF chtype = "select" {
 			return answers[pointer - 1]["name"].
@@ -22,14 +23,18 @@ function Checkboxes {
 	function movePointer {
 		PARAMETER char.
 		IF char = TERMINAL:INPUT:UPCURSORONE {
-			IF pointer > 1{
+			IF pointer > 1 {
 				PRINT " " AT (5, pointer).
 				SET pointer TO pointer - 1.
 				PRINT "<" AT (5, pointer).
 				IF chtype = "select" togglePos().
 				return true.
-			}ELSE{	
-				RETURN false.
+			} ELSE {
+				PRINT " " AT (5, pointer).
+				SET pointer TO items_i.
+				PRINT "<" AT (5, pointer).
+				IF chtype = "select" togglePos().
+				RETURN true.
 			}
 		}
 		IF char = TERMINAL:INPUT:DOWNCURSORONE {
@@ -40,7 +45,11 @@ function Checkboxes {
 				IF chtype = "select" togglePos().
 				RETURN true.
 			} ELSE {
-				RETURN false.
+				PRINT " " AT (5, pointer).
+				SET pointer TO 1.
+				PRINT "<" AT (5, pointer).
+				IF chtype = "select" togglePos().
+				RETURN true.
 			}
 		}
 		IF char = " " {
@@ -90,7 +99,7 @@ function Checkboxes {
 				answers:ADD(LEXICON("name", choice, "value", FALSE)).
 				PRINT choice AT (10, items_i +1).
 			}
-			PRINT pos AT (0, items_i +1).
+			PRINT pos AT (0, items_i + 1).
 			IF chtype = "select" {
 				LOCAL default TO 0. 
 				IF choice:ISTYPE("LEXICON") {
@@ -110,9 +119,9 @@ function Checkboxes {
 			SET items_i TO items_i + 1.
 			SET print_i TO print_i + 1.
 			SET pos TO pos + 1.
-			_print("").
 		}
 		PRINT "<" AT (5, pointer).
+		_print("").
 		_print("up/down arrows to move, space to check, enter to confirm").
 	}
 	

@@ -13,7 +13,6 @@ function Tester {
 	GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
-	LOCAL ship_log TO globals["ship_log"].
 
 	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
@@ -46,16 +45,6 @@ function Tester {
 	LOCAL trgt_prog TO my_programme["fetch"](chosen_prog).
 	LOCAL trgt_orbit IS getTrgtAlt(trgt_prog["attributes"]["sats"], trgt_prog["attributes"]["alt"]).
 
-	LOCAL done IS false.
-	LOCAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
-
-	// Onces
-	LOCAL warp_1s IS doOnce().
-
-	// Timers
-	LOCAL conn_Timer IS Timer(). // retry connection to KSC timer
-	LOCAL journal_Timer IS Timer(). // save to journal in this time
-
 	// Load the modules after all of the global variables are set
 	LOCAL phase_modules IS LIST(
 		"PreLaunch",
@@ -68,7 +57,7 @@ function Tester {
 	).
 	
 	loadDeps(phase_modules, "modules").
-
+	
 	GLOBAL this_craft IS LEXICON(
 		"PreLaunch", P_PreLaunch(),
 		"HandleStaging", P_HandleStaging(),
@@ -78,20 +67,53 @@ function Tester {
 		"CorrectionBurn", P_CorrectionBurn(),
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
-
-
-	IF SHIP:STATUS = "PRELAUNCH" {
-		Display["imprint"]("Aurora Space Program V1.4.0").
-		Display["imprint"](SHIP:NAME).
-		//this_craft["PreLaunch"]["init"](). // waits for user input, then countdowns, then on 0 it return and the script goes forward
-		//ship_state["set"]("phase", "TAKEOFF").
-	}
-	SET from_save TO this_craft["PreLaunch"]["from_save"].
 	
-	function showPage {
+	LOCAL f_list IS LIST("getPhaseAngle", "delayCall", "getTrgtAlt", "BACK").
+
+	LOCAL from_save TO this_craft["PreLaunch"]["from_save"]. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
+		
+	function listModules {
+		LOCAL p_list TO this_craft:KEYS.
+		p_list:ADD("BACK").
+		LOCAL chooser TO LIST(
+			LEXICON(
+				"name", "module",
+				"type", "select",
+				"msg", "Select a module to test",
+				"choices", p_list
+			)
+		).
+		LOCAL page TO Inquiry(chooser)["module"].
+		IF NOT(page = "BACK") {
+			return showModulePage(page).
+		} ELSE {
+			//CS().
+			RETURN showHomePage().
+		}
+	}
+	
+	function listFunctions {
+		LOCAL chooser TO LIST(
+			LEXICON(
+				"name", "func",
+				"type", "select",
+				"msg", "Select a function to test",
+				"choices", f_list
+			)
+		).
+		LOCAL func TO Inquiry(chooser)["func"].
+		IF NOT(func = "BACK") {
+			return runFunction(func).
+		} ELSE {
+			//CS().
+			RETURN showHomePage().
+		}
+	}
+	
+	function showModulePage {
 		PARAMETER page.
 		LOCAL choices TO this_craft[page]:KEYS.
-		choices:ADD("Go Back").
+		choices:ADD("BACK").
 		LOCAL a_chooser TO LIST(
 			LEXICON(
 				"name", "action",
@@ -101,7 +123,7 @@ function Tester {
 			)
 		).
 		LOCAL action_name TO Inquiry(a_chooser)["action"].
-		IF NOT(action_name = "Go Back") {
+		IF NOT(action_name = "BACK") {
 			IF this_craft[page][action_name]:TYPENAME = "UserDelegate" {
 				CS().
 				Display["print"](action_name + " returned", this_craft[page][action_name]()).
@@ -109,39 +131,91 @@ function Tester {
 				CS().
 				Display["print"](action_name, this_craft[page][action_name]).
 			}
-			PRINT "after".
 			WAIT 2.
-			PRINT "waiter".
 			Display["reset"]().
-			RETURN showPage(page).
+			RETURN showModulePage(page).
 		} ELSE {
-			RETURN showHomePage().
+			RETURN listModules().
 		}
 	}
 	
+	LOCAL phase_angle IS LEXICON("current", 0).
+	
+	function runFunction {
+		PARAMETER func.
+		IF func = "getPhaseAngle" {
+			LOCAL target_l IS LIST().
+			LIST TARGETS IN target_l.
+			LOCAL inquiry TO Inquiry(LIST(
+				LEXICON(
+					"name", "target",
+					"type", "select",
+					"msg", "Choose a target vessel",
+					"choices", target_l
+				)
+			)).
+			CS().
+			Display["reset"].
+			SET phase_angle TO getPhaseAngle(trgt_prog["attributes"]["sats"], inquiry["target"], phase_angle["current"]).
+			Display["print"]("Deegres spread:", phase_angle["spread"]).
+			Display["print"]("Deegres travelled:", phase_angle["travelled"]).
+			Display["print"]("Target separation:", phase_angle["separation"]).
+			Display["print"]("Est. angle move:", phase_angle["move"]).
+			Display["print"]("Target phase angle:", phase_angle["target"]).
+			Display["print"]("Current phase angle:", phase_angle["current"]).
+			Display["print"]("Press enter to continue").
+			
+			LOCAL done IS false.
+			UNTIL done {
+				IF TERMINAL:INPUT:HASCHAR {
+					LOCAL char to TERMINAL:INPUT:GETCHAR().
+					IF char = TERMINAL:INPUT:ENTER {
+						Display["reset"].
+						SET done to true.
+						//CS().
+						listFunctions().
+					}
+				}
+			}
+		} ELSE IF func = "delayCall" {
+			CS().
+			Display["print"]("Call time", FLOOR(TIME:SECONDS)).
+			delayCall({returnDisplay["print"]("Function called at", FLOOR(TIME:SECONDS)).}, 1).
+			WAIT 2.
+			listFunctions().
+		} ELSE IF func = "getTrgtAlt" {
+			LOCAL trgt TO Inquiry(LIST(
+				LEXICON(
+					"name", "sat_num",
+					"type", "number",
+					"msg", "Number of satellites"
+				),
+				LEXICON(
+					"name", "min_h",
+					"type", "number",
+					"msg", "Min. altitute"
+				)
+			)).
+			getTrgtAlt(trgt["sat_num"], trgt["min_h"]).
+		}
+		
+	}
+	
 	function showHomePage {
-		LOCAL p_list TO LIST(
-			"PreLaunch", 
-			"HandleStaging",
-			"Thrusting",
-			"Deployables",
-			"Injection",
-			"CorrectionBurn",
-			"CheckCraftCondition",
-			"EXIT"
-		).
-		LOCAL m_chooser TO LIST(
+		LOCAL chooser TO LIST(
 			LEXICON(
-				"name", "page",
+				"name", "choice",
 				"type", "select",
-				"msg", "Choose a module",
-				"choices", p_list
+				"msg", "Choose test category",
+				"choices", LIST("Modules", "Functions", "EXIT")
 			)
 		).
-		LOCAL page TO Inquiry(m_chooser)["page"].
-		IF NOT(page = "EXIT") {
-			return showPage(page).
-		} ELSE {
+		LOCAL choice TO Inquiry(chooser)["choice"].
+		IF choice = "Modules" {
+			return listModules().
+		} IF choice = "Functions" {
+			return listFunctions().
+		} ELSE IF choice = "EXIT" {
 			CS().
 			RETURN 0.
 		}
