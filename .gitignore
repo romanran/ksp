@@ -1,2 +1,6 @@
 
 flightlogs/
+
+Aurora/app/node_modules/
+
+Aurora/app/package-lock\.json

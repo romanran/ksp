@@ -7,7 +7,7 @@ function P_CorrectionBurn {
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
 	}
-	LOCAL LOCK stg_res TO globals["stg_res"]().
+	LOCAL LOCK ship_res TO getResources().
 	
 	function neutralizeControls {
 		RCS OFF.
@@ -16,13 +16,13 @@ function P_CorrectionBurn {
 	}
 	
 	function moveFore {
-		PARAMETER val.
-		IF (stg_res["MonoPropellant"]:AMOUNT / stg_res["MonoPropellant"]:CAPACITY) * 100 < 10 {
+		PARAMETER val TO 1.
+		IF ship_res:HASKEY("MonoPropellant") AND (ship_res["MonoPropellant"]:AMOUNT / ship_res["MonoPropellant"]:CAPACITY) * 100 < 10 {
+			RETURN 0.
+		} ELSE {
 			SET val TO MAX(-1, MIN(val, 1)).
 			SET SHIP:CONTROL:FORE TO val.	
 			RETURN 1.
-		} ELSE {
-			RETURN 0.
 		}
 	}
 		

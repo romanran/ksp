@@ -1,15 +1,3 @@
-_TD.prototype.createCharts = function () {
-	//	deb(this.journal1);
-	this.journals_A = [];
-	_.each(this.journals, (obj) => {
-		let $new_canvas = $('<canvas></canvas>');
-		this.dom.$canvas_wrap.html($new_canvas);
-		let journal = new JournalChart($new_canvas, obj);
-		deb(journal);
-		this.journals_A.push(obj);
-	});
-	let x = [];
-};
 class JournalChart {
 	constructor($canvas, data) {
 		let x = [];
@@ -160,10 +148,4 @@ class JournalChart {
 	}
 };
 
-Chart.plugins.register({
-	beforeDraw: function (chartInstance) {
-		var ctx = chartInstance.chart.ctx;
-		ctx.fillStyle = "#303439";
-		ctx.fillRect(0, 0, chartInstance.chart.width, chartInstance.chart.height);
-	}
-});
+module.exports = JournalChart;

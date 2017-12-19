@@ -2,7 +2,7 @@
 
 function Timer {
 	LOCAL internal_t TO 999999999.
-	LOCAL invokes TO 0.
+	LOCAL invokes TO 0. //0 - not yet set, 1 - timer set, counting, >2 - already used
 	LOCAL wait_for TO 1.
 	
 	function onReady {
@@ -28,6 +28,7 @@ function Timer {
 		SET internal_t TO FLOOR(TIME:SECONDS).
 		SET invokes TO 1.
 	}
+	
 	function resetTimer {
 		SET internal_t TO 999999999.
 		SET invokes TO 0.
@@ -38,6 +39,7 @@ function Timer {
 		PARAMETER delay_t IS 1.
 		SET internal_t TO internal_t + delay_t - wait_for.
 	}
+	
 	function checkTimer {
 		RETURN FLOOR(TIME:SECONDS) - (internal_t + wait_for).
 	}
