@@ -10,6 +10,7 @@ function P_HandleStaging {
 		GLOBAL globals TO setGlobal().
 	}
 	LOCAL LOCK stg_res TO globals["stg_res"]().
+	LOCAL staging_ready_Timer IS Timer().
 	LOCAL staging_Timer IS Timer().
 	LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
 	LOCAL nacc_Timer IS Timer(). //for no acceleration test once
@@ -20,7 +21,7 @@ function P_HandleStaging {
 	
 	ON AG5 {
 		//stage override, just in case
-		staging_Timer["set"]().
+		staging_ready_Timer["set"]().
 		SET done_staging TO doStage().
 	}
 	
@@ -37,30 +38,32 @@ function P_HandleStaging {
 	
 	function nextStage {
 		PARAMETER res_type.
-		RETURN stage_1s["do"]({
-			HUDTEXT("No " + res_type + " left, staging, resetting engine PID", 6, 2, 42, green, false).
-			staging_Timer["set"]().
-			IF DEFINED this_craft {
+		//RETURN stage_1s["do"]({
+			HUDTEXT("No " + res_type + " left, staging, resetting engine PID", 1, 3, 12, WHITE, false).
+			staging_ready_Timer["set"]().
+			IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 				this_craft["Thrusting"]["resetPID"]().
 			}
 			SET done_staging TO doStage().
+			staging_Timer["reset"]().
+			//stage_1s["reset"]().
 			RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
-		}).
+		//}).
 	}
 	
 	function check {
 		PARAMETER res_type.
-		IF res_type <> 0 {
+		IF NOT res_type <> 0 {
 			RETURN -1.
 		}
-		
 		IF STAGE:(res_type + "") < 1 AND stg_res:HASKEY(res_type) {
-			HUDTEXT("Separation in " + stage_delay + " seconds...", 2, 2, 42, green, false).
-			delayCall(nextStage@:bind(res_type), 2).
+			stage_1s["do"]({
+				HUDTEXT("Separation in " + stage_delay + " seconds...", 2, 2, 42, green, false).
+				staging_Timer["set"]().
+			}).
 		}
-		staging_Timer["ready"](2, {
-			stage_1s["reset"]().
-		}).
+		staging_Timer["ready"](stage_delay, nextStage@:bind(res_type)).
+		staging_ready_Timer["ready"](2, stage_1s["reset"]).
 	}
 	
 	function refresh {
@@ -95,7 +98,7 @@ function P_HandleStaging {
 				HUDTEXT("Reset, do stage.", 3, 2, 20, green, false).
 				RETURN stage_1s["do"]({
 					SET done_staging TO doStage().
-					staging_Timer["set"]().
+					staging_ready_Timer["set"]().
 					staging2_Timer["set"]().
 					RETURN "Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase".
 				}).
@@ -106,8 +109,7 @@ function P_HandleStaging {
 
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
-		"takeOff", takeOff@,
-		"done_staging", done_staging
+		"takeOff", takeOff@
 	).
 	
 	RETURN methods.

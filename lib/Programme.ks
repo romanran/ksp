@@ -10,12 +10,12 @@ function Programme {
 		LOCAL obj TO READJSON(path).
 		FOR vsl IN obj["vessels"] {
 			IF vsl = SHIPNAME {
-				RETURN HUDTEXT(SHIPNAME + " already exists inside the " + ptype + "program", 4, 2, 40, red, false).
+				RETURN HUDTEXT(SHIPNAME + " already exists inside the " + ptype + " program", 4, 2, 30, red, false).
 			}
 		}
 		obj["vessels"]:ADD(SHIPNAME).
 		WRITEJSON(obj, path).
-		HUDTEXT(SHIPNAME + " has been added to the " + ptype + "program", 4, 2, 40, green, false).
+		HUDTEXT(SHIPNAME + " has been added to the " + ptype + " program", 4, 2, 30, green, false).
 	}
 	
 	function fetch {

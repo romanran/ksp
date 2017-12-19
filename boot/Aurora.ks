@@ -43,6 +43,7 @@ function Aurora {
 		SET chosen_prog TO Inquiry(pr_chooser).
 		SET chosen_prog TO chosen_prog["program"].
 		ship_state["set"]("programme", chosen_prog).
+		SET my_programme TO Programme(chosen_prog).
 		my_programme["add"]().
 		CS().
 	}
@@ -105,7 +106,7 @@ function Aurora {
 		Display["print"]("Current phase", ship_state["state"]["phase"]).
 		this_craft["CheckCraftCondition"]["refresh"]().
 		
-		LOCAL stage_response IS  this_craft["HandleStaging"]["refresh"]().
+		LOCAL stage_response IS this_craft["HandleStaging"]["refresh"]().
 
 		IF stage_response {
 			logJ(stage_response).

@@ -213,26 +213,6 @@ function calcAngleFromVec {
 	RETURN ARCCOS(v1 * v2).
 }
 
-function delayCall {
-	PARAMETER func.
-	PARAMETER sec_delay.
-	PARAMETER _start IS FLOOR(TIME:SECONDS).
-	LOCAL temp IS "".
-	
-	IF NOT func:TYPENAME = "UserDelegate" {
-		SET temp TO func.
-		SET func TO sec_delay.
-		SET sec_delay TO temp.
-	}
-	
-	IF FLOOR(TIME:SECONDS) > FLOOR(TIME:SECONDS) + sec_delay {
-		RETURN func().
-	} ELSE {
-		WAIT 0.01.
-		RETURN delayCall(func, sec_delay, _start).
-	}
-}
-
 function getPhaseAngle {
 	PARAMETER no_of_sats.
 	PARAMETER trgt_vessel.

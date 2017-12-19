@@ -2,7 +2,7 @@
 
 function Timer {
 	LOCAL internal_t TO 999999999.
-	LOCAL invokes TO 0.
+	LOCAL invokes TO 0. //0 - not yet set, 1 - timer set, counting, >2 - already used
 	LOCAL wait_for TO 1.
 	
 	function onReady {

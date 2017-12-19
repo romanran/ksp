@@ -177,12 +177,6 @@ function Tester {
 					}
 				}
 			}
-		} ELSE IF func = "delayCall" {
-			CS().
-			Display["print"]("Call time", FLOOR(TIME:SECONDS)).
-			delayCall({returnDisplay["print"]("Function called at", FLOOR(TIME:SECONDS)).}, 1).
-			WAIT 2.
-			listFunctions().
 		} ELSE IF func = "getTrgtAlt" {
 			LOCAL trgt TO Inquiry(LIST(
 				LEXICON(
