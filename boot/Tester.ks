@@ -68,7 +68,7 @@ function Tester {
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 	
-	LOCAL f_list IS LIST("getPhaseAngle", "delayCall", "getTrgtAlt", "BACK").
+	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "BACK").
 
 	LOCAL from_save TO this_craft["PreLaunch"]["from_save"]. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 		

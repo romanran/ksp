@@ -12,9 +12,12 @@ function P_Thrusting {
 	}
 	LOCAL pid_timer TO TIME:SECONDS.
 	LOCAL throttle_PID to setPID(0, 1).
-
+	LOCAL using_rcs TO false.
+	LOCAL aborted TO false.
+	
 	LOCAL pitch_1s TO DoOnce().
 	LOCAL pid_1s TO DoOnce().
+	LOCAL rcs_1s TO DoOnce().
 	LOCAL abort_1s IS DoOnce().
 	LOCAL de_acc_1s IS DoOnce().
 	LOCAL LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
@@ -49,8 +52,19 @@ function P_Thrusting {
 		}
 		
 		SET throttle_PID:SETPOINT TO target_kpa.
-			
-		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 2000 {
+		IF ROUND(globals["acc_vec"]():MAG / (KERBIN:MU / KERBIN:RADIUS ^ 2), 3) < 1 AND ALTITUDE > 70000 {
+			SET using_rcs TO true.
+		}
+		
+		IF using_rcs {
+			rcs_1s["do"]({
+				LOCK THROTTLE TO 0.
+				SET SHIP:CONTROL:FORE TO 1. // use rcs
+				logJ("Switch to rcs thrusters").
+			}).
+		}
+
+		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 1800 {
 			//if ship is off course when not achieved orbital speed yet and the staging wait isnt in progress
 			abort_1s["do"]({
 				LOCK THROTTLE TO 0.
@@ -58,19 +72,31 @@ function P_Thrusting {
 				ABORT ON.
 				UNLOCK STEERING.
 				logJ("Course deviation - malfunction - abort").
+				SET aborted TO true.
+				IF using_rcs {
+					SET SHIP:CONTROL:FORE TO 0.
+				}
 			}).
 		}
 	}
 	
 	function decelerate {
+		IF aborted {
+			RETURN 0.
+		}
 		//decrease acceleration to not to overshoot target apoapsis
 		de_acc_1s["do"]({
 			HUDTEXT("Decreasing acceleration", 2, 2, 42, green, false).
 			UNLOCK throttle_PID.
 			UNLOCK thrott.
-			LOCK THROTTLE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
+			IF NOT using_rcs {
+				LOCK THROTTLE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
+			}
 			logJ("Deacceleration").
 		}).
+		IF using_rcs {
+			SET SHIP:CONTROL:FORE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
+		}
 	}
 	
 	function resetPID {

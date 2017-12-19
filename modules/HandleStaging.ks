@@ -38,17 +38,17 @@ function P_HandleStaging {
 	
 	function nextStage {
 		PARAMETER res_type.
-		//RETURN stage_1s["do"]({
-			HUDTEXT("No " + res_type + " left, staging, resetting engine PID", 1, 3, 12, WHITE, false).
-			staging_ready_Timer["set"]().
-			IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
-				this_craft["Thrusting"]["resetPID"]().
-			}
-			SET done_staging TO doStage().
-			staging_Timer["reset"]().
-			//stage_1s["reset"]().
-			RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
-		//}).
+
+		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
+		staging_ready_Timer["set"]().
+		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
+			HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
+			this_craft["Thrusting"]["resetPID"]().
+		}
+		SET done_staging TO doStage().
+		staging_Timer["reset"]().
+
+		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
 	
 	function check {

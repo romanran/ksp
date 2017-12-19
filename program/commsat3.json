@@ -6,7 +6,8 @@
         "commsat3 694",
         "vessels",
         {
-            "items": [],
+            "items": [
+            ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
         "attributes",

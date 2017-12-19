@@ -143,6 +143,7 @@ function Aurora {
 
 		IF ALTITUDE > 30000 AND globals["q_pressure"]() < 2 {
 			this_craft["Deployables"]["fairing"]().
+			RCS ON.
 		} //eject fairing
 		IF ALTITUDE > 80000 AND from_save = false {
 			//--vacuum, deploy panels and antennas, turn on lights
