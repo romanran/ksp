@@ -18,14 +18,14 @@ function P_Injection {
 		RCS ON.
 		UNLOCK STEERING.
 		SET THROTTLE TO 0.
-		HUDTEXT("CIRCURALISATION...", 3, 2, 42, RGB(10,225,10), false).	
+		HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.
 		LOCAL trgt_vector TO LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
 		SET trgt_vector:X TO ROUND(trgt_vector:X, 4).
 		SET trgt_vector:Y TO ROUND(trgt_vector:Y, 4).
 		SET trgt_vector:Z TO ROUND(trgt_vector:Z, 4).
 		LOCK STEERING TO trgt_vector.
-		RETURN "RCS on, circuralisation".
+		RETURN "RCS on, Circularisation".
 	}
 
 	function burn {
@@ -33,26 +33,34 @@ function P_Injection {
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
 				LOCK THROTTLE TO thrott.
-				RETURN "Circuralisation burn".
+				RETURN "Circularisation burn".
 			}).
 		}
 		
 		IF ROUND(SHIP:ORBIT:PERIOD) >= trgt_orbit["period"] - 50 {
 			LOCK THROTTLE TO 0.
 			SET done TO 1.
-			HUDTEXT("CIRCURALISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).
-			RETURN "Circuralisation Phase I complete".
+			HUDTEXT("CIRCULARISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).
+			RETURN "Circularisation Phase I complete".
 		}
 		
 		RETURN 0. // return that the maneuver is not done
+	}
+	
+	function getInitialized {
+		return initialized.
+	}
+	
+	function getDone {
+		return done.
 	}
 	
 
 	LOCAL methods TO LEXICON(
 		"init", init@,
 		"burn", burn@,
-		"initialized", initialized,
-		"done", done,
+		"initialized", getInitialized@,
+		"done", getDone@,
 		"dV_change", dV_change@,
 		"burn_time", burn_time,
 		"throttle", thrott@

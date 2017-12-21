@@ -68,7 +68,7 @@ function Tester {
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 	
-	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "BACK").
+	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "calcBurnTime", "BACK").
 
 	LOCAL from_save TO this_craft["PreLaunch"]["from_save"]. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 		
@@ -146,7 +146,7 @@ function Tester {
 		IF func = "getPhaseAngle" {
 			LOCAL target_l IS LIST().
 			LIST TARGETS IN target_l.
-			LOCAL inquiry TO Inquiry(LIST(
+			LOCAL usr_input TO Inquiry(LIST(
 				LEXICON(
 					"name", "target",
 					"type", "select",
@@ -155,28 +155,23 @@ function Tester {
 				)
 			)).
 			CS().
-			Display["reset"].
-			SET phase_angle TO getPhaseAngle(trgt_prog["attributes"]["sats"], inquiry["target"], phase_angle["current"]).
-			Display["print"]("Deegres spread:", phase_angle["spread"]).
-			Display["print"]("Deegres travelled:", phase_angle["travelled"]).
+			SET phase_angle TO getPhaseAngle(trgt_prog["attributes"]["sats"], usr_input["target"], phase_angle["current"]).
+			Display["print"]("Degrees spread:", phase_angle["spread"]).
+			Display["print"]("Degrees traveled:", phase_angle["traveled"]).
 			Display["print"]("Target separation:", phase_angle["separation"]).
 			Display["print"]("Est. angle move:", phase_angle["move"]).
 			Display["print"]("Target phase angle:", phase_angle["target"]).
 			Display["print"]("Current phase angle:", phase_angle["current"]).
-			Display["print"]("Press enter to continue").
 			
-			LOCAL done IS false.
-			UNTIL done {
-				IF TERMINAL:INPUT:HASCHAR {
-					LOCAL char to TERMINAL:INPUT:GETCHAR().
-					IF char = TERMINAL:INPUT:ENTER {
-						Display["reset"].
-						SET done to true.
-						//CS().
-						listFunctions().
-					}
-				}
-			}
+		} ELSE IF func = "calcBurnTime" {
+			LOCAL usr_input TO Inquiry(LIST(
+				LEXICON(
+					"name", "dv",
+					"type", "number",
+					"msg", "Input target ΔV"
+				)
+			)).
+			PRINT calcBurnTime(usr_input["dv"]).
 		} ELSE IF func = "getTrgtAlt" {
 			LOCAL trgt TO Inquiry(LIST(
 				LEXICON(
@@ -192,7 +187,18 @@ function Tester {
 			)).
 			getTrgtAlt(trgt["sat_num"], trgt["min_h"]).
 		}
-		
+		LOCAL done IS false.
+		Display["print"]("Press enter to continue").
+		UNTIL done {
+			IF TERMINAL:INPUT:HASCHAR {
+				LOCAL char to TERMINAL:INPUT:GETCHAR().
+				IF char = TERMINAL:INPUT:ENTER {
+					Display["reset"].
+					SET done to true.
+					listFunctions().
+				}
+			}
+		}
 	}
 	
 	function showHomePage {

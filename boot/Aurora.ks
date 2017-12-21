@@ -181,7 +181,7 @@ function Aurora {
 			}
 			Display["print"]("THROTTLE: ", this_craft["Injection"]["throttle"]()).
 			Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
-			Display["print"]("initialized: ", this_craft["Injection"]["initialized"]).
+			Display["print"]("initialized: ", this_craft["Injection"]["initialized"]()).
 			Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 			Display["print"]("ORB. PERIOD:", ROUND(SHIP:ORBIT:PERIOD, 3)).
 			Display["print"]("TRGT ORB. PERIOD: ", trgt_orbit["period"]).

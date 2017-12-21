@@ -58,7 +58,7 @@ function Inquiry {
 	}
 	
 	function read {
-		//CS().
+		CS().
 		PARAMETER msg.
 		PARAMETER i_type.
 		PARAMETER choices.
@@ -73,64 +73,70 @@ function Inquiry {
 		IF i_type = "select" {
 			SET check_list TO Checkboxes(msg, choices, "select").
 		}
-		UNTIL done {
-			IF TERMINAL:INPUT:HASCHAR {
-				PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,0).
-				LOCAL char to TERMINAL:INPUT:GETCHAR().
-				IF i_type = "number" AND numbers:CONTAINS(char) {
-					SET val TO val + "" + char.
+		
+		function readInput {
+			IF NOT TERMINAL:INPUT:HASCHAR {
+				return 0.
+			}
+			PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,0).
+			LOCAL char to TERMINAL:INPUT:GETCHAR().
+			IF i_type = "number" AND numbers:CONTAINS(char) {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "letter" AND letters:CONTAINS(char) {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "char" {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "checkbox" OR i_type = "select" {
+				IF check_list["movePointer"](char) {
 					Sounds:PLAY(correct_s).
-				} ELSE IF i_type = "letter" AND letters:CONTAINS(char) {
-					SET val TO val + "" + char.
-					Sounds:PLAY(correct_s).
-				} ELSE IF i_type = "char" {
-					SET val TO val + "" + char.
-					Sounds:PLAY(correct_s).
-				} ELSE IF i_type = "checkbox" OR "select" {
-					IF check_list["movePointer"](char) {
-						Sounds:PLAY(correct_s).
-					} ELSE {
-						Sounds:PLAY(err_s).
-					}
 				} ELSE {
 					Sounds:PLAY(err_s).
 				}
-				IF char = TERMINAL:INPUT:BACKSPACE {
-					IF val:LENGTH >= 1 {
-						SET val TO val:SUBSTRING(0, val:LENGTH - 1).
-						PRINT msg + ": " + val AT (0,0).
-						Sounds:PLAY(NOTE("d5",  0.1, 0, 0.3)).
-					} ELSE {
-						Sounds:PLAY(err_s).
-					}
-				} ELSE IF char = TERMINAL:INPUT:ENTER {
-					IF NOT i_type = "checkbox" AND val:LENGTH < 1 {
-						onError("Value can't be empty").
-					} ELSE {
-						IF i_type = "checkbox" OR "select" {
-							SET val TO check_list["getAnswers"]().
-						}
-						IF i_type = "number" AND NOT(val = "") {
-							SET val TO val:TONUMBER(onError).
-						}
-						LOCAL promise IS _promise(filter@, val).
-						SET done TO promise["done"].
-						IF promise["err"] = false {
-							Sounds:PLAY( enter_s ).
-							RETURN promise["val"].
-						} ELSE {
-							SET val TO val + "". //convert back to str
-							onError(promise["val"]).
-							Sounds:PLAY(err_s).
-						}
-					}
+			} ELSE {
+				Sounds:PLAY(err_s).
+			}
+			IF char = TERMINAL:INPUT:BACKSPACE {
+				IF val:LENGTH >= 1 {
+					SET val TO val:SUBSTRING(0, val:LENGTH - 1).
+					PRINT msg + ": " + val AT (0,0).
+					Sounds:PLAY(NOTE("d5",  0.1, 0, 0.3)).
+				} ELSE {
+					Sounds:PLAY(err_s).
+				}
+			} ELSE IF char = TERMINAL:INPUT:ENTER {
+				IF NOT i_type = "checkbox" AND val:LENGTH < 1 {
+					RETURN onError("Value can't be empty").
+				}
+				IF i_type = "checkbox" OR i_type = "select" {
+					SET val TO check_list["getAnswers"]().
+				}
+				IF i_type = "number" AND NOT(val = "") {
+					SET val TO val:TONUMBER(onError).
+				}
+				LOCAL promise IS _promise(filter@, val).
+				SET done TO promise["done"].
+				IF promise["err"] = false {
+					Sounds:PLAY( enter_s ).
+					RETURN promise["val"].
+				} ELSE {
+					SET val TO val + "". //convert back to str
+					onError(promise["val"]).
+					Sounds:PLAY(err_s).
 				}
 			}
-			PRINT msg+": "+val AT (0,0).
+		}
+		
+		UNTIL done {
+			readInput().
+			PRINT msg + ": " + val AT (0,0).
 			WAIT 0.
 		}
 		RETURN val.
 	}
+	
 	
 	function _promise {
 		PARAMETER filter, val.

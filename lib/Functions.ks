@@ -83,7 +83,7 @@ function calcDeltaV {
 	//return speed difference
 	IF v2 > SHIP:VELOCITY:ORBIT:MAG {
 		SET trgtv TO v2 - SHIP:VELOCITY:ORBIT:MAG.
-	}ELSE{
+	} ELSE {
 		SET trgtv TO SHIP:VELOCITY:ORBIT:MAG - v2.
 	}
 	RETURN trgtv.
@@ -99,16 +99,18 @@ function calcBurnTime {
 	FOR eng IN eng_list {
 		IF eng:STAGE = STAGE:NUMBER {
 			SET f TO f + eng:MAXTHRUST * 1000.  // Engine Thrust (kg * m/s²)
-			SET p TO eng:ISP.               // Engine ISP (s)
+			SET p TO eng:ISP.                   // Engine ISP (s)
 		}
 	}
-	LOCAL m IS SHIP:MASS * 1000.        // Starting mass (kg)
-	LOCAL eul IS CONSTANT:E.            // Base of natural log
-	LOCAL kerb_g IS 9.80665.                 // Gravitational acceleration constant (m/s²)
+	LOCAL m IS SHIP:MASS * 1000.    // Starting mass (kg)
+	LOCAL eul IS CONSTANT:E.       // Base of natural log
+	LOCAL kerb_g IS 9.81.       // Gravitational acceleration constant (m/s)
+	globals["display"]["print"](f).
+	globals["display"]["print"](p).
 	IF f > 0 AND p > 0 {
 		RETURN kerb_g * m * p * (1 - eul ^ (-dV / ( kerb_g * p))) / f.
     }
-	RETURN 0.
+	RETURN -1.
 }
 
 function calcOrbPeriod {
@@ -148,18 +150,18 @@ function getdV {
 
     // calculate total fuel mass
     FOR res IN STAGE:RESOURCES {
-        LOCAL iter is 0.
+        LOCAL i is 0.
         FOR fuel in fuels {
             IF fuel = res:NAME {
-                SET fuel_mass TO fuel_mass + fuelsDensity[iter] * res:AMOUNT.
+                SET fuel_mass TO fuel_mass + fuelsDensity[i] * res:AMOUNT.
             }
-            SET iter TO iter + 1.
+            SET i TO i + 1.
         }
     }
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
     FOR eng in eng_list {
-        IF eng:IGNITION {
+        IF eng:STAGE = STAGE:NUMBER {
             SET thrustTotal TO thrustTotal + eng:maxthrust.
 			SET mDotTotal TO mDotTotal + eng:maxthrust / eng:ISP.
         }
@@ -169,7 +171,7 @@ function getdV {
 		SET avgIsp TO thrustTotal / mDotTotal.
 	}
     // deltaV calculation as Isp*g0*ln(m0/m1).
-    LOCAL dV IS avgIsp * 9.82 * LN(SHIP:MASS / (SHIP:MASS - fuel_mass)).
+    LOCAL dV IS avgIsp * 9.81 * LN(SHIP:MASS / (SHIP:MASS - fuel_mass)).
 
     RETURN dV.
 }
@@ -235,7 +237,7 @@ function getPhaseAngle {
 
 	RETURN LEXICON(
 		"spread", 360 / no_of_sats,
-		"travelled", 360 * radius_percent,
+		"traveled", 360 * radius_percent,
 		"separation", 360 * radius_percent +  360 / no_of_sats,
 		"move", phase_ang,
 		"target", tphase_ang,

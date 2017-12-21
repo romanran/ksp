@@ -24,6 +24,9 @@ function CS {
 	IF NOT (env = "debug") {
 		CLEARSCREEN.
 	}
+	IF DEFINED Display {
+		Display["reset"].
+	}
 }
 
 function deb {
