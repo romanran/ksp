@@ -105,8 +105,7 @@ function calcBurnTime {
 	LOCAL m IS SHIP:MASS * 1000.    // Starting mass (kg)
 	LOCAL eul IS CONSTANT:E.       // Base of natural log
 	LOCAL kerb_g IS 9.81.       // Gravitational acceleration constant (m/s)
-	globals["display"]["print"](f).
-	globals["display"]["print"](p).
+
 	IF f > 0 AND p > 0 {
 		RETURN kerb_g * m * p * (1 - eul ^ (-dV / ( kerb_g * p))) / f.
     }

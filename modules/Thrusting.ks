@@ -24,7 +24,8 @@ function P_Thrusting {
 	LOCAL LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
 	LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()), 3), 0.1).
 	LOCAL LOCK target_kPa TO ROUND(MAX(((-ALTITUDE + 40000) / 40000) * 10, 1), 3).
-
+	LOCAL eng_list IS LIST().
+    LIST ENGINES IN eng_list. 
 	
 	function takeOff {
 		SET throttle_PID:MAXOUTPUT TO 1.
@@ -52,15 +53,22 @@ function P_Thrusting {
 		}
 		
 		SET throttle_PID:SETPOINT TO target_kpa.
-		IF ROUND(globals["acc_vec"]():MAG / (KERBIN:MU / KERBIN:RADIUS ^ 2), 3) < 1 AND ALTITUDE > 70000 {
+		
+		LOCAL total_thrust IS 0.
+		FOR eng in eng_list {
+			IF eng:STAGE = STAGE:NUMBER {
+				SET total_thrust TO total_thrust + eng:THRUST.
+			}
+		}
+		IF total_thrust < 1 AND globals["q_pressure"]() < 1 {
 			SET using_rcs TO true.
 		}
 		
 		IF using_rcs {
 			rcs_1s["do"]({
-				LOCK THROTTLE TO 0.
-				SET SHIP:CONTROL:FORE TO 1. // use rcs
-				logJ("Switch to rcs thrusters").
+				RCS ON.
+				SET SHIP:CONTROL:FORE TO 1. // use RCS
+				logJ("Switch to RCS thrusters").
 			}).
 		}
 

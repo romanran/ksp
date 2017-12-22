@@ -74,7 +74,7 @@ function P_PreLaunch {
 		Display["print"]("COUNTDOWN START").
 		FROM {LOCAL i IS 5.} UNTIL i = -1 STEP {SET i TO i - 1.} DO {
 			WAIT 1.
-			IF i = 4{
+			IF i = 4 {
 				LOCK THROTTLE TO 1.
 			}
 			ON AG3 {

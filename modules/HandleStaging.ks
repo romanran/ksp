@@ -13,17 +13,11 @@ function P_HandleStaging {
 	LOCAL staging_ready_Timer IS Timer().
 	LOCAL staging_Timer IS Timer().
 	LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
-	LOCAL nacc_Timer IS Timer(). //for no acceleration test once
+	LOCAL nacc_1s IS DoOnce(). //for no acceleration test once
 	LOCAL stage_1s IS DoOnce().
 	LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 	LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
 	LOCAL stage_delay TO 2.
-	
-	ON AG5 {
-		//stage override, just in case
-		staging_ready_Timer["set"]().
-		SET done_staging TO doStage().
-	}
 	
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
@@ -71,22 +65,21 @@ function P_HandleStaging {
 			check("LIQUIDFUEL").
 			check("SOLIDFUEL").
 		}
-		LOCAL valid_phase IS ship_state["state"]:HASKEY("phase") 
-		AND (ship_state["state"]["phase"] = "TAKEOFF" 
-		OR ship_state["state"]["phase"] = "THRUSTING").
 		
-		IF NOT valid_phase {
-			RETURN "Must be a TAKEOFF or THRUSTING phase".
+		LOCAL must_thrust_phase IS ship_state["state"]:HASKEY("phase") 
+		AND LIST("TAKEOFF", "THRUSTING"):CONTAINS(ship_state["state"]["phase"]).
+		
+		IF NOT must_thrust_phase {
+			RETURN 2.
 		}
 		
 		LOCAL no_acceleration TO SHIP:ALTITUDE < 70000 AND globals["acc_vec"]():MAG / g_base < 0.04.
 		//if not under accel
 		IF no_acceleration {
-			RETURN nacc_Timer["ready"](4, {
+			nacc_1s["do"]({
 				HUDTEXT("NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...", 3, 3, 20, red, false).
 				staging2_Timer["set"]().
-				nacc_Timer["set"]().
-				RETURN "NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...".
+				logJ("NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...").
 			}).
 		}
 		
@@ -99,12 +92,17 @@ function P_HandleStaging {
 				RETURN stage_1s["do"]({
 					SET done_staging TO doStage().
 					staging_ready_Timer["set"]().
-					staging2_Timer["set"]().
-					RETURN "Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase".
+					IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
+						HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
+						this_craft["Thrusting"]["resetPID"]().
+					}
+					nacc_1s["reset"]().
+					logJ("Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase").
 				}).
 			}
 		}).
 		
+		RETURN done_staging.
 	}
 
 	LOCAL methods TO LEXICON(

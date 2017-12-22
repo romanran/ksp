@@ -68,7 +68,7 @@ function Tester {
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 	
-	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "calcBurnTime", "BACK").
+	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "calcBurnTime", "gbase", "BACK").
 
 	LOCAL from_save TO this_craft["PreLaunch"]["from_save"]. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 		
@@ -143,6 +143,7 @@ function Tester {
 	
 	function runFunction {
 		PARAMETER func.
+		CS().
 		IF func = "getPhaseAngle" {
 			LOCAL target_l IS LIST().
 			LIST TARGETS IN target_l.
@@ -185,7 +186,13 @@ function Tester {
 					"msg", "Min. altitute"
 				)
 			)).
-			getTrgtAlt(trgt["sat_num"], trgt["min_h"]).
+			CS().
+			Display["print"](getTrgtAlt(trgt["sat_num"], trgt["min_h"])).
+		} ELSE IF func = "gbase" {
+			LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
+			Display["print"]("G :", g_base).
+			Display["print"]("Acceleration:", globals["acc_vec"]():MAG).
+			Display["print"]("Acceleration absolute:", globals["acc_vec"]():MAG / g_base - 1).
 		}
 		LOCAL done IS false.
 		Display["print"]("Press enter to continue").

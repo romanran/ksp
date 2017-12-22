@@ -141,14 +141,16 @@ function Aurora {
 			}
 		}//--thrusting
 
-		IF ALTITUDE > 30000 AND globals["q_pressure"]() < 2 {
+		IF ALTITUDE > 60000 AND globals["q_pressure"]() < 1 {
 			this_craft["Deployables"]["fairing"]().
 			RCS ON.
 		} //eject fairing
 		IF ALTITUDE > 80000 AND from_save = false {
 			//--vacuum, deploy panels and antennas, turn on lights
-			logJ(this_craft["Deployables"]["panels"]()).
-			logJ(this_craft["Deployables"]["antennas"]()).
+			LOCAL log_str IS this_craft["Deployables"]["panels"]().
+			logJ(log_str).
+			SET log_str TO this_craft["Deployables"]["antennas"]().
+			logJ(log_str).
 		}
 
 		IF ship_state["state"]["phase"] = "COASTING" {

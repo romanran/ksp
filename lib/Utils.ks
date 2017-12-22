@@ -74,7 +74,7 @@ function generateID {
 
 function logJ {
 	PARAMETER str.
-	IF DEFINED ship_log AND ship_log:HASKEY("add") AND str {
-		ship_log["add"](str).
+	IF DEFINED globals["ship_log"] AND globals["ship_log"]:HASKEY("add") AND str {
+		globals["ship_log"]["add"](str).
 	}
 }
