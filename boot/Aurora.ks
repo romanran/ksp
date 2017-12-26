@@ -125,7 +125,7 @@ function Aurora {
 			Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
 			Display["print"]("T.PIT:", this_craft["Thrusting"]["trgt_pitch"]()).
 			Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)).
-			Display["print"]("T.kPa:", this_craft["Thrusting"]["target_kpa"]()).
+			Display["print"]("T4T:", this_craft["Thrusting"]["target4throttle"]()).
 			Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
 			
 			this_craft["Thrusting"]["handleFlight"]().

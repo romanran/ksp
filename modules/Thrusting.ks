@@ -20,16 +20,25 @@ function P_Thrusting {
 	LOCAL rcs_1s TO DoOnce().
 	LOCAL abort_1s IS DoOnce().
 	LOCAL de_acc_1s IS DoOnce().
+	LOCAL thrust_data IS LEXICON().
+	LOCAL thrust_data_file IS "0:datasets/thrust1.json".
+	IF (EXISTS(thrust_data_file)) {
+		SET thrust_data TO READJSON(thrust_data_file).
+	}
 	LOCAL LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
 	LOCAL LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
-	LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()), 3), 0.1).
-	LOCAL LOCK target_kPa TO ROUND(MAX(((-ALTITUDE + 40000) / 40000) * 10, 1), 3).
+	//LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, getRatio("current")), 3), 0.1).
+	LOCAL LOCK target4throttle TO getRatio("target").
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
 	
+	LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()), 3), 0.1).
+    LOCAL LOCK target_kPa TO ROUND(MAX(((-ALTITUDE + 40000) / 40000) * 10, 1), 3).
+ 
 	function takeOff {
 		SET throttle_PID:MAXOUTPUT TO 1.
 		SET throttle_PID:MINOUTPUT TO 1.
+		IF ALTITUDE
 		SET throttle_PID:SETPOINT TO target_kPa.
 		SET pid_timer TO TIME:SECONDS.
 		LOCK THROTTLE TO thrott.
@@ -52,7 +61,7 @@ function P_Thrusting {
 			}).
 		}
 		
-		SET throttle_PID:SETPOINT TO target_kpa.
+		SET throttle_PID:SETPOINT TO target_kPa.
 		
 		LOCAL total_thrust IS 0.
 		FOR eng in eng_list {
@@ -113,6 +122,20 @@ function P_Thrusting {
 		pid_1s["reset"]().
 	}
 	
+	function getRatio {
+		PARAMETER get.
+		LOCAL param1 IS ALTITUDE.
+		LOCAL param2 IS SHIP:VELOCITY:SURFACE:MAG.
+		
+		LOCAL result IS 0.
+		IF get = "current" {
+			SET result TO param1 / param2.
+		} ELSE {
+			SET result TO param1 / interpolateBezier(thrust_data, param1).
+		}
+		RETURN 1.
+	}
+	
 	LOCAL methods TO LEXICON(
 		"takeOff", takeOff@,
 		"handleFlight", handleFlight@,
@@ -120,7 +143,7 @@ function P_Thrusting {
 		"resetPID", resetPID@,
 		"trgt_pitch", trgt_pitch@, 
 		"ship_p", ship_p@, 
-		"target_kpa", target_kpa@, 
+		"target4throttle", target4throttle@, 
 		"thrott", thrott@
 	).
 	

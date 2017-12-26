@@ -29,6 +29,9 @@ function Journal {
 		row:add("PER", ROUND(ALT:PERIAPSIS)).
 		row:add("ORBV", ROUND(VELOCITY:ORBIT:MAG)).
 		row:add("SURV", ROUND(VELOCITY:SURFACE:MAG)).
+		row:add("Q", ROUND(globals["q_pressure"]())).
+		row:add("THROTT", ROUND(THROTTLE)).
+		row:add("PITCH", ROUND(this_craft["Thrusting"]["ship_p"]())).
 		row:add("FACING", FACING).
 		row:add("VERTICALSPEED", ROUND(VERTICALSPEED)).
 		SET res_lex TO LEXICON().
