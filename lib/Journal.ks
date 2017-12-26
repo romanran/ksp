@@ -17,7 +17,7 @@ function Journal {
 	row:add("RESOURCES", res_lex).
 	self:add(row_num, row).
 	
-	function addEntry {
+	LOCAL function addEntry {
 		PARAMETER description IS "NC".
 		SET row_num TO row_num + 1.
 		LOCAL ship_res TO getResources().
@@ -44,11 +44,11 @@ function Journal {
 		self:add(row_num, row).
 		WRITEJSON(self, save_path).
 	}
-	function dumpAll {
+	LOCAL function dumpAll {
 		PRINT self:DUMP.
 	}
 	
-	function saveToLog {
+	LOCAL function saveToLog {
 		IF ADDONS:RT:HASKSCCONNECTION(SHIP) {
 			COPYPATH(save_path, "0:flightlogs/").
 			HUDTEXT("Flight journal saved!", 3, 2, 40, green, false).

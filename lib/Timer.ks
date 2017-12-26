@@ -5,7 +5,7 @@ function Timer {
 	LOCAL invokes TO 0. //0 - not yet set, 1 - timer set, counting, >2 - already used
 	LOCAL wait_for TO 1.
 	
-	function onReady {
+	LOCAL function onReady {
 		PARAMETER p_wait_for IS wait_for.
 		PARAMETER fun IS 0.
 		PARAMETER params IS "empty".
@@ -24,18 +24,18 @@ function Timer {
 		}
 	}
 
-	function setTimer {
+	LOCAL function setTimer {
 		SET internal_t TO FLOOR(TIME:SECONDS).
 		SET invokes TO 1.
 	}
 	
-	function resetTimer {
+	LOCAL function resetTimer {
 		SET internal_t TO 999999999.
 		SET invokes TO 0.
 		SET wait_for TO 1.
 	}
 	
-	function delayTimer {
+	LOCAL function delayTimer {
 		PARAMETER delay_t IS 1.
 		SET internal_t TO internal_t + delay_t - wait_for.
 	}
@@ -44,7 +44,7 @@ function Timer {
 		RETURN FLOOR(TIME:SECONDS) - (internal_t + wait_for).
 	}
 
-	return lex(
+	return LEX(
 		"ready", onReady@,
 		"check", checkTimer@,
 		"set", setTimer@,

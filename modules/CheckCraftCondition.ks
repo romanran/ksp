@@ -5,7 +5,7 @@ loadDeps(dependencies).
 
 function P_CheckCraftCondition {
 
-	function checkTreshold {
+	LOCAL function checkTreshold {
 		PARAMETER res.
 		PARAMETER percent.
 		PARAMETER r_amount.
@@ -20,7 +20,7 @@ function P_CheckCraftCondition {
 	LOCAL LOCK mp TO checkTreshold("MonoPropellant", 1, 1).
 	LOCAL override IS 0.
 	
-	function refresh {
+	LOCAL function refresh {
 		IF ec {
 			//if below 20% of max ships capacity or 40 units
 			//electic charge saving and generation

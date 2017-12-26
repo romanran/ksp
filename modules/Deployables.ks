@@ -8,7 +8,7 @@ function P_Deployables {
 	LOCAL deploy_1s IS doOnce().
 	LOCAL antenna_1s IS doOnce().
 	
-	function jettisonFairing {
+	LOCAL function jettisonFairing {
 		return fairing_1s["do"]({
 			IF doModuleEvent("ModuleProceduralFairing", "DEPLOY") {
 				RETURN "Fairings jettison".
@@ -19,7 +19,7 @@ function P_Deployables {
 		}).
 	} //eject fairing	
 	
-	function deployAntennas {
+	LOCAL function deployAntennas {
 		PARAMETER t_on TO 1.
 		IF NOT antenna_1s["ready"]() {
 			RETURN "Already called".
@@ -39,11 +39,11 @@ function P_Deployables {
 		}).
 	}
 	
-	function retractAntennas {
+	LOCAL function retractAntennas {
 		return deployAntennas(0).
 	}
 	
-	function deployPanels {
+	LOCAL function deployPanels {
 		PARAMETER t_on TO 1.
 		IF t_on {
 			return deploy_1s["do"]({
@@ -62,11 +62,11 @@ function P_Deployables {
 		}
 	}
 	
-	function retractPanels {
+	LOCAL function retractPanels {
 		return deployPanels(0).
 	}
 	
-	function resetAll {
+	LOCAL function resetAll {
 		deploy_1s["reset"]().
 		fairing_1s["reset"]().
 		antenna_1s["reset"]().

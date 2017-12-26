@@ -1,7 +1,7 @@
 function DoOnce {
 	LOCAL is_ready TO 1.
 	
-	function call {
+	LOCAL function call {
 		PARAMETER func IS 0.
 		PARAMETER params IS "empty".
 		IF (func <> 0) AND is_ready {
@@ -16,15 +16,15 @@ function DoOnce {
 		}
 	}
 
-	function resetIt {
+	LOCAL function resetIt {
 		SET is_ready TO 1.
 	}
 	
-	function isReady {
+	LOCAL function isReady {
 		RETURN is_ready.
 	}
 
-	RETURN lex(
+	RETURN LEXICON(
 		"do", call@,
 		"ready", isReady@,
 		"reset", resetIt@

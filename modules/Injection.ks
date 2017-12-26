@@ -13,7 +13,7 @@ function P_Injection {
 	LOCAL initialized TO 0.
 	LOCAL done TO 0.
 	
-	function init {
+	LOCAL function init {
 		SET initialized TO 1.
 		RCS ON.
 		UNLOCK STEERING.
@@ -28,7 +28,7 @@ function P_Injection {
 		RETURN "RCS on, Circularisation".
 	}
 
-	function burn {
+	LOCAL function burn {
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time / 2) {
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
@@ -47,11 +47,11 @@ function P_Injection {
 		RETURN 0. // return that the maneuver is not done
 	}
 	
-	function getInitialized {
+	LOCAL function getInitialized {
 		return initialized.
 	}
 	
-	function getDone {
+	LOCAL function getDone {
 		return done.
 	}
 	

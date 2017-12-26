@@ -21,12 +21,12 @@ function P_Thrusting {
 	LOCAL abort_1s IS DoOnce().
 	LOCAL de_acc_1s IS DoOnce().
 	LOCAL thrust_data IS LEXICON().
-	LOCAL thrust_data_file IS "0:datasets/thrust1.json".
+	LOCAL thrust_data_file IS "0:datasets/thrust1".
 	IF (EXISTS(thrust_data_file)) {
 		SET thrust_data TO READJSON(thrust_data_file).
 	}
 	LOCAL LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
-	LOCAL LOCK ship_p TO 90 - vectorangle(UP:FOREVECTOR, FACING:FOREVECTOR).
+	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
 	//LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, getRatio("current")), 3), 0.1).
 	LOCAL LOCK target4throttle TO getRatio("target").
 	LOCAL eng_list IS LIST().
@@ -35,7 +35,7 @@ function P_Thrusting {
 	LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()), 3), 0.1).
     LOCAL LOCK target_kPa TO ROUND(MAX(((-ALTITUDE + 40000) / 40000) * 10, 1), 3).
  
-	function takeOff {
+	LOCAL function takeOff {
 		SET throttle_PID:MAXOUTPUT TO 1.
 		SET throttle_PID:MINOUTPUT TO 1.
 		IF ALTITUDE
@@ -45,7 +45,7 @@ function P_Thrusting {
 		RETURN "Take off".
 	}
 	
-	function handleFlight {
+	LOCAL function handleFlight {
 		
 		pitch_1s["do"]({
 			LOCK STEERING TO R(0, 0, 0) + HEADING(90, trgt_pitch).
@@ -97,7 +97,7 @@ function P_Thrusting {
 		}
 	}
 	
-	function decelerate {
+	LOCAL function decelerate {
 		IF aborted {
 			RETURN 0.
 		}
@@ -116,13 +116,13 @@ function P_Thrusting {
 		}
 	}
 	
-	function resetPID {
+	LOCAL function resetPID {
 		SET pid_timer TO TIME:SECONDS.
 		throttle_PID:RESET.
 		pid_1s["reset"]().
 	}
 	
-	function getRatio {
+	LOCAL function getRatio {
 		PARAMETER get.
 		LOCAL param1 IS ALTITUDE.
 		LOCAL param2 IS SHIP:VELOCITY:SURFACE:MAG.

@@ -2,7 +2,8 @@ function ExposePanels {
 	//dependency - PID
 	DECLARE LOCAL panels_PID TO 0.
 	DECLARE LOCAL timer TO 0.
-	function init {
+	
+	LOCAL function init {
 		PARAMETER setp IS "err1".
 		IF setp = "err1" {
 			PRINT "No setpoint value specified"
@@ -13,7 +14,7 @@ function ExposePanels {
 		SET panels_PID TO setPID( setp, prop ).
 	}
 	
-	function refresh {
+	LOCAL function refresh {
 		return panels_PID:UPDATE(TIME:SECONDS-timer, LIGHT). 
 	}
 	

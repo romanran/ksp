@@ -17,7 +17,6 @@ function Tester {
 	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
 	CS().
-	
 	//SET TERMINAL:WIDTH TO 42.
 	//SET TERMINAL:HEIGHT TO 30.
 
@@ -131,9 +130,18 @@ function Tester {
 				CS().
 				Display["print"](action_name, this_craft[page][action_name]).
 			}
-			WAIT 2.
-			Display["reset"]().
-			RETURN showModulePage(page).
+			LOCAL done IS false.
+			Display["print"]("Press enter to continue").
+			UNTIL done {
+				IF TERMINAL:INPUT:HASCHAR {
+					LOCAL char to TERMINAL:INPUT:GETCHAR().
+					IF char = TERMINAL:INPUT:ENTER {
+						Display["reset"]().
+						SET done to true.
+						showModulePage(page).
+					}
+				}
+			}
 		} ELSE {
 			RETURN listModules().
 		}
@@ -172,7 +180,8 @@ function Tester {
 					"msg", "Input target ΔV"
 				)
 			)).
-			PRINT calcBurnTime(usr_input["dv"]).
+			CS().
+			Display["print"]("Target dv: " + usr_input["dv"] + " time: " + calcBurnTime(usr_input["dv"])).
 		} ELSE IF func = "getTrgtAlt" {
 			LOCAL trgt TO Inquiry(LIST(
 				LEXICON(
@@ -200,7 +209,7 @@ function Tester {
 			IF TERMINAL:INPUT:HASCHAR {
 				LOCAL char to TERMINAL:INPUT:GETCHAR().
 				IF char = TERMINAL:INPUT:ENTER {
-					Display["reset"].
+					Display["reset"]().
 					SET done to true.
 					listFunctions().
 				}

@@ -7,6 +7,21 @@ function doStage {
 	return STAGE:NUMBER = 0.
 }
 
+function setPID{
+	PARAMETER setp IS "err1".
+	IF setp = "err1"{
+		PRINT "No setpoint value specified".
+		return false.
+	}
+	PARAMETER prop IS 0.2.
+	LOCAL Kp TO prop.
+	LOCAL Ki TO prop * 0.5.
+	LOCAL Kd TO prop * 0.0125.
+	LOCAL PIDL TO PIDLOOP(Kp, Kp, Kd).
+	SET PIDL:SETPOINT TO setp.
+	return PIDL.
+}
+
 function getStageResources {
 	LOCAL res_l TO LEXICON().
 	FOR res IN STAGE:RESOURCES {
@@ -178,12 +193,18 @@ function getdV {
 function getTrgtAlt {
 	PARAMETER sat_num is 3.
 	PARAMETER min_h is 100.
+	PARAMETER trgt_body_str IS "current".
+	LOCAL trgt_body IS SHIP:ORBIT:BODY.
+	IF trgt_body_str <> "current" {
+		SET trgt_body TO BODY(trgt_body_str).
+	}
 	LOCAL ang TO 360 / (sat_num * 2). 
-	LOCAL h TO KERBIN:RADIUS + min_h.
+	LOCAL h TO trgt_body:RADIUS + min_h.
 	LOCAL altA TO (h / COS(ang)). //absolute
-	LOCAL altR TO altA - KERBIN:RADIUS. //relative altitude
+	LOCAL altR TO altA - trgt_body:RADIUS. //relative altitude
 	LOCAL comm_r TO ROUND(SQRT((altA * altA) * 2)).//range
-	LOCAL orb_period TO calcOrbPeriod(altA).
+	LOCAL orb_period TO calcOrbPeriod(altA, trgt_body_str).
+
 	RETURN LEXICON(
 		"r", comm_r,
 		"altA",  altA,

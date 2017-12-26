@@ -11,7 +11,6 @@
 
 COPYPATH("0:lib/Checkboxes", "1:").
 RUNONCEPATH("1:Checkboxes").
-
 function Inquiry {
 	PARAMETER inputs.
 	LOCAL numbers TO "01234566789.":SPLIT("").
@@ -20,8 +19,8 @@ function Inquiry {
 	LOCAL err_s TO NOTE(400, 0.1).
 	LOCAL correct_s TO NOTE("c6",  0.1, 0, 0.3).
 	LOCAL enter_s TO  NOTE("E6",  0.5, 0, 0.3).
-	
-	function loop {
+
+	LOCAL function loop {
 		LOCAL vals TO LEXICON().
 		FOR inp IN inputs {
 			IF inp:HASKEY("name") {
@@ -50,14 +49,14 @@ function Inquiry {
 		}
 		RETURN vals.
 	}
-	
+
 	function onError {
 		PARAMETER err TO "".
 		PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,1).
 		PRINT err AT (0,1).
 	}
-	
-	function read {
+
+	LOCAL function read {
 		CS().
 		PARAMETER msg.
 		PARAMETER i_type.
@@ -74,7 +73,7 @@ function Inquiry {
 			SET check_list TO Checkboxes(msg, choices, "select").
 		}
 		
-		function readInput {
+		LOCAL function readInput {
 			IF NOT TERMINAL:INPUT:HASCHAR {
 				return 0.
 			}
@@ -136,9 +135,9 @@ function Inquiry {
 		}
 		RETURN val.
 	}
-	
-	
-	function _promise {
+
+
+	LOCAL function _promise {
 		PARAMETER filter, val.
 		LOCAL done IS true.
 		LOCAL err IS false.
@@ -161,6 +160,6 @@ function Inquiry {
 			"err", err
 		).
 	}
-	
+
 	RETURN loop().
 }

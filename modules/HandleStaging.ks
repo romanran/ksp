@@ -26,11 +26,11 @@ function P_HandleStaging {
 	
 	// --- METHODS ---
 	
-	function takeOff {
+	LOCAL function takeOff {
 		SET done_staging TO doStage().
 	}
 	
-	function nextStage {
+	LOCAL function nextStage {
 		PARAMETER res_type.
 
 		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
@@ -45,12 +45,22 @@ function P_HandleStaging {
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
 	
-	function check {
+	LOCAL function check {
 		PARAMETER res_type.
 		IF NOT res_type <> 0 {
 			RETURN -1.
 		}
-		IF STAGE:(res_type + "") < 1 AND stg_res:HASKEY(res_type) {
+		LOCAL out_of_res TO false.
+		IF res_type = "LIQUIDFUEL" {
+			SET out_of_res TO STAGE:LIQUIDFUEL < 1.
+		} ELSE IF res_type = "SOLIDFUEL" {
+			SET out_of_res TO STAGE:SOLIDFUEL < 1.
+		} ELSE IF res_type = "MONOPROPELLANT" {
+			SET out_of_res TO STAGE:MONOPROPELLANT < 1.
+		} ELSE IF res_type = "OXIDIZER" {
+			SET out_of_res TO STAGE:OXIDIZER < 1.
+		}
+		IF out_of_res AND stg_res:HASKEY(res_type) {
 			stage_1s["do"]({
 				HUDTEXT("Separation in " + stage_delay + " seconds...", 2, 2, 42, green, false).
 				staging_Timer["set"]().
@@ -60,9 +70,10 @@ function P_HandleStaging {
 		staging_ready_Timer["ready"](2, stage_1s["reset"]).
 	}
 	
-	function refresh {
+	LOCAL function refresh {
 		IF NOT done_staging {
 			check("LIQUIDFUEL").
+			check("OXIDIZER").
 			check("SOLIDFUEL").
 		}
 		

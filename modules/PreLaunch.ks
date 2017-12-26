@@ -11,7 +11,7 @@ function P_PreLaunch {
 	}
 	IF NOT(DEFINED Display) LOCAL Display TO globals["Display"].
 	//--PRELAUNCH
-	function init {
+	LOCAL function init {
 		LOCAL from_save TO false.
 		LOCAL start IS false.
 		
@@ -30,7 +30,7 @@ function P_PreLaunch {
 				first_stage_engines:ADD(eng).
 			}
 		}
-		function preLaunchError {
+		LOCAL function preLaunchError {
 			PARAMETER err.
 			LOCAL Sounds TO GETVOICE(0).
 			HUDTEXT(err, 5, 4, 40, red, false).

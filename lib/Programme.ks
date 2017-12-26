@@ -6,7 +6,7 @@ function Programme {
 	LOCAL path TO "0:program/" + ptype + ".json".
 	LOCAL filelist IS LIST().
 	
-	function addVessel {
+	LOCAL function addVessel {
 		LOCAL obj TO READJSON(path).
 		FOR vsl IN obj["vessels"] {
 			IF vsl = SHIPNAME {
@@ -17,8 +17,8 @@ function Programme {
 		WRITEJSON(obj, path).
 		HUDTEXT(SHIPNAME + " has been added to the " + ptype + " program", 4, 2, 30, green, false).
 	}
-	
-	function fetch {
+
+	LOCAL function fetch {
 		PARAMETER npath IS path.
 		IF npath:FIND("json") < 0 {
 			SET npath TO "0:program/" + npath + ".json".
@@ -26,12 +26,12 @@ function Programme {
 		LOCAL obj TO READJSON(npath).
 		RETURN obj.
 	}
-	
+
 	function dumpAll {
 		PRINT self:DUMP.
 	}
-	
-	function listPrograms {
+
+	LOCAL function listPrograms {
 		LOCAL prev_path TO PATH().
 		CD("0:program").
 		LIST FILES IN filelist.
@@ -44,8 +44,8 @@ function Programme {
 		CD(prev_path).
 		RETURN programs_a.
 	}
-	
-	function create {
+
+	LOCAL function create {
 		PARAMETER atts IS LEXICON().
 		
 		IF VOLUME(0):EXISTS("program/" + ptype + ".json") {
@@ -65,7 +65,7 @@ function Programme {
 		WRITEJSON(new_program, path).
 		CD(prev_path).
 	}
-	
+
 	LOCAL methods TO LEXICON(
 		"create", create@,
 		"add", addVessel@,
