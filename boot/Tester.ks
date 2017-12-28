@@ -67,7 +67,7 @@ function Tester {
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 	
-	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "calcBurnTime", "gbase", "BACK").
+	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "calcBurnTime", "gbase", "interpolate", "BACK").
 
 	LOCAL from_save TO this_craft["PreLaunch"]["from_save"]. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 		
@@ -202,6 +202,36 @@ function Tester {
 			Display["print"]("G :", g_base).
 			Display["print"]("Acceleration:", globals["acc_vec"]():MAG).
 			Display["print"]("Acceleration absolute:", globals["acc_vec"]():MAG / g_base - 1).
+		} ELSE IF func = "interpolate" {
+			LOCAL prev_path TO PATH().
+			CD("0:datasets").
+			LOCAL datasets IS LIST().
+			LOCAL filelist IS LIST().
+			LIST FILES IN filelist.
+			FOR file IN filelist {
+				IF file:ISFILE AND file:EXTENSION = "json" {
+					datasets:ADD(file:NAME:REPLACE(".json", "")).
+				}
+			}
+			CD(prev_path).
+
+			LOCAL trgt TO Inquiry(LIST(
+				LEXICON(
+					"name", "data",
+					"type", "select",
+					"msg", "Choose a dataset",
+					"choices", datasets
+				),
+				LEXICON(
+					"name", "alt",
+					"type", "number",
+					"msg", "Altitude (m)"
+				)
+			)).
+			LOCAL thrust_data TO READJSON("0:datasets/" + trgt["data"] + ".json").
+			LOCAL target4throttle TO interpolateLagrange(thrust_data, trgt["alt"]).
+			CS().
+			Display["print"]("Interpolated target for " + trgt["alt"] + "m", target4throttle).
 		}
 		LOCAL done IS false.
 		Display["print"]("Press enter to continue").

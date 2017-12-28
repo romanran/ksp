@@ -7,7 +7,7 @@ function doStage {
 	return STAGE:NUMBER = 0.
 }
 
-function setPID{
+function setPID {
 	PARAMETER setp IS "err1".
 	IF setp = "err1"{
 		PRINT "No setpoint value specified".
@@ -264,4 +264,24 @@ function getPhaseAngle {
 		"current", curr_angle
 	).
 
+}
+
+function interpolateLagrange {
+	PARAMETER data.
+	PARAMETER param1.
+	LOCAL y0 IS 0.
+	IF NOT (data:HASKEY("x") AND data:HASKEY("y")) {
+		RETURN 0.
+	}
+	LOCAL n IS data["x"]:LENGTH.
+	FROM {LOCAL j is 1.} UNTIL j = n STEP {SET j TO j + 1.} DO {
+		LOCAL t IS 1.
+		FROM {LOCAL i is 1.} UNTIL i = n STEP {SET i TO i + 1.} DO {
+			IF NOT (i = j) {
+				SET t TO t * (param1 - data["x"][i]) / (data["x"][j] - data["x"][i]).
+			}
+		}
+		SET y0 TO y0 + t * data["y"][j].
+	}
+	RETURN y0.
 }

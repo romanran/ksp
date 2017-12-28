@@ -16,7 +16,6 @@ function P_Injection {
 	LOCAL function init {
 		SET initialized TO 1.
 		RCS ON.
-		UNLOCK STEERING.
 		SET THROTTLE TO 0.
 		HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.

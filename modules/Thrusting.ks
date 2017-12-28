@@ -11,7 +11,7 @@ function P_Thrusting {
 		GLOBAL globals TO setGlobal().
 	}
 	LOCAL pid_timer TO TIME:SECONDS.
-	LOCAL throttle_PID to setPID(0, 1).
+	LOCAL throttle_PID to setPID(0, 0.1).
 	LOCAL using_rcs TO false.
 	LOCAL aborted TO false.
 	
@@ -21,32 +21,31 @@ function P_Thrusting {
 	LOCAL abort_1s IS DoOnce().
 	LOCAL de_acc_1s IS DoOnce().
 	LOCAL thrust_data IS LEXICON().
-	LOCAL thrust_data_file IS "0:datasets/thrust1".
+	LOCAL thrust_data_file IS "0:datasets/thrust1.json".
 	IF (EXISTS(thrust_data_file)) {
 		SET thrust_data TO READJSON(thrust_data_file).
 	}
 	LOCAL LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
-	//LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, getRatio("current")), 3), 0.1).
-	LOCAL LOCK target4throttle TO getRatio("target").
+	LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, SHIP:VELOCITY:SURFACE:MAG), 3), 0.1).
+	LOCAL LOCK target4throttle TO interpolateLagrange(thrust_data, ALTITUDE).
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
 	
-	LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()), 3), 0.1).
+	// LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()), 3), 0.1).
     LOCAL LOCK target_kPa TO ROUND(MAX(((-ALTITUDE + 40000) / 40000) * 10, 1), 3).
  
 	LOCAL function takeOff {
 		SET throttle_PID:MAXOUTPUT TO 1.
 		SET throttle_PID:MINOUTPUT TO 1.
-		IF ALTITUDE
-		SET throttle_PID:SETPOINT TO target_kPa.
+		SET throttle_PID:SETPOINT TO 1.
 		SET pid_timer TO TIME:SECONDS.
 		LOCK THROTTLE TO thrott.
 		RETURN "Take off".
 	}
 	
 	LOCAL function handleFlight {
-		
+		LOCAL total_thrust IS 0.
 		pitch_1s["do"]({
 			LOCK STEERING TO R(0, 0, 0) + HEADING(90, trgt_pitch).
 		}).
@@ -60,10 +59,7 @@ function P_Thrusting {
 				logJ("Reached the safe altitude of " + safe_alt).
 			}).
 		}
-		
-		SET throttle_PID:SETPOINT TO target_kPa.
-		
-		LOCAL total_thrust IS 0.
+		SET throttle_PID:SETPOINT TO target4throttle.
 		FOR eng in eng_list {
 			IF eng:STAGE = STAGE:NUMBER {
 				SET total_thrust TO total_thrust + eng:THRUST.
@@ -82,7 +78,7 @@ function P_Thrusting {
 		}
 
 		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 1800 {
-			//if ship is off course when not achieved orbital speed yet and the staging wait isnt in progress
+			//if ship is off course when not achieved orbital speed yet and the staging wait isn't in progress
 			abort_1s["do"]({
 				LOCK THROTTLE TO 0.
 				HUDTEXT("MALFUNCTION ABORT", 5, 2, 54, red, false).
@@ -120,20 +116,6 @@ function P_Thrusting {
 		SET pid_timer TO TIME:SECONDS.
 		throttle_PID:RESET.
 		pid_1s["reset"]().
-	}
-	
-	LOCAL function getRatio {
-		PARAMETER get.
-		LOCAL param1 IS ALTITUDE.
-		LOCAL param2 IS SHIP:VELOCITY:SURFACE:MAG.
-		
-		LOCAL result IS 0.
-		IF get = "current" {
-			SET result TO param1 / param2.
-		} ELSE {
-			SET result TO param1 / interpolateBezier(thrust_data, param1).
-		}
-		RETURN 1.
 	}
 	
 	LOCAL methods TO LEXICON(

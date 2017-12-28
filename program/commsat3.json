@@ -7,9 +7,6 @@
         "vessels",
         {
             "items": [
-                "Sat-1 477",
-                "Sat-1 806",
-                "Sat 627"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },

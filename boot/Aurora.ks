@@ -75,7 +75,7 @@ function Aurora {
 	).
 	
 	loadDeps(phase_modules, "modules").
-	deb(trgt_orbit).
+
 	GLOBAL this_craft IS LEXICON(
 		"PreLaunch", P_PreLaunch(),
 		"HandleStaging", P_HandleStaging(),
@@ -126,6 +126,7 @@ function Aurora {
 			Display["print"]("T.PIT:", this_craft["Thrusting"]["trgt_pitch"]()).
 			Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)).
 			Display["print"]("T4T:", this_craft["Thrusting"]["target4throttle"]()).
+			Display["print"]("Current v:", SHIP:VELOCITY:SURFACE:MAG).
 			Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
 			
 			this_craft["Thrusting"]["handleFlight"]().
@@ -145,7 +146,7 @@ function Aurora {
 			this_craft["Deployables"]["fairing"]().
 			RCS ON.
 		} //eject fairing
-		IF ALTITUDE > 80000 AND from_save = false {
+		IF ALTITUDE > 80000 AND NOT from_save {
 			//--vacuum, deploy panels and antennas, turn on lights
 			LOCAL log_str IS this_craft["Deployables"]["panels"]().
 			logJ(log_str).
@@ -173,10 +174,10 @@ function Aurora {
 			inject_init_1s["do"]({
 				logJ(this_craft["Injection"]["init"]()). // initialize and get the response
 			}).
-			//logJ(iinit). // log the response
+			//logJ(iinit).  log the response
 			this_craft["Injection"]["burn"]().
 			//logJ(iburn).
-			IF this_craft["Injection"]["done"] {
+			IF this_craft["Injection"]["done"]() {
 				ship_log["add"]("Injection complete").
 				ship_log["save"]().
 				ship_state["set"]("phase", "CORRECTION_BURN").
