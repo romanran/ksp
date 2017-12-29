@@ -18,6 +18,8 @@ function P_HandleStaging {
 	LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 	LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
 	LOCAL stage_delay TO 2.
+	LOCAL eng_list IS LIST().
+    LIST ENGINES IN eng_list. 
 	
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
@@ -40,7 +42,12 @@ function P_HandleStaging {
 			this_craft["Thrusting"]["resetPID"]().
 		}
 		SET done_staging TO doStage().
-		staging_Timer["reset"]().
+		WAIT 0.
+		FOR eng IN eng_list {
+			IF eng:STAGE = STAGE:NUMBER {
+				eng:SHUTDOWN.
+			}
+		}
 
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
@@ -64,10 +71,18 @@ function P_HandleStaging {
 			stage_1s["do"]({
 				HUDTEXT("Separation in " + stage_delay + " seconds...", 2, 2, 42, green, false).
 				staging_Timer["set"]().
+				nextStage(res_type).
 			}).
 		}
-		staging_Timer["ready"](stage_delay, nextStage@:bind(res_type)).
-		staging_ready_Timer["ready"](2, stage_1s["reset"]).
+		staging_ready_Timer["ready"](stage_delay, stage_1s["reset"]).
+		staging_Timer["ready"](stage_delay, {
+			FOR eng IN eng_list {
+				IF eng:STAGE = STAGE:NUMBER {
+					eng:ACTIVATE.
+				}
+			}
+			staging_Timer["reset"]().
+		}).
 	}
 	
 	LOCAL function refresh {

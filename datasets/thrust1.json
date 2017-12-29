@@ -1,37 +1,15 @@
 {
-    "entries": [
-        "x",
-        {
-            "items": [
-				1,
-				10,
-				1000, 
-				9000,
-				30000,
-				35000, 
-				40000,
-				60000,
-				80000,
-				999999999
-            ],
-            "$type": "kOS.Safe.Encapsulation.ListValue"
-        },
-		"y",
-        {
-            "items": [
-				5,
-				25,
-				80,
-				355,
-				900,
-				1100,
-				1400,
-				2400,
-				3000,
-				9999999
-            ],
-            "$type": "kOS.Safe.Encapsulation.ListValue"
-        }
-    ],
-    "$type": "kOS.Safe.Encapsulation.Lexicon"
+	"items": [
+		1, 5
+		10, 25,
+		1000, 80,
+		9000, 355,
+		30000, 900,
+		35000, 1100,
+		40000, 1400,
+		60000, 2400,
+		80000, 3000,
+		999999999, 999999
+	],
+	"$type": "kOS.Safe.Encapsulation.ListValue"
 }

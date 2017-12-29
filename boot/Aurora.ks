@@ -97,7 +97,7 @@ function Aurora {
 		ship_state["set"]("phase", "TAKEOFF").
 	}
 	SET done TO 0.
-	SET from_save TO this_craft["PreLaunch"]["from_save"].
+	SET from_save TO this_craft["PreLaunch"]["from_save"]().
 
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
@@ -135,10 +135,12 @@ function Aurora {
 			}
 			IF CEILING(APOAPSIS) >= trgt_orbit["alt"] AND ALTITUDE > 70000 {
 				LOCK THROTTLE TO 0.
+				UNLOCK STEERING.
 				HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
 				//leaving thrusting section at that time
 				ship_state["set"]("phase", "COASTING").
 				ship_log["add"]("COAST TRANSITION phase").
+				Display["reset"]().
 			}
 		}//--thrusting
 
@@ -155,18 +157,18 @@ function Aurora {
 		}
 
 		IF ship_state["state"]["phase"] = "COASTING" {
+			HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
+			SET WARPMODE TO "RAILS".
 			warp_1s["do"]({
-				HUDTEXT("WARPING", 2, 2, 42, green, false).
-				SET WARPMODE TO "RAILS".
-				WARPTO (TIME:SECONDS + ETA:APOAPSIS - 60).
-			}).
-			IF ETA:APOAPSIS < 120 AND ETA:APOAPSIS <> 0{
-				KUNIVERSE:TIMEWARP:CANCELWARP().
 				warp_delay["set"]().
-			}
-			warp_delay["ready"](1, {
+			}).
+			IF ETA:APOAPSIS < this_craft["Injection"]["burn_time"] - 60 AND ETA:APOAPSIS > 0{
+				KUNIVERSE:TIMEWARP:CANCELWARP().
 				ship_state["set"]("phase", "KERBINJECTION").
 				ship_log["add"]("KERBINJECTION phase").
+			}
+			warp_delay["ready"](2, {
+				WARPTO (TIME:SECONDS + ETA:APOAPSIS - this_craft["Injection"]["burn_time"] - 60).
 			}).
 		} //--coasting
 
@@ -174,9 +176,7 @@ function Aurora {
 			inject_init_1s["do"]({
 				logJ(this_craft["Injection"]["init"]()). // initialize and get the response
 			}).
-			//logJ(iinit).  log the response
 			this_craft["Injection"]["burn"]().
-			//logJ(iburn).
 			IF this_craft["Injection"]["done"]() {
 				ship_log["add"]("Injection complete").
 				ship_log["save"]().

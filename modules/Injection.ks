@@ -19,12 +19,9 @@ function P_Injection {
 		SET THROTTLE TO 0.
 		HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.
-		LOCAL trgt_vector TO LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
-		SET trgt_vector:X TO ROUND(trgt_vector:X, 4).
-		SET trgt_vector:Y TO ROUND(trgt_vector:Y, 4).
-		SET trgt_vector:Z TO ROUND(trgt_vector:Z, 4).
+		LOCK trgt_vector TO LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
 		LOCK STEERING TO trgt_vector.
-		RETURN "RCS on, Circularisation".
+		RETURN "RCS ON, Circularisation".
 	}
 
 	LOCAL function burn {
@@ -61,7 +58,7 @@ function P_Injection {
 		"initialized", getInitialized@,
 		"done", getDone@,
 		"dV_change", dV_change@,
-		"burn_time", burn_time,
+		"burn_time", burn_time@,
 		"throttle", thrott@
 	).
 	

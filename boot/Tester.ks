@@ -69,7 +69,7 @@ function Tester {
 	
 	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "calcBurnTime", "gbase", "interpolate", "BACK").
 
-	LOCAL from_save TO this_craft["PreLaunch"]["from_save"]. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
+	LOCAL from_save TO this_craft["PreLaunch"]["from_save"](). //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 		
 	function listModules {
 		LOCAL p_list TO this_craft:KEYS.

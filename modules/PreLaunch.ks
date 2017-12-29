@@ -93,9 +93,13 @@ function P_PreLaunch {
 		}
 	}
 	
+	LOCAL function getFromSave {
+		return from_save.
+	}
+	
 	LOCAL methods TO LEXICON(
 		"init", init@,
-		"from_save", from_save
+		"from_save", getFromSave
 	).
 	
 	RETURN methods.

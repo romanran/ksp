@@ -25,7 +25,7 @@ function CS {
 		CLEARSCREEN.
 	}
 	IF DEFINED Display {
-		Display["reset"].
+		Display["reset"]().
 	}
 }
 
@@ -77,4 +77,21 @@ function logJ {
 	IF DEFINED globals["ship_log"] AND globals["ship_log"]:HASKEY("add") AND str {
 		globals["ship_log"]["add"](str).
 	}
+}
+
+function arr2obj {
+	PARAMETER data.
+	PARAMETER key1.
+	PARAMETER key2.
+	LOCAL key IS "".
+	LOCAL return_lex IS LEXICON(key1, LIST(), key2, LIST()).
+	FROM {LOCAL i is 0.} UNTIL i = data:LENGTH STEP {SET i TO i + 1.} DO {
+		IF MOD(i, 2) = 0 {
+			SET key TO key1.
+		} ELSE {
+			SET key TO key2.
+		}
+		return_lex[key]:ADD(data[i]).
+	}
+	RETURN return_lex.
 }

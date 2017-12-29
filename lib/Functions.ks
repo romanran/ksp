@@ -94,12 +94,10 @@ function calcDeltaV {
 	PARAMETER target_alt.
 	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
 	LOCAL v2 IS SQRT( grav_param * (1 / target_alt) ).//speed in a circural orbit
-	LOCAL trgtv IS 0.
 	//return speed difference
+	LOCAL trgtv IS SHIP:VELOCITY:ORBIT:MAG - v2.
 	IF v2 > SHIP:VELOCITY:ORBIT:MAG {
-		SET trgtv TO v2 - SHIP:VELOCITY:ORBIT:MAG.
-	} ELSE {
-		SET trgtv TO SHIP:VELOCITY:ORBIT:MAG - v2.
+		SET trgtv TO -trgtv.
 	}
 	RETURN trgtv.
 }
@@ -107,14 +105,21 @@ function calcDeltaV {
 function calcBurnTime {
 	// Takes dv as a parameter
 	PARAMETER dV.
+	PARAMETER rcs_on IS false.
 	LOCAL f IS 0.
 	LOCAL p IS 0.
 	LOCAL eng_list IS LIST().
 	LIST ENGINES IN eng_list.
+	SET rcs_thrusters TO getModules("modulercsfx").
 	FOR eng IN eng_list {
 		IF eng:STAGE = STAGE:NUMBER {
 			SET f TO f + eng:MAXTHRUST * 1000.  // Engine Thrust (kg * m/s²)
 			SET p TO eng:ISP.                   // Engine ISP (s)
+		}
+	}
+	IF rcs_on {
+		FOR rcs_eng IN rcs_thrusters {
+			LOCAL rcs_isp TO rcs_eng:getfield("rcs isp").
 		}
 	}
 	LOCAL m IS SHIP:MASS * 1000.    // Starting mass (kg)
@@ -124,7 +129,7 @@ function calcBurnTime {
 	IF f > 0 AND p > 0 {
 		RETURN kerb_g * m * p * (1 - eul ^ (-dV / ( kerb_g * p))) / f.
     }
-	RETURN -1.
+	RETURN 60.
 }
 
 function calcOrbPeriod {
@@ -263,15 +268,14 @@ function getPhaseAngle {
 		"target", tphase_ang,
 		"current", curr_angle
 	).
-
 }
 
 function interpolateLagrange {
 	PARAMETER data.
 	PARAMETER param1.
 	LOCAL y0 IS 0.
-	IF NOT (data:HASKEY("x") AND data:HASKEY("y")) {
-		RETURN 0.
+	IF data:TYPENAME = "LIST" {
+		SET data TO arr2obj(data, "x", "y").
 	}
 	LOCAL n IS data["x"]:LENGTH.
 	FROM {LOCAL j is 1.} UNTIL j = n STEP {SET j TO j + 1.} DO {

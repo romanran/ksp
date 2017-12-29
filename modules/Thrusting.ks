@@ -27,7 +27,7 @@ function P_Thrusting {
 	}
 	LOCAL LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
-	LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, SHIP:VELOCITY:SURFACE:MAG), 3), 0.1).
+	LOCAL LOCK thrott TO throttle_PID:UPDATE(TIME:SECONDS - pid_timer, SHIP:VELOCITY:SURFACE:MAG).
 	LOCAL LOCK target4throttle TO interpolateLagrange(thrust_data, ALTITUDE).
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
@@ -54,7 +54,7 @@ function P_Thrusting {
 			pid_1s["do"]({
 				//reset pid from initial safe altitude gain 100% thrust
 				SET pid_timer TO TIME:SECONDS.
-				SET throttle_PID:MINOUTPUT TO 0.
+				SET throttle_PID:MINOUTPUT TO 0.1.
 				throttle_PID:RESET.
 				logJ("Reached the safe altitude of " + safe_alt).
 			}).
