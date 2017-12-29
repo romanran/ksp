@@ -45,6 +45,7 @@ function P_Deployables {
 	
 	LOCAL function deployPanels {
 		PARAMETER t_on TO 1.
+		globals["Display"]["print"]("is deploy on or off", t_on).
 		IF t_on {
 			return deploy_1s["do"]({
 				PANELS ON.
@@ -54,10 +55,10 @@ function P_Deployables {
 			}).
 		} ELSE {
 			return deploy_1s["do"]({
-					PANELS OFF.
-					RADIATORS OFF.
-					LIGHTS OFF.
-					RETURN "Panels OFF Radiators OFF Lights OFF".
+				PANELS OFF.
+				RADIATORS OFF.
+				LIGHTS OFF.
+				RETURN "Panels OFF Radiators OFF Lights OFF".
 			}).
 		}
 	}

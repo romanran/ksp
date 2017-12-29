@@ -110,7 +110,7 @@ function calcBurnTime {
 	LOCAL p IS 0.
 	LOCAL eng_list IS LIST().
 	LIST ENGINES IN eng_list.
-	SET rcs_thrusters TO getModules("modulercsfx").
+	LOCAL rcs_thrusters TO getModules("modulercsfx").
 	FOR eng IN eng_list {
 		IF eng:STAGE = STAGE:NUMBER {
 			SET f TO f + eng:MAXTHRUST * 1000.  // Engine Thrust (kg * m/s²)
@@ -119,7 +119,7 @@ function calcBurnTime {
 	}
 	IF rcs_on {
 		FOR rcs_eng IN rcs_thrusters {
-			LOCAL rcs_isp TO rcs_eng:getfield("rcs isp").
+			LOCAL rcs_isp TO rcs_eng:GETFIELD("rcs isp").
 		}
 	}
 	LOCAL m IS SHIP:MASS * 1000.    // Starting mass (kg)

@@ -98,7 +98,7 @@ function Aurora {
 	}
 	SET done TO 0.
 	SET from_save TO this_craft["PreLaunch"]["from_save"]().
-
+	
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
 
@@ -142,19 +142,19 @@ function Aurora {
 				ship_log["add"]("COAST TRANSITION phase").
 				Display["reset"]().
 			}
-		}//--thrusting
 
-		IF ALTITUDE > 60000 AND globals["q_pressure"]() < 1 {
-			this_craft["Deployables"]["fairing"]().
-			RCS ON.
-		} //eject fairing
-		IF ALTITUDE > 80000 AND NOT from_save {
-			//--vacuum, deploy panels and antennas, turn on lights
-			LOCAL log_str IS this_craft["Deployables"]["panels"]().
-			logJ(log_str).
-			SET log_str TO this_craft["Deployables"]["antennas"]().
-			logJ(log_str).
-		}
+			IF ALTITUDE > 60000 AND globals["q_pressure"]() < 1 {
+				this_craft["Deployables"]["fairing"]().
+				RCS ON.
+			} //eject fairing
+			IF ALTITUDE > 80000 {
+				//--vacuum, deploy panels and antennas, turn on lights
+				LOCAL log_str IS this_craft["Deployables"]["panels"]().
+				//logJ(log_str).
+				SET log_str TO this_craft["Deployables"]["antennas"]().
+				//logJ(log_str).
+			}
+		}//--thrusting
 
 		IF ship_state["state"]["phase"] = "COASTING" {
 			HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
@@ -162,13 +162,13 @@ function Aurora {
 			warp_1s["do"]({
 				warp_delay["set"]().
 			}).
-			IF ETA:APOAPSIS < this_craft["Injection"]["burn_time"] - 60 AND ETA:APOAPSIS > 0{
+			IF ETA:APOAPSIS < this_craft["Injection"]["burn_time"]() - 60 AND ETA:APOAPSIS > 0{
 				KUNIVERSE:TIMEWARP:CANCELWARP().
 				ship_state["set"]("phase", "KERBINJECTION").
 				ship_log["add"]("KERBINJECTION phase").
 			}
 			warp_delay["ready"](2, {
-				WARPTO (TIME:SECONDS + ETA:APOAPSIS - this_craft["Injection"]["burn_time"] - 60).
+				WARPTO (TIME:SECONDS + ETA:APOAPSIS - this_craft["Injection"]["burn_time"]() - 60).
 			}).
 		} //--coasting
 

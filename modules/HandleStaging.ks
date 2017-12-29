@@ -10,7 +10,6 @@ function P_HandleStaging {
 		GLOBAL globals TO setGlobal().
 	}
 	LOCAL LOCK stg_res TO globals["stg_res"]().
-	LOCAL staging_ready_Timer IS Timer().
 	LOCAL staging_Timer IS Timer().
 	LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
 	LOCAL nacc_1s IS DoOnce(). //for no acceleration test once
@@ -36,7 +35,6 @@ function P_HandleStaging {
 		PARAMETER res_type.
 
 		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
-		staging_ready_Timer["set"]().
 		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 			HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
 			this_craft["Thrusting"]["resetPID"]().
@@ -74,8 +72,8 @@ function P_HandleStaging {
 				nextStage(res_type).
 			}).
 		}
-		staging_ready_Timer["ready"](stage_delay, stage_1s["reset"]).
 		staging_Timer["ready"](stage_delay, {
+			stage_1s["reset"]().
 			FOR eng IN eng_list {
 				IF eng:STAGE = STAGE:NUMBER {
 					eng:ACTIVATE.
@@ -117,7 +115,7 @@ function P_HandleStaging {
 				HUDTEXT("Reset, do stage.", 3, 2, 20, green, false).
 				RETURN stage_1s["do"]({
 					SET done_staging TO doStage().
-					staging_ready_Timer["set"]().
+					staging_Timer["set"]().
 					IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 						HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
 						this_craft["Thrusting"]["resetPID"]().

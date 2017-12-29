@@ -35,9 +35,13 @@ function P_CheckCraftCondition {
 		SET override TO ec OR mp.
 	}
 	
+	LOCAL function getOverride {
+		return override.
+	}
+	
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
-		"override", override
+		"override", getOverride@
 	).
 	
 	RETURN methods.

@@ -6,7 +6,7 @@
  check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere
 - make program creator
 - move all of the ifs to function and load them on program checklist. for example, in altitude ifs, call a function "deployantennas", so the function can be called even from ground.
- save created programs in json
+ - save created programs in json
  check if comm range is within max ranges of antennas on board
  check different gravity turns slopes by comparing dV and resources used
  - if throttle is 0, thrust with RCS
@@ -19,3 +19,4 @@
  - make a menu for testing all modules
  
  Create stages object, calculate needed dV and check if current stage and the next ones have necessary dV for the maneuver
+ Write coasting module for specific target

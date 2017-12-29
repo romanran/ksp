@@ -12,7 +12,7 @@ function P_PreLaunch {
 	IF NOT(DEFINED Display) LOCAL Display TO globals["Display"].
 	//--PRELAUNCH
 	LOCAL function init {
-		LOCAL from_save TO false.
+		SET from_save TO false.
 		LOCAL start IS false.
 		
 		LOCAL ship_engines IS LIST().
@@ -99,7 +99,7 @@ function P_PreLaunch {
 	
 	LOCAL methods TO LEXICON(
 		"init", init@,
-		"from_save", getFromSave
+		"from_save", getFromSave@
 	).
 	
 	RETURN methods.

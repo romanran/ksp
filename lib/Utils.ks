@@ -4,6 +4,16 @@ function loadDeps {
 	PARAMETER libs.
 	PARAMETER path IS "lib".
 	IF NOT ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
+		FOR lib IN libs {
+			LOCAL trgt_path IS "1:" + lib.
+			IF EXISTS(trgt_path) {
+				IF EXISTS("1:" + lib) {
+					RUNONCEPATH(lib).
+				}
+			} ELSE {
+				deb("Path " + trgt_path + " not found").
+			}
+		}
 		RETURN 0.
 	}
 	FOR lib IN libs {
