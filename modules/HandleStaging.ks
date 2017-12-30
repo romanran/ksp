@@ -18,7 +18,7 @@ function P_HandleStaging {
 	LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
-	LOCAL quiet_period IS 1.
+	LOCAL quiet_period IS 3.
 	LOCAL no_acc_period IS 5.
 	LOCAL quiet IS false.
 	
@@ -36,13 +36,14 @@ function P_HandleStaging {
 	LOCAL function nextStage {
 		PARAMETER res_type.
 
+		SET quiet TO true.
+		WAIT 0.
 		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
 		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 			HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
 			this_craft["Thrusting"]["resetPID"]().
 		}
 		SET done_staging TO doStage().
-		SET quiet TO true.
 
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}

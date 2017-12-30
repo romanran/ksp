@@ -99,7 +99,6 @@ function Aurora {
 	
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
-
 		Display["reset"]().
 		Display["print"]("Current phase", ship_state["get"]("phase")).
 		this_craft["CheckCraftCondition"]["refresh"]().
@@ -111,13 +110,11 @@ function Aurora {
 		}
 		LOCAL phase IS ship_state["get"]("phase").
 		IF phase = "TAKEOFF" {
+			ship_state["set"]("phase", "THRUSTING").
 			this_craft["HandleStaging"]["takeOff"]().
 			this_craft["Thrusting"]["takeOff"]().
 			journal_Timer["set"]().
-			ship_state["set"]("phase", "THRUSTING").
-		}
-		
-		IF phase = "THRUSTING" {
+		} ELSE IF phase = "THRUSTING" {
 			LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 			Display["print"]("THR", this_craft["Thrusting"]["thrott"]()).
 			Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
@@ -132,13 +129,14 @@ function Aurora {
 				this_craft["Thrusting"]["decelerate"]().
 			}
 			IF CEILING(APOAPSIS) >= trgt_orbit["alt"] AND ALTITUDE > 70000 {
-				LOCK THROTTLE TO 0.
+				ship_state["set"]("phase", "COASTING").
+				SET THROTTLE TO 0.
 				UNLOCK STEERING.
 				HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
 				//leaving thrusting section at that time
-				ship_state["set"]("phase", "COASTING").
 				ship_log["add"]("COAST TRANSITION phase").
 				Display["reset"]().
+				this_craft["Injection"]["burn_time"]().
 			}
 
 			IF ALTITUDE > 60000 AND globals["q_pressure"]() < 1 {
@@ -147,54 +145,46 @@ function Aurora {
 			} //eject fairing
 			IF ALTITUDE > 80000 {
 				//--vacuum, deploy panels and antennas, turn on lights
-				LOCAL log_str IS this_craft["Deployables"]["panels"]().
-				//logJ(log_str).
-				SET log_str TO this_craft["Deployables"]["antennas"]().
-				//logJ(log_str).
+				this_craft["Deployables"]["panels"]().
+				this_craft["Deployables"]["antennas"]().
 			}
-		}//--thrusting
-
-		IF phase = "COASTING" {
-			//HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
+		}  ELSE IF phase = "COASTING" {
 			SET WARPMODE TO "RAILS".
 			warp_1s["do"]({
+				HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
 				warp_delay["set"]().
+				Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 			}).
-			IF ETA:APOAPSIS < this_craft["Injection"]["burn_time"]() - 60 AND ETA:APOAPSIS > 0{
-				KUNIVERSE:TIMEWARP:CANCELWARP().
+			IF ETA:APOAPSIS < this_craft["Injection"]["burn_time"]() + 120 AND ETA:APOAPSIS > 0 {
 				ship_state["set"]("phase", "KERBINJECTION").
 				ship_log["add"]("KERBINJECTION phase").
+				KUNIVERSE:TIMEWARP:CANCELWARP().
 			}
 			warp_delay["ready"](2, {
 				WARPTO (TIME:SECONDS + ETA:APOAPSIS - this_craft["Injection"]["burn_time"]() - 60).
 			}).
-		} //--coasting
-
-		IF phase = "KERBINJECTION" {
+		} ELSE IF phase = "KERBINJECTION" {
 			inject_init_1s["do"]({
 				logJ(this_craft["Injection"]["init"]()). // initialize and get the response
 			}).
 			this_craft["Injection"]["burn"]().
 			IF this_craft["Injection"]["done"]() {
+				ship_state["set"]("phase", "CORRECTION_BURN").
 				ship_log["add"]("Injection complete").
 				ship_log["save"]().
-				ship_state["set"]("phase", "CORRECTION_BURN").
 			}
 			Display["print"]("THROTTLE: ", this_craft["Injection"]["throttle"]()).
 			Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
-			Display["print"]("initialized: ", this_craft["Injection"]["initialized"]()).
 			Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 			Display["print"]("ORB. PERIOD:", ROUND(SHIP:ORBIT:PERIOD, 3)).
 			Display["print"]("TRGT ORB. PERIOD: ", trgt_orbit["period"]).
-		} //target orbit injection
-
-		IF phase = "CORRECTION_BURN" {
+		} ELSE IF phase = "CORRECTION_BURN" {
 			IF ROUND(SHIP:ORBIT:PERIOD, 3) = trgt_orbit["period"] {
-				IF this_craft["CorrectionBurn"]["neutrilize"]() {
+				IF this_craft["CorrectionBurn"]["neutralize"]() {
+					ship_state["set"]("phase", "ORBITING").
 					HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
 					ship_log["add"]("CIRCURALISATION COMPLETE").
 					ship_log["save"]().
-					ship_state["set"]("phase", "ORBITING").
 				}
 			} ELSE {
 				LOCAL margin IS -(ROUND(SHIP:ORBIT:PERIOD, 3) / trgt_orbit["period"] - 1).
@@ -204,8 +194,7 @@ function Aurora {
 				Display["print"]("ORB. PERIOD:", ROUND(SHIP:ORBIT:PERIOD, 3)).
 				Display["print"]("TRGT ORB. PERIOD: ", trgt_orbit["period"]).
 			}
-		}
-		IF phase = "ORBITING" {
+		} ELSE IF phase = "ORBITING" {
 			UNLOCK THROTTLE.
 			UNLOCK STEERING.
 			conn_Timer["set"]().

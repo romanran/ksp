@@ -19,7 +19,7 @@ function P_Injection {
 		SET THROTTLE TO 0.
 		HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.
-		LOCK trgt_vector TO LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
+		LOCK trgt_vector TO R(0,0,0) + LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
 		LOCK STEERING TO trgt_vector.
 		RETURN "RCS ON, Circularisation".
 	}
@@ -41,10 +41,10 @@ function P_Injection {
 			LOCK THROTTLE TO 0.
 			SET done TO 1.
 			HUDTEXT("CIRCULARISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).
-			RETURN "Circularisation Phase I complete".
+			RETURN true.
 		}
 		
-		RETURN 0. // return that the maneuver is not done
+		RETURN false. // return that the maneuver is not done
 	}
 	
 	LOCAL function getInitialized {

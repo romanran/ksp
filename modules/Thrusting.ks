@@ -11,7 +11,7 @@ function P_Thrusting {
 		GLOBAL globals TO setGlobal().
 	}
 	LOCAL pid_timer TO TIME:SECONDS.
-	LOCAL throttle_PID to setPID(0, 0.1).
+	LOCAL throttle_PID to setPID(0, 0.2).
 	LOCAL using_rcs TO false.
 	LOCAL aborted TO false.
 	
@@ -109,7 +109,7 @@ function P_Thrusting {
 			logJ("Deacceleration").
 		}).
 		IF NOT using_rcs {
-			IF globals["ship_state"]["get"]["quiet"] {
+			IF globals["ship_state"]["get"]("quiet") {
 				SET THROTTLE TO 0.
 			} ELSE {
 				SET THROTTLE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
