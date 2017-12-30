@@ -26,8 +26,8 @@ function Tester {
 	LOCAL my_programme TO Programme().
 	LOCAL prlist TO my_programme["list"]().
 	LOCAL chosen_prog TO "".
-	IF ship_state["state"]:HASKEY("programme") {
-		SET chosen_prog TO ship_state["state"]["programme"].
+	IF ship_state["get"]():HASKEY("programme") {
+		SET chosen_prog TO ship_state["get"]("programme").
 	} ELSE {
 		LOCAL pr_chooser TO LIST(
 			LEXICON(

@@ -13,10 +13,20 @@ function ShipState {
 		SET ship_state[key] TO val.
 		WRITEJSON(ship_state, filename).
 	}
+	
+	LOCAL function shipState {
+		PARAMETER key IS "n0n".
+		IF key = "n0n" {
+			return ship_state.
+		} ELSE IF ship_state:HASKEY(key) {
+			return ship_state[key].
+		}
+		return 0.
+	}
 
 	LOCAL methods TO LEXICON(
 		"set", setAndSave@,
-		"state", ship_state
+		"get", shipState@
 	).
 	
 	RETURN methods.

@@ -18,6 +18,9 @@ function P_HandleStaging {
 	LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
+	LOCAL quiet_period IS 1.
+	LOCAL no_acc_period IS 5.
+	LOCAL quiet IS false.
 	
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
@@ -39,12 +42,7 @@ function P_HandleStaging {
 			this_craft["Thrusting"]["resetPID"]().
 		}
 		SET done_staging TO doStage().
-		FOR eng IN eng_list {
-			HUDTEXT(eng:TOSTRING + " " + eng:STAGE + " " + STAGE:NUMBER , 5, 5, 26, red, false).
-			IF eng:STAGE = STAGE:NUMBER {
-				eng:SHUTDOWN.
-			}
-		}
+		SET quiet TO true.
 
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
@@ -70,15 +68,10 @@ function P_HandleStaging {
 				staging_Timer["set"]().
 			}).
 		}
-		staging_Timer["ready"](3, {
+		staging_Timer["ready"](quiet_period, {
 			stage_1s["reset"]().
-			HUDTEXT("read activate" + STAGE:NUMBER, 5, 5, 26, red, false).
-			FOR eng IN eng_list {
-				IF eng:STAGE = STAGE:NUMBER {
-					eng:ACTIVATE.
-				}
-			}
 			staging_Timer["reset"]().
+			SET quiet TO false.
 		}).
 	}
 	
@@ -89,8 +82,9 @@ function P_HandleStaging {
 			check("SOLIDFUEL").
 		}
 		
-		LOCAL must_thrust_phase IS ship_state["state"]:HASKEY("phase") 
-		AND LIST("TAKEOFF", "THRUSTING"):CONTAINS(ship_state["state"]["phase"]).
+		LOCAL must_thrust_phase IS ship_state["get"]():HASKEY("phase") 
+		AND LIST("TAKEOFF", "THRUSTING"):CONTAINS(ship_state["get"]("phase")).
+		ship_state["set"]("quiet", quiet).
 		
 		IF NOT must_thrust_phase {
 			RETURN 2.
@@ -100,14 +94,14 @@ function P_HandleStaging {
 		//if not under accel
 		IF no_acceleration {
 			nacc_1s["do"]({
-				HUDTEXT("NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...", 3, 3, 20, red, false).
+				HUDTEXT("NO ACCELERATION DETECTED, WAITING FOR THRUST " + no_acc_period + " SECONDS...", 3, 3, 20, red, false).
 				staging2_Timer["set"]().
 				logJ("NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...").
 			}).
 		}
 		
-		staging2_Timer["ready"](3, {
-			HUDTEXT("Waited 3 SECONDS...", 3, 2, 20, blue, false).
+		staging2_Timer["ready"](no_acc_period, {
+			HUDTEXT("Waited " + no_acc_period + " SECONDS...", 3, 2, 20, blue, false).
 			//if there is still no acceleration, staging must have no engines available, stage again
 			IF no_acceleration {
 				stage_1s["reset"]().
@@ -127,10 +121,15 @@ function P_HandleStaging {
 		
 		RETURN done_staging.
 	}
+	
+	LOCAL function getQuiet {
+		return quiet.
+	}
 
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
-		"takeOff", takeOff@
+		"takeOff", takeOff@,
+		"quiet", getQuiet@
 	).
 	
 	RETURN methods.

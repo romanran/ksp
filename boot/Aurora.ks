@@ -24,13 +24,12 @@ function Aurora {
 	LOCAL Display TO globals["Display"].
 	LOCAL ship_log TO globals["ship_log"].
 
-
 	// Get programme name from ship state or inquiry
 	LOCAL my_programme TO Programme().
 	LOCAL prlist TO my_programme["list"]().
 	LOCAL chosen_prog TO "".
-	IF ship_state["state"]:HASKEY("programme") {
-		SET chosen_prog TO ship_state["state"]["programme"].
+	IF ship_state["get"]():HASKEY("programme") {
+		SET chosen_prog TO ship_state["get"]("programme").
 	} ELSE {
 		LOCAL pr_chooser TO LIST(
 			LEXICON(
@@ -102,28 +101,28 @@ function Aurora {
 	UNTIL done {
 
 		Display["reset"]().
-		Display["print"]("Current phase", ship_state["state"]["phase"]).
+		Display["print"]("Current phase", ship_state["get"]("phase")).
 		this_craft["CheckCraftCondition"]["refresh"]().
 		
 		LOCAL stage_response IS this_craft["HandleStaging"]["refresh"]().
-
+		
 		IF stage_response {
 			logJ(stage_response).
 		}
-
-		IF ship_state["state"]["phase"] = "TAKEOFF" {
+		LOCAL phase IS ship_state["get"]("phase").
+		IF phase = "TAKEOFF" {
 			this_craft["HandleStaging"]["takeOff"]().
 			this_craft["Thrusting"]["takeOff"]().
 			journal_Timer["set"]().
 			ship_state["set"]("phase", "THRUSTING").
 		}
 		
-		IF ship_state["state"]["phase"] = "THRUSTING" {
+		IF phase = "THRUSTING" {
 			LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 			Display["print"]("THR", this_craft["Thrusting"]["thrott"]()).
 			Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
 			Display["print"]("T.PIT:", this_craft["Thrusting"]["trgt_pitch"]()).
-			Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)).
+			Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
 			Display["print"]("T4T:", this_craft["Thrusting"]["target4throttle"]()).
 			Display["print"]("Current v:", SHIP:VELOCITY:SURFACE:MAG).
 			Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
@@ -155,7 +154,7 @@ function Aurora {
 			}
 		}//--thrusting
 
-		IF ship_state["state"]["phase"] = "COASTING" {
+		IF phase = "COASTING" {
 			//HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
 			SET WARPMODE TO "RAILS".
 			warp_1s["do"]({
@@ -171,7 +170,7 @@ function Aurora {
 			}).
 		} //--coasting
 
-		IF ship_state["state"]["phase"] = "KERBINJECTION" {
+		IF phase = "KERBINJECTION" {
 			inject_init_1s["do"]({
 				logJ(this_craft["Injection"]["init"]()). // initialize and get the response
 			}).
@@ -189,7 +188,7 @@ function Aurora {
 			Display["print"]("TRGT ORB. PERIOD: ", trgt_orbit["period"]).
 		} //target orbit injection
 
-		IF ship_state["state"]["phase"] = "CORRECTION_BURN" {
+		IF phase = "CORRECTION_BURN" {
 			IF ROUND(SHIP:ORBIT:PERIOD, 3) = trgt_orbit["period"] {
 				IF this_craft["CorrectionBurn"]["neutrilize"]() {
 					HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
@@ -206,7 +205,7 @@ function Aurora {
 				Display["print"]("TRGT ORB. PERIOD: ", trgt_orbit["period"]).
 			}
 		}
-		IF ship_state["state"]["phase"] = "ORBITING" {
+		IF phase = "ORBITING" {
 			UNLOCK THROTTLE.
 			UNLOCK STEERING.
 			conn_Timer["set"]().
@@ -219,7 +218,7 @@ function Aurora {
 			}
 		}).
 		journal_Timer["ready"](10, {
-			ship_log["add"](ship_state["state"]["phase"] + " phase").
+			ship_log["add"](phase + " phase").
 			journal_Timer["reset"]().
 		}).
 		WAIT 0.

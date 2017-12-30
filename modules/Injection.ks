@@ -28,9 +28,13 @@ function P_Injection {
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time / 2) {
 			circ_burn_1s["do"]({
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
-				LOCK THROTTLE TO thrott.
 				RETURN "Circularisation burn".
 			}).
+		}
+		IF globals["ship_state"]["get"]("quiet") {
+			SET THROTTLE TO 0.
+		} ELSE {
+			SET THROTTLE TO thrott.
 		}
 		
 		IF ROUND(SHIP:ORBIT:PERIOD) >= trgt_orbit["period"] - 50 {

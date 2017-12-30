@@ -272,20 +272,20 @@ function getPhaseAngle {
 
 function interpolateLagrange {
 	PARAMETER data.
-	PARAMETER param1.
-	LOCAL y0 IS 0.
+	PARAMETER param.
+	LOCAL result IS 0.
 	IF data:TYPENAME = "LIST" {
 		SET data TO arr2obj(data, "x", "y").
 	}
 	LOCAL n IS data["x"]:LENGTH.
-	FROM {LOCAL j is 1.} UNTIL j = n STEP {SET j TO j + 1.} DO {
-		LOCAL t IS 1.
-		FROM {LOCAL i is 1.} UNTIL i = n STEP {SET i TO i + 1.} DO {
+	FROM {LOCAL i is 0.} UNTIL i = n STEP {SET i TO i + 1.} DO {
+		LOCAL term TO 1.
+		FROM {LOCAL j is 0.} UNTIL j = n STEP {SET j TO j + 1.} DO {
 			IF NOT (i = j) {
-				SET t TO t * (param1 - data["x"][i]) / (data["x"][j] - data["x"][i]).
+				SET term TO term * ((param - data["x"][j]) / (data["x"][i] - data["x"][j])).
 			}
 		}
-		SET y0 TO y0 + t * data["y"][j].
+		SET result TO result + data["y"][i] * term.
 	}
-	RETURN y0.
+	RETURN result.
 }

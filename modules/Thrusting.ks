@@ -32,9 +32,6 @@ function P_Thrusting {
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
 	
-	// LOCAL LOCK thrott TO MAX(ROUND(throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()), 3), 0.1).
-    LOCAL LOCK target_kPa TO ROUND(MAX(((-ALTITUDE + 40000) / 40000) * 10, 1), 3).
- 
 	LOCAL function takeOff {
 		SET throttle_PID:MAXOUTPUT TO 1.
 		SET throttle_PID:MINOUTPUT TO 1.
@@ -59,21 +56,23 @@ function P_Thrusting {
 				logJ("Reached the safe altitude of " + safe_alt).
 			}).
 		}
-		SET throttle_PID:SETPOINT TO target4throttle.
-		IF NOT STAGE:READY {
+		IF globals["ship_state"]["get"]("quiet")  {
+			SET throttle_PID:MINOUTPUT TO 0.
 			SET throttle_PID:MAXOUTPUT TO 0.
 		} ELSE {
+			SET throttle_PID:MINOUTPUT TO 0.1.
 			SET throttle_PID:MAXOUTPUT TO 1.
 		}
+		SET throttle_PID:SETPOINT TO target4throttle.
+
 		FOR eng in eng_list {
 			IF eng:STAGE = STAGE:NUMBER {
 				SET total_thrust TO total_thrust + eng:THRUST.
 			}
 		}
-		IF total_thrust < 1 AND globals["q_pressure"]() < 1 {
+		IF total_thrust < 1 AND globals["q_pressure"]() < 1 AND NOT globals["ship_state"]["get"]("quiet")  {
 			SET using_rcs TO true.
 		}
-		
 		IF using_rcs {
 			rcs_1s["do"]({
 				RCS ON.
@@ -107,12 +106,15 @@ function P_Thrusting {
 			HUDTEXT("Decreasing acceleration", 2, 2, 42, green, false).
 			UNLOCK throttle_PID.
 			UNLOCK thrott.
-			IF NOT using_rcs {
-				LOCK THROTTLE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
-			}
 			logJ("Deacceleration").
 		}).
-		IF using_rcs {
+		IF NOT using_rcs {
+			IF globals["ship_state"]["get"]["quiet"] {
+				SET THROTTLE TO 0.
+			} ELSE {
+				SET THROTTLE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
+			}
+		} ELSE {
 			SET SHIP:CONTROL:FORE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
 		}
 	}

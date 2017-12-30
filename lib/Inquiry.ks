@@ -16,7 +16,7 @@ function Inquiry {
 	LOCAL numbers TO "01234566789.":SPLIT("").
 	LOCAL letters TO "abcdefghijklmnopqrstuwvxyz":SPLIT("").
 	LOCAL Sounds TO GETVOICE(0).
-	LOCAL err_s TO NOTE(400, 0.1).
+	LOCAL err_s TO NOTE(400, 0.1, 0, 0.3).
 	LOCAL correct_s TO NOTE("c6",  0.1, 0, 0.3).
 	LOCAL enter_s TO  NOTE("E6",  0.5, 0, 0.3).
 
