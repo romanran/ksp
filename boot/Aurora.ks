@@ -44,7 +44,6 @@ function Aurora {
 		SET chosen_prog TO chosen_prog["program"].
 		ship_state["set"]("programme", chosen_prog).
 		SET my_programme TO Programme(chosen_prog).
-		my_programme["add"]().
 		CS().
 	}
 	// load the programme
@@ -86,8 +85,8 @@ function Aurora {
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 
-
 	IF SHIP:STATUS = "PRELAUNCH" {
+		ship_state["set"]("phase", "PRELAUNCH").
 		Display["imprint"]("Aurora Space Program V1.5.0").
 		Display["imprint"](SHIP:NAME).
 		Display["imprint"]("Comm range:", trgt_orbit["r"] + "m.").
@@ -157,7 +156,7 @@ function Aurora {
 		}//--thrusting
 
 		IF ship_state["state"]["phase"] = "COASTING" {
-			HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
+			//HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
 			SET WARPMODE TO "RAILS".
 			warp_1s["do"]({
 				warp_delay["set"]().
@@ -215,6 +214,8 @@ function Aurora {
 		conn_Timer["ready"](10, {
 			IF NOT ship_log["save"]() {
 				conn_Timer["set"]().
+			} ELSE {
+				my_programme["add"]().
 			}
 		}).
 		journal_Timer["ready"](10, {

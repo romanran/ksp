@@ -35,7 +35,7 @@ function getStageResources {
 function getResources{
 	LOCAL res_l TO LEXICON().
 	FOR res IN SHIP:RESOURCES {
-		IF res:CAPACITY > 0{
+		IF res:CAPACITY > 0 {
 			res_l:ADD(res:NAME, res).
 		}
 	}

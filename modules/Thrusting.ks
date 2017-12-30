@@ -60,6 +60,11 @@ function P_Thrusting {
 			}).
 		}
 		SET throttle_PID:SETPOINT TO target4throttle.
+		IF NOT STAGE:READY {
+			SET throttle_PID:MAXOUTPUT TO 0.
+		} ELSE {
+			SET throttle_PID:MAXOUTPUT TO 1.
+		}
 		FOR eng in eng_list {
 			IF eng:STAGE = STAGE:NUMBER {
 				SET total_thrust TO total_thrust + eng:THRUST.

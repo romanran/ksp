@@ -12,21 +12,22 @@ function P_CheckCraftCondition {
 		IF ship_res:HASKEY(res) {
 			RETURN ((ship_res[res]:AMOUNT / ship_res[res]:CAPACITY) * 100 < percent) OR ship_res[res]:AMOUNT < r_amount.
 		} ELSE {
-			RETURN 0.
+			RETURN false.
 		}
 	}
 	LOCAL LOCK ship_res TO getResources().
-	LOCAL LOCK ec TO checkTreshold("ELECTRICCHARGE", 20, 40).
-	LOCAL LOCK mp TO checkTreshold("MonoPropellant", 1, 1).
 	LOCAL override IS 0.
 	
 	LOCAL function refresh {
+		LOCAL ec TO checkTreshold("ELECTRICCHARGE", 20, 40).
+		LOCAL mp TO checkTreshold("MonoPropellant", 1, 1).
 		IF ec {
 			//if below 20% of max ships capacity or 40 units
 			//electic charge saving and generation
 			KUNIVERSE:TIMEWARP:CANCELWARP().
 			RCS ON.
 			SAS OFF.
+			SET THROTTLE TO 0.
 			LOCK STEERING TO UP + R(0, 45, 0).
 			PANELS ON.
 			FUELCELLS ON.

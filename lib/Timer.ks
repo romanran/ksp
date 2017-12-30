@@ -8,16 +8,11 @@ function Timer {
 	LOCAL function onReady {
 		PARAMETER p_wait_for IS wait_for.
 		PARAMETER fun IS 0.
-		PARAMETER params IS "empty".
 		SET wait_for TO p_wait_for.
-		IF FLOOR(TIME:SECONDS) >= internal_t + wait_for AND invokes = 1 {
+		IF TIME:SECONDS >= internal_t + wait_for AND invokes = 1 {
 			SET invokes TO 2.
 			IF fun <> 0 {
-				IF params <> "empty" {
-					RETURN fun(params).//pass arguments as a list
-				} ELSE {
-					RETURN fun().
-				}
+				RETURN fun().
 			}
 		} ELSE {
 			RETURN 0.
@@ -25,7 +20,7 @@ function Timer {
 	}
 
 	LOCAL function setTimer {
-		SET internal_t TO FLOOR(TIME:SECONDS).
+		SET internal_t TO TIME:SECONDS.
 		SET invokes TO 1.
 	}
 	
@@ -41,7 +36,7 @@ function Timer {
 	}
 	
 	function checkTimer {
-		RETURN FLOOR(TIME:SECONDS) - (internal_t + wait_for).
+		RETURN TIME:SECONDS - (internal_t + wait_for).
 	}
 
 	return LEX(

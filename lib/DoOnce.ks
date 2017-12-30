@@ -6,11 +6,7 @@ function DoOnce {
 		PARAMETER params IS "empty".
 		IF (func <> 0) AND is_ready {
 			SET is_ready TO 0.
-			IF params <> "empty" {
-				RETURN func(params).//pass arguments as a list
-			} ELSE {
-				RETURN func().
-			}
+			RETURN func().
 		} ELSE {
 			RETURN 0.
 		}
