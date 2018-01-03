@@ -28,8 +28,7 @@ function P_CheckCraftCondition {
 			RCS ON.
 			SAS OFF.
 			SET THROTTLE TO 0.
-			UNLOCK STEERING.
-			LOCK STEERING TO UP + R(0, 45, 0).
+			SET STEERING TO UP + R(0, 45, 0).
 			PANELS ON.
 			FUELCELLS ON.
 		}

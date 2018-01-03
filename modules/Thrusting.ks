@@ -6,37 +6,24 @@ loadDeps(dependencies).
 
 function P_Thrusting {
 	PARAMETER trg_orbit.
-	PARAMETER safe_alt IS 150. //safe altitude to release max thrust during a launch
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
 	}
-	LOCAL pid_timer TO TIME:SECONDS.
-	LOCAL throttle_PID to setPID(0, 0.1).
 	LOCAL using_rcs TO false.
 	LOCAL aborted TO false.
 	
 	LOCAL pitch_1s TO DoOnce().
-	LOCAL pid_1s TO DoOnce().
 	LOCAL rcs_1s TO DoOnce().
 	LOCAL abort_1s IS DoOnce().
 	LOCAL de_acc_1s IS DoOnce().
-	LOCAL thrust_data IS LEXICON().
-	LOCAL thrust_data_file IS "0:datasets/thrust1.json".
-	IF (EXISTS(thrust_data_file)) {
-		SET thrust_data TO READJSON(thrust_data_file).
-	}
-	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
+
+	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory()).
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
-	LOCAL LOCK thrott TO throttle_PID:UPDATE(TIME:SECONDS - pid_timer, SHIP:VELOCITY:SURFACE:MAG).
-	LOCAL LOCK target4throttle TO interpolateLagrange(thrust_data, ALTITUDE).
+	LOCAL thrott TO 1.
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
 	
 	LOCAL function takeOff {
-		SET throttle_PID:MAXOUTPUT TO 1.
-		SET throttle_PID:MINOUTPUT TO 1.
-		SET throttle_PID:SETPOINT TO 1.
-		SET pid_timer TO TIME:SECONDS.
 		LOCK THROTTLE TO thrott.
 		RETURN "Take off".
 	}
@@ -47,26 +34,12 @@ function P_Thrusting {
 			LOCK STEERING TO R(0, 0, 0) + HEADING(90, trg_pitch).
 		}).
 		
-		IF ALT:RADAR > safe_alt AND pid_1s["ready"]() {
-			pid_1s["do"]({
-				//reset pid from initial safe altitude gain 100% thrust
-				SET pid_timer TO TIME:SECONDS.
-				SET throttle_PID:MINOUTPUT TO 0.1.
-				throttle_PID:RESET.
-				logJ("Reached the safe altitude of " + safe_alt).
-			}).
-		}
 		IF globals["ship_state"]["get"]("quiet")  {
-			SET throttle_PID:MINOUTPUT TO 0.
-			SET throttle_PID:MAXOUTPUT TO 0.
+			SET thrott TO 0.
 		} ELSE {
-			SET throttle_PID:MINOUTPUT TO 0.1.
-			SET throttle_PID:MAXOUTPUT TO 1.
+			SET thrott TO 1.
 		}
-		IF ALTITUDE > 70000 {
-			LOCK THROTTLE TO 1.
-		}
-		SET throttle_PID:SETPOINT TO target4throttle.
+
 
 		FOR eng in eng_list {
 			IF eng:STAGE = STAGE:NUMBER {
@@ -92,7 +65,7 @@ function P_Thrusting {
 				ABORT ON.
 				UNLOCK STEERING.
 				logJ("Course deviation - malfunction - abort").
-				ship_state["set"]("phase", "aborted").
+				globals["ship_state"]["set"]("phase", "aborted").
 				SET aborted TO true.
 				IF using_rcs {
 					SET SHIP:CONTROL:FORE TO 0.
@@ -124,21 +97,13 @@ function P_Thrusting {
 		}
 	}
 	
-	LOCAL function resetPID {
-		SET pid_timer TO TIME:SECONDS.
-		throttle_PID:RESET.
-		pid_1s["reset"]().
-	}
 	
 	LOCAL methods TO LEXICON(
 		"takeOff", takeOff@,
 		"handleFlight", handleFlight@,
 		"decelerate", decelerate@,
-		"resetPID", resetPID@,
 		"trg_pitch", trg_pitch@, 
-		"ship_p", ship_p@, 
-		"target4throttle", target4throttle@, 
-		"thrott", thrott@
+		"ship_p", ship_p@
 	).
 	
 	RETURN methods.

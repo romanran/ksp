@@ -145,11 +145,18 @@ function calcOrbPeriod {
 	RETURN ROUND(SQRT((4 * CONSTANT:PI ^ 2 * trg_alt ^ 3) / g_param), 3).
 }
 
+function getTWR {
+	LOCAL radius TO SHIP:ALTITUDE + SHIP:ORBIT:BODY:RADIUS.
+	LOCAL weight TO CONSTANT:G * ((SHIP:MASS * SHIP:ORBIT:BODY:MASS) / (radius * radius)).
+	RETURN SHIP:MAXTHRUST / weight.
+}
+
 function calcTrajectory {
-	PARAMETER alt.
 	PARAMETER target_alt IS 70000.
-	LOCAL funcx TO ROUND(1 - (alt ^ 2 / target_alt ^ 2) ^ 0.25, 3).
-	RETURN ROUND(SIN(funcx * CONSTANT:RadToDeg) * (90 * 1.1884), 2).
+	LOCAL twr TO getTWR().
+	LOCAL factor TO  -0.4 * twr^3 + 1.97 * twr^2 - 2.6 * twr + 1.15.
+	LOCAL factor TO MIN(0.9, MAX(factor, 0.1)).
+	RETURN ROUND(90 * (1 - (ALTITUDE / target_alt) ^ factor), 2).
 }
 
 function getdV {   

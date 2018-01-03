@@ -39,10 +39,6 @@ function P_HandleStaging {
 		SET quiet TO true.
 		WAIT 0.5.
 		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
-		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
-			HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
-			this_craft["Thrusting"]["resetPID"]().
-		}
 		SET done_staging TO doStage().
 
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
@@ -112,7 +108,6 @@ function P_HandleStaging {
 					staging_Timer["set"]().
 					IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 						HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
-						this_craft["Thrusting"]["resetPID"]().
 					}
 					nacc_1s["reset"]().
 					logJ("Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase").

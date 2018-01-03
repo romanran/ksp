@@ -114,11 +114,11 @@ function Aurora {
 			journal_Timer["set"]().
 		} ELSE IF phase = "THRUSTING" {
 			LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
-			Display["print"]("THR", this_craft["Thrusting"]["thrott"]()).
+			Display["print"]("THR", THROTTLE * 100 + "%").
 			Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
 			Display["print"]("T.PITCH:", this_craft["Thrusting"]["trg_pitch"]()).
 			Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
-			Display["print"]("T4T:", this_craft["Thrusting"]["target4throttle"]()).
+			Display["print"]("TWR:", ROUND(getTWR(), 3)).
 			Display["print"]("Current v:", SHIP:VELOCITY:SURFACE:MAG).
 			Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
 			

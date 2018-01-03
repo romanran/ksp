@@ -71,7 +71,7 @@ function P_PreLaunch {
 		Display["print"]("ABORT ON AG3.").
 		WAIT UNTIL start = TRUE.
 		
-		Display["print"]("COUNTDOWN START").
+		Display["print"]("COUNTDOWN STARTED").
 		FROM {LOCAL i IS 5.} UNTIL i = -1 STEP {SET i TO i - 1.} DO {
 			WAIT 1.
 			IF i = 4 {
