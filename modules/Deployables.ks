@@ -10,7 +10,7 @@ function P_Deployables {
 	
 	LOCAL function jettisonFairing {
 		return fairing_1s["do"]({
-			IF doModuleEvent("ModuleProceduralFairing", "DEPLOY") {
+			IF doModuleEvent("ModuleProceduralFairing", "DEPLOY") OR doModuleEvent("ProceduralFairingDecoupler", "JETTISON") {
 				RETURN "Fairings jettison".
 			} ELSE {
 				HUDTEXT("NO FAIRINGS DETECTED", 2, 2, 42, RGB(255,60,0), false).

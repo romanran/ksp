@@ -37,7 +37,7 @@ function P_HandleStaging {
 		PARAMETER res_type.
 
 		SET quiet TO true.
-		WAIT 0.
+		WAIT 0.5.
 		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
 		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 			HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).

@@ -95,11 +95,11 @@ function calcDeltaV {
 	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
 	LOCAL v2 IS SQRT( grav_param * (1 / target_alt) ).//speed in a circural orbit
 	//return speed difference
-	LOCAL trgtv IS SHIP:VELOCITY:ORBIT:MAG - v2.
+	LOCAL trgv IS SHIP:VELOCITY:ORBIT:MAG - v2.
 	IF v2 > SHIP:VELOCITY:ORBIT:MAG {
-		SET trgtv TO -trgtv.
+		SET trgv TO -trgv.
 	}
-	RETURN trgtv.
+	RETURN trgv.
 }
 
 function calcBurnTime {
@@ -135,21 +135,21 @@ function calcBurnTime {
 function calcOrbPeriod {
 	// Takes r - circular orbit absolute altitude
 	// Takes celestial body name string
-	PARAMETER trgt_alt.
-	PARAMETER trgt_body_str IS "current".
-	LOCAL trgt_body IS SHIP:ORBIT:BODY.
-	IF trgt_body_str <> "current" {
-		SET trgt_body TO BODY(trgt_body_str).
+	PARAMETER trg_alt.
+	PARAMETER trg_body_str IS "current".
+	LOCAL trg_body IS SHIP:ORBIT:BODY.
+	IF trg_body_str <> "current" {
+		SET trg_body TO BODY(trg_body_str).
 	}
-	LOCAL grav_param IS CONSTANT:G * trgt_body:MASS. //GM
-	RETURN ROUND(SQRT((4 * CONSTANT:PI ^ 2 * trgt_alt ^ 3) / grav_param), 3).
+	LOCAL g_param IS CONSTANT:G * trg_body:MASS. //GM
+	RETURN ROUND(SQRT((4 * CONSTANT:PI ^ 2 * trg_alt ^ 3) / g_param), 3).
 }
 
 function calcTrajectory {
 	PARAMETER alt.
 	PARAMETER target_alt IS 70000.
 	LOCAL funcx TO ROUND(1 - (alt ^ 2 / target_alt ^ 2) ^ 0.25, 3).
-	RETURN ROUND(SIN(funcx*CONSTANT:RadToDeg) * (90 * 1.1884), 2).
+	RETURN ROUND(SIN(funcx * CONSTANT:RadToDeg) * (90 * 1.1884), 2).
 }
 
 function getdV {   
@@ -195,20 +195,20 @@ function getdV {
     RETURN dV.
 }
 
-function getTrgtAlt {
+function gettrgAlt {
 	PARAMETER sat_num is 3.
 	PARAMETER min_h is 100.
-	PARAMETER trgt_body_str IS "current".
-	LOCAL trgt_body IS SHIP:ORBIT:BODY.
-	IF trgt_body_str <> "current" {
-		SET trgt_body TO BODY(trgt_body_str).
+	PARAMETER trg_body_str IS "current".
+	LOCAL trg_body IS SHIP:ORBIT:BODY.
+	IF trg_body_str <> "current" {
+		SET trg_body TO BODY(trg_body_str).
 	}
 	LOCAL ang TO 360 / (sat_num * 2). 
-	LOCAL h TO trgt_body:RADIUS + min_h.
+	LOCAL h TO trg_body:RADIUS + min_h.
 	LOCAL altA TO (h / COS(ang)). //absolute
-	LOCAL altR TO altA - trgt_body:RADIUS. //relative altitude
+	LOCAL altR TO altA - trg_body:RADIUS. //relative altitude
 	LOCAL comm_r TO ROUND(SQRT((altA * altA) * 2)).//range
-	LOCAL orb_period TO calcOrbPeriod(altA, trgt_body_str).
+	LOCAL orb_period TO calcOrbPeriod(altA, trg_body_str).
 
 	RETURN LEXICON(
 		"r", comm_r,
@@ -242,16 +242,16 @@ function calcAngleFromVec {
 
 function getPhaseAngle {
 	PARAMETER no_of_sats.
-	PARAMETER trgt_vessel.
+	PARAMETER trg_vessel.
 	PARAMETER last_angle IS 0.
 	
-	IF NOT trgt_vessel:ISTYPE("VESSEL") {
+	IF NOT trg_vessel:ISTYPE("VESSEL") {
 		RETURN 0.
 	}
 	
-	LOCAL radius_percent IS ROUND(260 / trgt_vessel:OBT:PERIOD, 3).
-	LOCAL phase_ang IS calcPhaseAngle(600000 + ALTITUDE, trgt_vessel:ORBIT:SEMIMAJORAXIS / 2).
-	LOCAL curr_angle IS calcAngleFromVec(SHIP:UP:STARVECTOR, trgt_vessel:UP:STARVECTOR).
+	LOCAL radius_percent IS ROUND(260 / trg_vessel:OBT:PERIOD, 3).
+	LOCAL phase_ang IS calcPhaseAngle(600000 + ALTITUDE, trg_vessel:ORBIT:SEMIMAJORAXIS / 2).
+	LOCAL curr_angle IS calcAngleFromVec(SHIP:UP:STARVECTOR, trg_vessel:UP:STARVECTOR).
 	LOCAL ahead IS false.
 	IF curr_angle > last_angle {
 		//target is ahead

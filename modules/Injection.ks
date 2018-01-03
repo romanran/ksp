@@ -4,9 +4,9 @@ LOCAL dependencies IS LIST("DoOnce", "Functions", "ShipGlobals").
 loadDeps(dependencies).
 
 function P_Injection {
-	PARAMETER trgt_orbit.
-	LOCAL LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD / trgt_orbit["period"]) ^ 100, 0.1). //release acceleration at the end
-	LOCAL LOCK dV_change TO calcDeltaV(trgt_orbit["altA"]).
+	PARAMETER trg_orbit.
+	LOCAL LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD / trg_orbit["period"]) ^ 100, 0.1). //release acceleration at the end
+	LOCAL LOCK dV_change TO calcDeltaV(trg_orbit["altA"]).
 	LOCAL LOCK burn_time TO calcBurnTime(dV_change).
 	LOCAL circ_burn_1s IS doOnce().
 	LOCAL init_1s IS doOnce().
@@ -19,8 +19,8 @@ function P_Injection {
 		SET THROTTLE TO 0.
 		HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.
-		LOCK trgt_vector TO R(0,0,0) + LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
-		LOCK STEERING TO trgt_vector.
+		LOCK trg_vector TO R(0,0,0) + LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
+		LOCK STEERING TO trg_vector.
 		RETURN "RCS ON, Circularisation".
 	}
 
@@ -30,6 +30,8 @@ function P_Injection {
 				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
 				RETURN "Circularisation burn".
 			}).
+		} ELSE {
+			RETURN false.
 		}
 		IF globals["ship_state"]["get"]("quiet") {
 			SET THROTTLE TO 0.
@@ -37,7 +39,7 @@ function P_Injection {
 			SET THROTTLE TO thrott.
 		}
 		
-		IF ROUND(SHIP:ORBIT:PERIOD) >= trgt_orbit["period"] - 50 {
+		IF ROUND(SHIP:ORBIT:PERIOD) >= trg_orbit["period"] - 50 {
 			LOCK THROTTLE TO 0.
 			SET done TO 1.
 			HUDTEXT("CIRCULARISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).

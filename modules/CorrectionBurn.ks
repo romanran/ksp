@@ -20,7 +20,7 @@ function P_CorrectionBurn {
 		IF ship_res:HASKEY("MonoPropellant") AND (ship_res["MonoPropellant"]:AMOUNT / ship_res["MonoPropellant"]:CAPACITY) * 100 < 10 {
 			RETURN 0.
 		} ELSE {
-			SET val TO MAX(-1, MIN(val, 1)).
+			SET val TO MAX(0, MIN(val, 1)).
 			SET SHIP:CONTROL:FORE TO val.	
 			RETURN 1.
 		}

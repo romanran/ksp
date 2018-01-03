@@ -9,8 +9,6 @@
 //
 @LAZYGLOBAL off.
 
-COPYPATH("0:lib/Checkboxes", "1:").
-RUNONCEPATH("1:Checkboxes").
 function Inquiry {
 	PARAMETER inputs.
 	LOCAL numbers TO "01234566789.":SPLIT("").

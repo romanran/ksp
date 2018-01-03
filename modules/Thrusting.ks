@@ -5,13 +5,13 @@ LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "ShipGlobals")
 loadDeps(dependencies).
 
 function P_Thrusting {
-	PARAMETER trgt_orbit.
+	PARAMETER trg_orbit.
 	PARAMETER safe_alt IS 150. //safe altitude to release max thrust during a launch
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
 	}
 	LOCAL pid_timer TO TIME:SECONDS.
-	LOCAL throttle_PID to setPID(0, 0.2).
+	LOCAL throttle_PID to setPID(0, 0.1).
 	LOCAL using_rcs TO false.
 	LOCAL aborted TO false.
 	
@@ -25,7 +25,7 @@ function P_Thrusting {
 	IF (EXISTS(thrust_data_file)) {
 		SET thrust_data TO READJSON(thrust_data_file).
 	}
-	LOCAL LOCK trgt_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
+	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE)).
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
 	LOCAL LOCK thrott TO throttle_PID:UPDATE(TIME:SECONDS - pid_timer, SHIP:VELOCITY:SURFACE:MAG).
 	LOCAL LOCK target4throttle TO interpolateLagrange(thrust_data, ALTITUDE).
@@ -44,7 +44,7 @@ function P_Thrusting {
 	LOCAL function handleFlight {
 		LOCAL total_thrust IS 0.
 		pitch_1s["do"]({
-			LOCK STEERING TO R(0, 0, 0) + HEADING(90, trgt_pitch).
+			LOCK STEERING TO R(0, 0, 0) + HEADING(90, trg_pitch).
 		}).
 		
 		IF ALT:RADAR > safe_alt AND pid_1s["ready"]() {
@@ -62,6 +62,9 @@ function P_Thrusting {
 		} ELSE {
 			SET throttle_PID:MINOUTPUT TO 0.1.
 			SET throttle_PID:MAXOUTPUT TO 1.
+		}
+		IF ALTITUDE > 70000 {
+			LOCK THROTTLE TO 1.
 		}
 		SET throttle_PID:SETPOINT TO target4throttle.
 
@@ -81,7 +84,7 @@ function P_Thrusting {
 			}).
 		}
 
-		IF (ship_p < 0 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 1800 {
+		IF (ship_p < -10 OR SHIP:VERTICALSPEED < 0) AND GROUNDSPEED < 1800 {
 			//if ship is off course when not achieved orbital speed yet and the staging wait isn't in progress
 			abort_1s["do"]({
 				LOCK THROTTLE TO 0.
@@ -89,6 +92,7 @@ function P_Thrusting {
 				ABORT ON.
 				UNLOCK STEERING.
 				logJ("Course deviation - malfunction - abort").
+				ship_state["set"]("phase", "aborted").
 				SET aborted TO true.
 				IF using_rcs {
 					SET SHIP:CONTROL:FORE TO 0.
@@ -101,6 +105,7 @@ function P_Thrusting {
 		IF aborted {
 			RETURN 0.
 		}
+
 		//decrease acceleration to not to overshoot target apoapsis
 		de_acc_1s["do"]({
 			HUDTEXT("Decreasing acceleration", 2, 2, 42, green, false).
@@ -112,10 +117,10 @@ function P_Thrusting {
 			IF globals["ship_state"]["get"]("quiet") {
 				SET THROTTLE TO 0.
 			} ELSE {
-				SET THROTTLE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
+				SET THROTTLE TO MAX(MIN(TAN(CONSTANT:Radtodeg * (1 - APOAPSIS/trg_orbit["alt"]) * 5 ), 1), 0.1).
 			}
 		} ELSE {
-			SET SHIP:CONTROL:FORE TO MAX(MIN( TAN( CONSTANT:Radtodeg*(1 - (APOAPSIS/trgt_orbit["alt"])) * 5 ), 1), 0.1).
+			SET SHIP:CONTROL:FORE TO MAX(MIN(TAN(CONSTANT:Radtodeg * (1 - (APOAPSIS/trg_orbit["alt"])) * 5 ), 1), 0.1).
 		}
 	}
 	
@@ -130,7 +135,7 @@ function P_Thrusting {
 		"handleFlight", handleFlight@,
 		"decelerate", decelerate@,
 		"resetPID", resetPID@,
-		"trgt_pitch", trgt_pitch@, 
+		"trg_pitch", trg_pitch@, 
 		"ship_p", ship_p@, 
 		"target4throttle", target4throttle@, 
 		"thrott", thrott@

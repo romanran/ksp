@@ -5,27 +5,27 @@ function loadDeps {
 	PARAMETER path IS "lib".
 	IF NOT ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
 		FOR lib IN libs {
-			LOCAL trgt_path IS "1:" + lib.
-			IF EXISTS(trgt_path) {
+			LOCAL trg_path IS "1:" + lib.
+			IF EXISTS(trg_path) {
 				IF EXISTS("1:" + lib) {
 					RUNONCEPATH(lib).
 				}
 			} ELSE {
-				deb("Path " + trgt_path + " not found").
+				deb("Path " + trg_path + " not found").
 			}
 		}
 		RETURN 0.
 	}
 	FOR lib IN libs {
-		LOCAL trgt_path IS "0:" + path + "/" + lib.
-		IF EXISTS(trgt_path) {
+		LOCAL trg_path IS "0:" + path + "/" + lib.
+		IF EXISTS(trg_path) {
 			IF EXISTS("1:" + lib) {
 				DELETEPATH("1:" + lib).
 			}
-			COPYPATH(trgt_path, "1:").
+			COPYPATH(trg_path, "1:").
 			RUNONCEPATH(lib).
 		} ELSE {
-			deb("Path " + trgt_path + " not found").
+			deb("Path " + trg_path + " not found").
 		}
 	}
 }

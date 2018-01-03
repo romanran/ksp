@@ -41,8 +41,8 @@ function Tester {
 		ship_state["set"]("programme", chosen_prog).
 	}
 	// load the programme
-	LOCAL trgt_prog TO my_programme["fetch"](chosen_prog).
-	LOCAL trgt_orbit IS getTrgtAlt(trgt_prog["attributes"]["sats"], trgt_prog["attributes"]["alt"]).
+	LOCAL trg_prog TO my_programme["fetch"](chosen_prog).
+	LOCAL trg_orbit IS gettrgAlt(trg_prog["attributes"]["sats"], trg_prog["attributes"]["alt"]).
 
 	// Load the modules after all of the global variables are set
 	LOCAL phase_modules IS LIST(
@@ -60,14 +60,14 @@ function Tester {
 	GLOBAL this_craft IS LEXICON(
 		"PreLaunch", P_PreLaunch(),
 		"HandleStaging", P_HandleStaging(),
-		"Thrusting", P_Thrusting(trgt_orbit),
+		"Thrusting", P_Thrusting(trg_orbit),
 		"Deployables", P_Deployables(),
-		"Injection", P_Injection(trgt_orbit),
+		"Injection", P_Injection(trg_orbit),
 		"CorrectionBurn", P_CorrectionBurn(),
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 	
-	LOCAL f_list IS LIST("getPhaseAngle", "getTrgtAlt", "calcBurnTime", "gbase", "interpolate", "BACK").
+	LOCAL f_list IS LIST("getPhaseAngle", "gettrgAlt", "calcBurnTime", "gbase", "interpolate", "BACK").
 
 	LOCAL from_save TO this_craft["PreLaunch"]["from_save"](). //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 		
@@ -164,7 +164,7 @@ function Tester {
 				)
 			)).
 			CS().
-			SET phase_angle TO getPhaseAngle(trgt_prog["attributes"]["sats"], usr_input["target"], phase_angle["current"]).
+			SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], usr_input["target"], phase_angle["current"]).
 			Display["print"]("Degrees spread:", phase_angle["spread"]).
 			Display["print"]("Degrees traveled:", phase_angle["traveled"]).
 			Display["print"]("Target separation:", phase_angle["separation"]).
@@ -182,8 +182,8 @@ function Tester {
 			)).
 			CS().
 			Display["print"]("Target dv: " + usr_input["dv"] + " time: " + calcBurnTime(usr_input["dv"])).
-		} ELSE IF func = "getTrgtAlt" {
-			LOCAL trgt TO Inquiry(LIST(
+		} ELSE IF func = "gettrgAlt" {
+			LOCAL trg TO Inquiry(LIST(
 				LEXICON(
 					"name", "sat_num",
 					"type", "number",
@@ -196,7 +196,7 @@ function Tester {
 				)
 			)).
 			CS().
-			Display["print"](getTrgtAlt(trgt["sat_num"], trgt["min_h"])).
+			Display["print"](gettrgAlt(trg["sat_num"], trg["min_h"])).
 		} ELSE IF func = "gbase" {
 			LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 			Display["print"]("G :", g_base).
@@ -215,7 +215,7 @@ function Tester {
 			}
 			CD(prev_path).
 
-			LOCAL trgt TO Inquiry(LIST(
+			LOCAL trg TO Inquiry(LIST(
 				LEXICON(
 					"name", "data",
 					"type", "select",
@@ -228,10 +228,10 @@ function Tester {
 					"msg", "Altitude (m)"
 				)
 			)).
-			LOCAL thrust_data TO READJSON("0:datasets/" + trgt["data"] + ".json").
-			LOCAL target4throttle TO interpolateLagrange(thrust_data, trgt["alt"]).
+			LOCAL thrust_data TO READJSON("0:datasets/" + trg["data"] + ".json").
+			LOCAL target4throttle TO interpolateLagrange(thrust_data, trg["alt"]).
 			CS().
-			Display["print"]("Interpolated target for " + trgt["alt"] + "m", target4throttle).
+			Display["print"]("Interpolated target for " + trg["alt"] + "m", target4throttle).
 		}
 		LOCAL done IS false.
 		Display["print"]("Press enter to continue").
