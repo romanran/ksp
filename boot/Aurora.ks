@@ -158,6 +158,7 @@ function Aurora {
 			SET WARPMODE TO "RAILS".
 			LOCAL safe_t TO 120.
 			warp_1s["do"]({
+				Display["clear"]().
 				HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
 				warp_delay["set"]().
 				Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
@@ -172,17 +173,19 @@ function Aurora {
 			}).
 		} ELSE IF phase = "KERBINJECTION" {
 			inject_init_1s["do"]({
+				Display["clear"]().
 				logJ(this_craft["Injection"]["init"]()). // initialize and get the response
 			}).
+			Display["print"]("THROTTLE: ", this_craft["Injection"]["throttle"]()).
+			Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
+			Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 			this_craft["Injection"]["burn"]().
 			IF this_craft["Injection"]["done"]() {
 				ship_state["set"]("phase", "CORRECTION_BURN").
 				ship_log["add"]("Injection complete").
 				ship_log["save"]().
+				Display["clear"]().
 			}
-			Display["print"]("THROTTLE: ", this_craft["Injection"]["throttle"]()).
-			Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
-			Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 		} ELSE IF phase = "CORRECTION_BURN" {
 			LOCAL curr_op IS ROUND(SHIP:ORBIT:PERIOD, 3).
 			IF curr_op >= trg_orbit["period"] {

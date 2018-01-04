@@ -19,33 +19,26 @@ function P_Injection {
 		SET THROTTLE TO 0.
 		HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.
-		LOCK trg_vector TO R(0,0,0) + LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
+		LOCK trg_vector TO LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
 		LOCK STEERING TO trg_vector.
 		RETURN "RCS ON, Circularisation".
 	}
 
 	LOCAL function burn {
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time / 2) {
-			circ_burn_1s["do"]({
-				HUDTEXT("CIRC BURN!", 3, 2, 42, RGB(230,155,10), false).
-				RETURN "Circularisation burn".
-			}).
-		} ELSE {
-			RETURN false.
+			IF globals["ship_state"]["get"]("quiet") {
+				SET THROTTLE TO 0.
+			} ELSE {
+				SET THROTTLE TO thrott.
+			}
+			
 		}
-		IF globals["ship_state"]["get"]("quiet") {
-			SET THROTTLE TO 0.
-		} ELSE {
-			SET THROTTLE TO thrott.
-		}
-		
 		IF ROUND(SHIP:ORBIT:PERIOD) >= trg_orbit["period"] - 50 {
 			LOCK THROTTLE TO 0.
 			SET done TO 1.
 			HUDTEXT("CIRCULARISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).
 			RETURN true.
 		}
-		
 		RETURN false. // return that the maneuver is not done
 	}
 	
