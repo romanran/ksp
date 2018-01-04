@@ -6,6 +6,13 @@ IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNE
 }
 RUNONCEPATH("Utils").
 
+SET STEERINGMANAGER:PITCHTS TO 6.
+SET STEERINGMANAGER:ROLLTS TO 6.
+SET STEERINGMANAGER:YAWTS TO 6.
+// SET STEERINGMANAGER:PITCHTORQUEFACTOR TO 0.05.
+// SET STEERINGMANAGER:YAWTORQUEFACTOR TO 0.05.
+// SET STEERINGMANAGER:ROLLTORQUEFACTOR TO 0.05.
+
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Programme", "ShipState", "ShipGlobals").
@@ -82,13 +89,14 @@ function Aurora {
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 
+	Display["imprint"]("Aurora Space Program V1.5.0").
+	Display["imprint"](SHIP:NAME).
+	Display["imprint"]("Comm range:", trg_orbit["r"] + "m.").
+	Display["imprint"]("TRG ALT:", trg_orbit["alt"] + "m.").
+	Display["imprint"]("TRG ORB period:", trg_orbit["period"] + "s.").
+	
 	IF SHIP:STATUS = "PRELAUNCH" {
 		ship_state["set"]("phase", "PRELAUNCH").
-		Display["imprint"]("Aurora Space Program V1.5.0").
-		Display["imprint"](SHIP:NAME).
-		Display["imprint"]("Comm range:", trg_orbit["r"] + "m.").
-		Display["imprint"]("TRG ALT:", trg_orbit["alt"] + "m.").
-		Display["imprint"]("TRG ORB period:", trg_orbit["period"] + "s.").
 		this_craft["PreLaunch"]["init"](). // waits for user input, then countdowns, then on 0 it return and the script goes forward
 		ship_state["set"]("phase", "TAKEOFF").
 	}
@@ -107,6 +115,16 @@ function Aurora {
 			logJ(stage_response).
 		}
 		LOCAL phase IS ship_state["get"]("phase").
+		IF ALTITUDE > 60000 AND globals["q_pressure"]() < 1 {
+			this_craft["Deployables"]["fairing"]().
+			RCS ON.
+		} //eject fairing
+		IF ALTITUDE > 70000 {
+			//--vacuum, deploy panels and antennas, turn on lights
+			this_craft["Deployables"]["panels"]().
+			this_craft["Deployables"]["antennas"]().
+		}
+			
 		IF phase = "TAKEOFF" {
 			ship_state["set"]("phase", "THRUSTING").
 			this_craft["HandleStaging"]["takeOff"]().
@@ -126,7 +144,7 @@ function Aurora {
 			IF (ROUND(APOAPSIS) > trg_orbit["alt"] - 200000) AND ALTITUDE > 50000 {
 				this_craft["Thrusting"]["decelerate"]().
 			}
-			IF CEILING(APOAPSIS) >= trg_orbit["alt"] AND ALTITUDE > 70000 {
+			IF CEILING(APOAPSIS) >= trg_orbit["alt"] AND ALTITUDE > 50000 {
 				ship_state["set"]("phase", "COASTING").
 				SET THROTTLE TO 0.
 				UNLOCK STEERING.
@@ -135,16 +153,6 @@ function Aurora {
 				ship_log["add"]("COAST TRANSITION phase").
 				Display["reset"]().
 				this_craft["Injection"]["burn_time"]().
-			}
-
-			IF ALTITUDE > 60000 AND globals["q_pressure"]() < 1 {
-				this_craft["Deployables"]["fairing"]().
-				RCS ON.
-			} //eject fairing
-			IF ALTITUDE > 80000 {
-				//--vacuum, deploy panels and antennas, turn on lights
-				this_craft["Deployables"]["panels"]().
-				this_craft["Deployables"]["antennas"]().
 			}
 		} ELSE IF phase = "COASTING" {
 			SET WARPMODE TO "RAILS".

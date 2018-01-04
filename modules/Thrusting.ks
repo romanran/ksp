@@ -17,7 +17,7 @@ function P_Thrusting {
 	LOCAL abort_1s IS DoOnce().
 	LOCAL de_acc_1s IS DoOnce().
 
-	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory()).
+	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(70000)).
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
 	LOCAL thrott TO 1.
 	LOCAL eng_list IS LIST().

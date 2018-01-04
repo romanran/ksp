@@ -11,9 +11,10 @@ function P_HandleStaging {
 	}
 	LOCAL LOCK stg_res TO globals["stg_res"]().
 	LOCAL staging_Timer IS Timer().
-	LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
+	LOCAL quiet_Timer IS Timer().
+	LOCAL no_acc_Timer IS Timer(). //for no acceleration staging wait
+	LOCAL stage_1s IS DoOnce(). //for no acceleration test once
 	LOCAL nacc_1s IS DoOnce(). //for no acceleration test once
-	LOCAL stage_1s IS DoOnce().
 	LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 	LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
 	LOCAL eng_list IS LIST().
@@ -35,11 +36,9 @@ function P_HandleStaging {
 	
 	LOCAL function nextStage {
 		PARAMETER res_type.
-
-		SET quiet TO true.
-		WAIT 0.5.
 		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
 		SET done_staging TO doStage().
+		STEERINGMANAGER:RESETPIDS().
 
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
@@ -61,13 +60,17 @@ function P_HandleStaging {
 		}
 		IF out_of_res AND stg_res:HASKEY(res_type) {
 			stage_1s["do"]({
-				nextStage(res_type).
 				staging_Timer["set"]().
+				quiet_Timer["set"]().
+				SET quiet TO true.
 			}).
 		}
+		quiet_Timer["ready"](1, {
+			nextStage(res_type).
+		}).
 		staging_Timer["ready"](quiet_period, {
-			stage_1s["reset"]().
 			staging_Timer["reset"]().
+			stage_1s["reset"]().
 			SET quiet TO false.
 		}).
 	}
@@ -92,26 +95,23 @@ function P_HandleStaging {
 		IF no_acceleration {
 			nacc_1s["do"]({
 				HUDTEXT("NO ACCELERATION DETECTED, WAITING FOR THRUST " + no_acc_period + " SECONDS...", 3, 3, 20, red, false).
-				staging2_Timer["set"]().
+				no_acc_Timer["set"]().
 				logJ("NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...").
 			}).
 		}
 		
-		staging2_Timer["ready"](no_acc_period, {
+		no_acc_Timer["ready"](no_acc_period, {
 			HUDTEXT("Waited " + no_acc_period + " SECONDS...", 3, 2, 20, blue, false).
 			//if there is still no acceleration, staging must have no engines available, stage again
 			IF no_acceleration {
-				stage_1s["reset"]().
 				HUDTEXT("Reset, do stage.", 3, 2, 20, green, false).
-				RETURN stage_1s["do"]({
-					SET done_staging TO doStage().
-					staging_Timer["set"]().
-					IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
-						HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
-					}
-					nacc_1s["reset"]().
-					logJ("Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase").
-				}).
+				SET done_staging TO doStage().
+				staging_Timer["set"]().
+				IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
+					HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
+				}
+				nacc_1s["reset"]().
+				logJ("Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase").
 			}
 		}).
 		
