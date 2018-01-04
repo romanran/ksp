@@ -82,7 +82,6 @@ function P_Thrusting {
 		//decrease acceleration to not to overshoot target apoapsis
 		de_acc_1s["do"]({
 			HUDTEXT("Decreasing acceleration", 2, 2, 42, green, false).
-			UNLOCK throttle_PID.
 			UNLOCK thrott.
 			logJ("Deacceleration").
 		}).

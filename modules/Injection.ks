@@ -8,8 +8,6 @@ function P_Injection {
 	LOCAL LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD / trg_orbit["period"]) ^ 100, 0.1). //release acceleration at the end
 	LOCAL LOCK dV_change TO calcDeltaV(trg_orbit["altA"]).
 	LOCAL LOCK burn_time TO calcBurnTime(dV_change).
-	LOCAL circ_burn_1s IS doOnce().
-	LOCAL init_1s IS doOnce().
 	LOCAL initialized TO 0.
 	LOCAL done TO 0.
 	

@@ -105,21 +105,21 @@ function Aurora {
 	
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
-		Display["reset"]().
-		Display["print"]("Current phase", ship_state["get"]("phase")).
-		this_craft["CheckCraftCondition"]["refresh"]().
-		
+		LOCAL phase IS ship_state["get"]("phase").
 		LOCAL stage_response IS this_craft["HandleStaging"]["refresh"]().
 		
-		IF stage_response {
+		Display["reset"]().
+		Display["print"]("Current phase", phase).
+		
+		IF stage_response {		this_craft["CheckCraftCondition"]["refresh"]().
+
 			logJ(stage_response).
 		}
-		LOCAL phase IS ship_state["get"]("phase").
-		IF ALTITUDE > 60000 AND globals["q_pressure"]() < 1 {
+		IF ALTITUDE > 70000 AND globals["q_pressure"]() < 1 {
 			this_craft["Deployables"]["fairing"]().
 			RCS ON.
 		} //eject fairing
-		IF ALTITUDE > 70000 {
+		IF ALTITUDE > 71000 {
 			//--vacuum, deploy panels and antennas, turn on lights
 			this_craft["Deployables"]["panels"]().
 			this_craft["Deployables"]["antennas"]().
@@ -147,11 +147,10 @@ function Aurora {
 			IF CEILING(APOAPSIS) >= trg_orbit["alt"] AND ALTITUDE > 50000 {
 				ship_state["set"]("phase", "COASTING").
 				SET THROTTLE TO 0.
-				UNLOCK STEERING.
 				HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
 				//leaving thrusting section at that time
 				ship_log["add"]("COAST TRANSITION phase").
-				Display["reset"]().
+				Display["clear"]().
 				this_craft["Injection"]["burn_time"]().
 			}
 		} ELSE IF phase = "COASTING" {
@@ -174,7 +173,8 @@ function Aurora {
 		} ELSE IF phase = "KERBINJECTION" {
 			inject_init_1s["do"]({
 				Display["clear"]().
-				logJ(this_craft["Injection"]["init"]()). // initialize and get the response
+				LOCAL init TO this_craft["Injection"]["init"]().
+				logJ(init). // initialize and get the response
 			}).
 			Display["print"]("THROTTLE: ", this_craft["Injection"]["throttle"]()).
 			Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).

@@ -4,7 +4,7 @@ LOCAL dependencies IS LIST("Functions", "ShipGlobals").
 loadDeps(dependencies).
 
 function P_CheckCraftCondition {
-
+	LOCAL do_once IS true.
 	LOCAL function checkTreshold {
 		PARAMETER res.
 		PARAMETER percent.
@@ -21,16 +21,17 @@ function P_CheckCraftCondition {
 	LOCAL function refresh {
 		LOCAL ec TO checkTreshold("ELECTRICCHARGE", 20, 40).
 		LOCAL mp TO checkTreshold("MonoPropellant", 1, 1).
-		IF ec {
+		IF ec AND do_once AND NOT (globals["ship_state"]["get"]("phase") = "KERBINJECTION") {
 			//if below 20% of max ships capacity or 40 units
 			//electic charge saving and generation
 			KUNIVERSE:TIMEWARP:CANCELWARP().
 			RCS ON.
 			SAS OFF.
 			SET THROTTLE TO 0.
-			SET STEERING TO UP + R(0, 45, 0).
+			LOCK STEERING TO SHIP:PROGRADE:VECTOR.
 			PANELS ON.
 			FUELCELLS ON.
+			SET do_once TO false.
 		}
 		
 		SET override TO ec OR mp.

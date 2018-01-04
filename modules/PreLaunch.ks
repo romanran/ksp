@@ -54,33 +54,43 @@ function P_PreLaunch {
 			preLaunchError("No accelerometer detected on the vessel").
 		}
 		IF (NOT sensors_types:CONTAINS("grav")) {
-			preLaunchError("No gravetometer detected on the vessel").
+			preLaunchError("No gravimeter detected on the vessel").
 		}
 
 		LOCAL ksc_light TO SHIP:PARTSTAGGED("ksc_light").
 		IF ksc_light:LENGTH > 0{
 			SET ksc_m_light TO ksc_light[0]:GETMODULE("modulelight").
 		}
-		ON AG1 {
-			doModuleAction("modulelight", "togglelight", true, ksc_light).
-			SET start TO TRUE.
-			logJ("Countdown start").
+		Display["print"]("Checks passed").
+		Display["print"]("Press ENTER to launch").
+		Display["print"]("Press ESC to abort").
+
+		UNTIL start {
+			IF TERMINAL:INPUT:HASCHAR {
+				LOCAL char to TERMINAL:INPUT:GETCHAR().
+				IF char = TERMINAL:INPUT:ENTER {
+					SET start to true.
+				}
+			}
 		}
-		Display["print"]("ALL SYSTEMS ARE GO.").
-		Display["print"]("AWAITING LAUNCH CONFIRMATION ON AG1").
-		Display["print"]("ABORT ON AG3.").
-		WAIT UNTIL start = TRUE.
 		
 		Display["print"]("COUNTDOWN STARTED").
+		doModuleAction("modulelight", "togglelight", true, ksc_light).
+		SET start TO TRUE.
+		logJ("Countdown start").
+		
 		FROM {LOCAL i IS 5.} UNTIL i = -1 STEP {SET i TO i - 1.} DO {
 			WAIT 1.
 			IF i = 4 {
 				LOCK THROTTLE TO 1.
 			}
-			ON AG3 {
-				doModuleAction("modulelight", "togglelight", false, ksc_light).
-				reboot.
-			}
+			IF TERMINAL:INPUT:HASCHAR {
+				LOCAL char to TERMINAL:INPUT:GETCHAR().
+				IF char = TERMINAL:INPUT:RETURN {
+					doModuleAction("modulelight", "togglelight", false, ksc_light).
+					reboot.
+				}
+			}				
 			IF i = 1 {
 				FOR eng IN first_stage_engines {
 					eng:ACTIVATE.
