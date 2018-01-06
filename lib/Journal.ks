@@ -17,7 +17,7 @@ function Journal {
 	row:add("RESOURCES", res_lex).
 	self:add(row_num, row).
 	
-	function addEntry {
+	LOCAL function addEntry {
 		PARAMETER description IS "NC".
 		SET row_num TO row_num + 1.
 		LOCAL ship_res TO getResources().
@@ -29,6 +29,9 @@ function Journal {
 		row:add("PER", ROUND(ALT:PERIAPSIS)).
 		row:add("ORBV", ROUND(VELOCITY:ORBIT:MAG)).
 		row:add("SURV", ROUND(VELOCITY:SURFACE:MAG)).
+		row:add("Q", ROUND(globals["q_pressure"]())).
+		row:add("THROTT", ROUND(THROTTLE)).
+		row:add("PITCH", ROUND(this_craft["Thrusting"]["ship_p"]())).
 		row:add("FACING", FACING).
 		row:add("VERTICALSPEED", ROUND(VERTICALSPEED)).
 		SET res_lex TO LEXICON().
@@ -41,11 +44,11 @@ function Journal {
 		self:add(row_num, row).
 		WRITEJSON(self, save_path).
 	}
-	function dumpAll {
+	LOCAL function dumpAll {
 		PRINT self:DUMP.
 	}
 	
-	function saveToLog {
+	LOCAL function saveToLog {
 		IF ADDONS:RT:HASKSCCONNECTION(SHIP) {
 			COPYPATH(save_path, "0:flightlogs/").
 			HUDTEXT("Flight journal saved!", 3, 2, 40, green, false).

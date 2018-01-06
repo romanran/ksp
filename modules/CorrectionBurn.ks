@@ -9,18 +9,18 @@ function P_CorrectionBurn {
 	}
 	LOCAL LOCK ship_res TO getResources().
 	
-	function neutralizeControls {
+	LOCAL function neutralizeControls {
 		RCS OFF.
 		SET SHIP:CONTROL:NEUTRALIZE TO TRUE.
 		RETURN 1.
 	}
 	
-	function moveFore {
+	LOCAL function moveFore {
 		PARAMETER val TO 1.
 		IF ship_res:HASKEY("MonoPropellant") AND (ship_res["MonoPropellant"]:AMOUNT / ship_res["MonoPropellant"]:CAPACITY) * 100 < 10 {
 			RETURN 0.
 		} ELSE {
-			SET val TO MAX(-1, MIN(val, 1)).
+			SET val TO MAX(0, MIN(val, 1)).
 			SET SHIP:CONTROL:FORE TO val.	
 			RETURN 1.
 		}

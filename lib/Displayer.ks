@@ -1,10 +1,11 @@
+@LAZYGLOBAL off.
 function Displayer {
 	LOCAL line_height TO 2.
 	LOCAL print_i TO 0.
 	LOCAL imprint_i TO 0.
 	LOCAL padd TO 0.
-	
-	function _genDots {
+
+	LOCAL function _genDots {
 		PARAMETER str1 TO 0.
 		PARAMETER str2 TO 0.
 		PARAMETER char TO ".".
@@ -26,13 +27,13 @@ function Displayer {
 		} ELSE {
 			SET to_range TO sto_range.
 		}
-		FROM {local i is 0.} UNTIL i = to_range STEP {set i to i+1.} DO {
+		FROM {LOCAL i TO 0.} UNTIL i = to_range STEP {SET i TO i+1.} DO {
 			SET dots TO dots + char.
 		}
 		RETURN dots.
 	}
-	
-	function _print {
+
+	LOCAL function _print {
 		PARAMETER sstr IS "empty-str".
 		PARAMETER val IS "empty-str".
 		LOCAL print_sum TO print_i + imprint_i.
@@ -61,26 +62,36 @@ function Displayer {
 		}
 		SET print_i TO print_i + line_height.
 	}
-	function _separator {
+	LOCAL function _separator {
 		LOCAL sep IS _genDots(0, 0, "-").
 		return sep.
 	}
-	
-	function _reset {
+
+	LOCAL function _reset {
+		SET print_i TO 0.
+	}
+
+	LOCAL function _clear {
+		LOCAL blank IS _genDots(0, 0, " ").
+		FROM {LOCAL i is imprint_i.} UNTIL i = print_i + imprint_i STEP {SET i TO i + 1.} DO {
+			PRINT blank AT (0, i).
+		}
 		SET print_i TO 0.
 	}
 	
-	function imprint {
+	LOCAL function imprint {
 		PARAMETER str IS _separator().
 		PARAMETER val IS "empty-str".
 		_print(str, val).
 		SET imprint_i TO imprint_i + line_height.
 		SET print_i TO print_i - line_height.
 	}
-	
+
+
 	LOCAL methods TO LEXICON(
 		"print", _print@,
 		"reset", _reset@,
+		"clear", _clear@,
 		"imprint", imprint@
 	).
 

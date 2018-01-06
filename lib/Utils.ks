@@ -4,18 +4,28 @@ function loadDeps {
 	PARAMETER libs.
 	PARAMETER path IS "lib".
 	IF NOT ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
+		FOR lib IN libs {
+			LOCAL trg_path IS "1:" + lib.
+			IF EXISTS(trg_path) {
+				IF EXISTS("1:" + lib) {
+					RUNONCEPATH(lib).
+				}
+			} ELSE {
+				deb("Path " + trg_path + " not found").
+			}
+		}
 		RETURN 0.
 	}
 	FOR lib IN libs {
-		LOCAL trgt_path IS "0:" + path + "/" + lib.
-		IF EXISTS(trgt_path) {
+		LOCAL trg_path IS "0:" + path + "/" + lib.
+		IF EXISTS(trg_path) {
 			IF EXISTS("1:" + lib) {
 				DELETEPATH("1:" + lib).
 			}
-			COPYPATH(trgt_path, "1:").
+			COPYPATH(trg_path, "1:").
 			RUNONCEPATH(lib).
 		} ELSE {
-			deb("Path " + trgt_path + " not found").
+			deb("Path " + trg_path + " not found").
 		}
 	}
 }
@@ -23,6 +33,9 @@ function loadDeps {
 function CS {
 	IF NOT (env = "debug") {
 		CLEARSCREEN.
+	}
+	IF DEFINED Display {
+		Display["reset"]().
 	}
 }
 
@@ -71,7 +84,24 @@ function generateID {
 
 function logJ {
 	PARAMETER str.
-	IF DEFINED ship_log AND ship_log:HASKEY("add") AND str {
-		ship_log["add"](str).
+	IF DEFINED globals["ship_log"] AND globals["ship_log"]:HASKEY("add") AND str {
+		globals["ship_log"]["add"](str).
 	}
+}
+
+function arr2obj {
+	PARAMETER data.
+	PARAMETER key1.
+	PARAMETER key2.
+	LOCAL key IS "".
+	LOCAL return_lex IS LEXICON(key1, LIST(), key2, LIST()).
+	FROM {LOCAL i is 0.} UNTIL i = data:LENGTH STEP {SET i TO i + 1.} DO {
+		IF MOD(i, 2) = 0 {
+			SET key TO key1.
+		} ELSE {
+			SET key TO key2.
+		}
+		return_lex[key]:ADD(data[i]).
+	}
+	RETURN return_lex.
 }

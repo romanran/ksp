@@ -10,20 +10,18 @@ function P_HandleStaging {
 		GLOBAL globals TO setGlobal().
 	}
 	LOCAL LOCK stg_res TO globals["stg_res"]().
-	LOCAL staging_ready_Timer IS Timer().
 	LOCAL staging_Timer IS Timer().
-	LOCAL staging2_Timer IS Timer(). //for no acceleration staging wait
-	LOCAL nacc_Timer IS Timer(). //for no acceleration test once
-	LOCAL stage_1s IS DoOnce().
+	LOCAL quiet_Timer IS Timer().
+	LOCAL no_acc_Timer IS Timer(). //for no acceleration staging wait
+	LOCAL stage_1s IS DoOnce(). //for no acceleration test once
+	LOCAL nacc_1s IS DoOnce(). //for no acceleration test once
 	LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 	LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
-	LOCAL stage_delay TO 2.
-	
-	ON AG5 {
-		//stage override, just in case
-		staging_ready_Timer["set"]().
-		SET done_staging TO doStage().
-	}
+	LOCAL eng_list IS LIST().
+    LIST ENGINES IN eng_list. 
+	LOCAL quiet_period IS 3.
+	LOCAL no_acc_period IS 5.
+	LOCAL quiet IS false.
 	
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
@@ -32,84 +30,102 @@ function P_HandleStaging {
 	
 	// --- METHODS ---
 	
-	function takeOff {
+	LOCAL function takeOff {
 		SET done_staging TO doStage().
 	}
 	
-	function nextStage {
+	LOCAL function nextStage {
 		PARAMETER res_type.
-		//RETURN stage_1s["do"]({
-			HUDTEXT("No " + res_type + " left, staging, resetting engine PID", 1, 3, 12, WHITE, false).
-			staging_ready_Timer["set"]().
-			IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
-				this_craft["Thrusting"]["resetPID"]().
-			}
-			SET done_staging TO doStage().
-			staging_Timer["reset"]().
-			//stage_1s["reset"]().
-			RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
-		//}).
+		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
+		SET done_staging TO doStage().
+		STEERINGMANAGER:RESETPIDS().
+
+		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
 	
-	function check {
+	LOCAL function check {
 		PARAMETER res_type.
 		IF NOT res_type <> 0 {
 			RETURN -1.
 		}
-		IF STAGE:(res_type + "") < 1 AND stg_res:HASKEY(res_type) {
+		LOCAL out_of_res TO false.
+		IF res_type = "LIQUIDFUEL" {
+			SET out_of_res TO STAGE:LIQUIDFUEL < 1.
+		} ELSE IF res_type = "SOLIDFUEL" {
+			SET out_of_res TO STAGE:SOLIDFUEL < 1.
+		} ELSE IF res_type = "MONOPROPELLANT" {
+			SET out_of_res TO STAGE:MONOPROPELLANT < 1.
+		} ELSE IF res_type = "OXIDIZER" {
+			SET out_of_res TO STAGE:OXIDIZER < 1.
+		}
+		IF out_of_res AND stg_res:HASKEY(res_type) {
 			stage_1s["do"]({
-				HUDTEXT("Separation in " + stage_delay + " seconds...", 2, 2, 42, green, false).
 				staging_Timer["set"]().
+				quiet_Timer["set"]().
+				SET quiet TO true.
 			}).
 		}
-		staging_Timer["ready"](stage_delay, nextStage@:bind(res_type)).
-		staging_ready_Timer["ready"](2, stage_1s["reset"]).
+		quiet_Timer["ready"](1, {
+			nextStage(res_type).
+		}).
 	}
 	
-	function refresh {
-		IF NOT done_staging {
+	LOCAL function refresh {
+		staging_Timer["ready"](quiet_period, {
+			staging_Timer["reset"]().
+			stage_1s["reset"]().
+			SET quiet TO false.
+		}).
+		IF NOT done_staging{
 			check("LIQUIDFUEL").
+			check("OXIDIZER").
 			check("SOLIDFUEL").
 		}
-		LOCAL valid_phase IS ship_state["state"]:HASKEY("phase") 
-		AND (ship_state["state"]["phase"] = "TAKEOFF" 
-		OR ship_state["state"]["phase"] = "THRUSTING").
 		
-		IF NOT valid_phase {
-			RETURN "Must be a TAKEOFF or THRUSTING phase".
+		LOCAL must_thrust_phase IS ship_state["get"]():HASKEY("phase") 
+		AND LIST("TAKEOFF", "THRUSTING"):CONTAINS(ship_state["get"]("phase")).
+		ship_state["set"]("quiet", quiet).
+		
+		IF NOT must_thrust_phase {
+			RETURN 2.
 		}
 		
 		LOCAL no_acceleration TO SHIP:ALTITUDE < 70000 AND globals["acc_vec"]():MAG / g_base < 0.04.
 		//if not under accel
 		IF no_acceleration {
-			RETURN nacc_Timer["ready"](4, {
-				HUDTEXT("NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...", 3, 3, 20, red, false).
-				staging2_Timer["set"]().
-				nacc_Timer["set"]().
-				RETURN "NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...".
+			nacc_1s["do"]({
+				HUDTEXT("NO ACCELERATION DETECTED, WAITING FOR THRUST " + no_acc_period + " SECONDS...", 3, 3, 20, red, false).
+				no_acc_Timer["set"]().
+				logJ("NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...").
 			}).
 		}
 		
-		staging2_Timer["ready"](3, {
-			HUDTEXT("Waited 3 SECONDS...", 3, 2, 20, blue, false).
+		no_acc_Timer["ready"](no_acc_period, {
+			HUDTEXT("Waited " + no_acc_period + " SECONDS...", 3, 2, 20, blue, false).
 			//if there is still no acceleration, staging must have no engines available, stage again
 			IF no_acceleration {
-				stage_1s["reset"]().
 				HUDTEXT("Reset, do stage.", 3, 2, 20, green, false).
-				RETURN stage_1s["do"]({
-					SET done_staging TO doStage().
-					staging_ready_Timer["set"]().
-					staging2_Timer["set"]().
-					RETURN "Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase".
-				}).
+				SET done_staging TO doStage().
+				staging_Timer["set"]().
+				IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
+					HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
+				}
+				nacc_1s["reset"]().
+				logJ("Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase").
 			}
 		}).
 		
+		RETURN done_staging.
+	}
+	
+	LOCAL function getQuiet {
+		return quiet.
 	}
 
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
-		"takeOff", takeOff@
+		"takeOff", takeOff@,
+		"quiet", getQuiet@
 	).
 	
 	RETURN methods.
