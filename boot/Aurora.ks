@@ -9,9 +9,6 @@ RUNONCEPATH("Utils").
 SET STEERINGMANAGER:PITCHTS TO 6.
 SET STEERINGMANAGER:ROLLTS TO 6.
 SET STEERINGMANAGER:YAWTS TO 6.
-// SET STEERINGMANAGER:PITCHTORQUEFACTOR TO 0.05.
-// SET STEERINGMANAGER:YAWTORQUEFACTOR TO 0.05.
-// SET STEERINGMANAGER:ROLLTORQUEFACTOR TO 0.05.
 
 function Aurora {
 	CD("1:").
@@ -32,10 +29,8 @@ function Aurora {
 
 	// Get programme name from ship state or inquiry
 	LOCAL my_programme TO Programme().
-	LOCAL chosen_prog TO "".
-	IF ship_state["get"]():HASKEY("programme") {
-		SET chosen_prog TO ship_state["get"]("programme").
-	} ELSE {
+	LOCAL chosen_prog TO ship_state["get"]("programme").
+	IF NOT chosen_prog {
 		LOCAL pr_chooser TO LIST(
 			LEXICON(
 				"name", "program",
@@ -46,7 +41,8 @@ function Aurora {
 		).
 		SET chosen_prog TO Inquiry(pr_chooser).
 		SET chosen_prog TO chosen_prog["program"].
-		ship_state["set"]("programme", chosen_prog).
+		COPYPATH("0:program/" + chosen_prog + ".json", "1:" + chosen_prog + ".json").
+		ship_state["set"]("programme", "1:" + chosen_prog + ".json").
 		SET my_programme TO Programme(chosen_prog).
 		CS().
 	}
@@ -111,18 +107,9 @@ function Aurora {
 		Display["reset"]().
 		Display["print"]("Current phase", phase).
 		
-		IF stage_response {		this_craft["CheckCraftCondition"]["refresh"]().
-
+		IF stage_response {
+			this_craft["CheckCraftCondition"]["refresh"]().
 			logJ(stage_response).
-		}
-		IF ALTITUDE > 70000 AND globals["q_pressure"]() < 1 {
-			this_craft["Deployables"]["fairing"]().
-			RCS ON.
-		} //eject fairing
-		IF ALTITUDE > 71000 {
-			//--vacuum, deploy panels and antennas, turn on lights
-			this_craft["Deployables"]["panels"]().
-			this_craft["Deployables"]["antennas"]().
 		}
 			
 		IF phase = "TAKEOFF" {
@@ -153,6 +140,15 @@ function Aurora {
 				Display["clear"]().
 				this_craft["Injection"]["burn_time"]().
 			}
+			
+			IF ALTITUDE > 70000 AND globals["q_pressure"]() < 1 {
+				this_craft["Deployables"]["fairing"]().
+				RCS ON.
+			} //eject fairing
+			IF ALTITUDE > 71000 {
+				//--vacuum, deploy panels and antennas, turn on lights
+				this_craft["Deployables"]["panels"]().
+			}
 		} ELSE IF phase = "COASTING" {
 			SET WARPMODE TO "RAILS".
 			LOCAL safe_t TO 120.
@@ -179,34 +175,32 @@ function Aurora {
 			Display["print"]("THROTTLE: ", this_craft["Injection"]["throttle"]()).
 			Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
 			Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
-			this_craft["Injection"]["burn"]().
-			IF this_craft["Injection"]["done"]() {
+			IF this_craft["Injection"]["burn"]() {
 				ship_state["set"]("phase", "CORRECTION_BURN").
 				ship_log["add"]("Injection complete").
 				ship_log["save"]().
 				Display["clear"]().
 			}
 		} ELSE IF phase = "CORRECTION_BURN" {
-			LOCAL curr_op IS ROUND(SHIP:ORBIT:PERIOD, 3).
-			IF curr_op >= trg_orbit["period"] {
-				IF this_craft["CorrectionBurn"]["neutralize"]() {
-					ship_state["set"]("phase", "ORBITING").
-					HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
-					ship_log["add"]("CIRCURALISATION COMPLETE").
-					ship_log["save"]().
-				}
+			IF SHIP:ORBIT:PERIOD >= trg_orbit["period"] {
+				this_craft["CorrectionBurn"]["neutralize"]().
+				ship_state["set"]("phase", "ORBITING").
+				HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
+				ship_log["add"]("CIRCURALISATION COMPLETE").
+				UNLOCK THROTTLE.
+				UNLOCK STEERING.
+				this_craft["Deployables"]["antennas"]().
+				conn_Timer["set"]().
 			} ELSE {
-				LOCAL margin IS  curr_op / trg_orbit["period"].
+				LOCAL margin IS  SHIP:ORBIT:PERIOD / trg_orbit["period"].
 				IF NOT this_craft["CorrectionBurn"]["fore"](margin) {
 					HUDTEXT("ONLY 10% OF MONOPROP LEFT!", 3, 2, 42, RED, false).
 				}
-				Display["print"]("ORB. PERIOD:", curr_op).
+				Display["print"]("ORB. PERIOD:", SHIP:ORBIT:PERIOD).
 				Display["print"]("TRG ORB. PERIOD: ", trg_orbit["period"]).
 			}
 		} ELSE IF phase = "ORBITING" {
-			UNLOCK THROTTLE.
-			UNLOCK STEERING.
-			conn_Timer["set"]().
+			Display["print"]("ORB. PERIOD:", SHIP:ORBIT:PERIOD).
 		}
 		conn_Timer["ready"](10, {
 			IF NOT ship_log["save"]() {

@@ -30,7 +30,6 @@ function P_Deployables {
 		}
 		return antenna_1s["do"]({
 			IF (doModuleEvent("ModuleRTAntenna", actions[0]) OR doModuleEvent("ModuleDeployableAntenna", actions[1])) {
-				HUDTEXT("DEPLOYING ANTENNAS", 2, 2, 42, RGB(55,255,0), false).
 				RETURN actions[1].
 			} ELSE {
 				HUDTEXT("NO ANTENNAS DETECTED", 2, 2, 42, RGB(255,60,0), false).

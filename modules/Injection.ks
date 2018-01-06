@@ -8,17 +8,13 @@ function P_Injection {
 	LOCAL LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD / trg_orbit["period"]) ^ 100, 0.1). //release acceleration at the end
 	LOCAL LOCK dV_change TO calcDeltaV(trg_orbit["altA"]).
 	LOCAL LOCK burn_time TO calcBurnTime(dV_change).
-	LOCAL initialized TO 0.
-	LOCAL done TO 0.
 	
 	LOCAL function init {
-		SET initialized TO 1.
 		RCS ON.
 		SET THROTTLE TO 0.
 		HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.
-		LOCK trg_vector TO LOOKDIRUP(SHIP:PROGRADE:VECTOR, SHIP:FACING:TOPVECTOR):FOREVECTOR.
-		LOCK STEERING TO trg_vector.
+		LOCK STEERING TO PROGRADE.
 		RETURN "RCS ON, Circularisation".
 	}
 
@@ -33,27 +29,16 @@ function P_Injection {
 		}
 		IF ROUND(SHIP:ORBIT:PERIOD) >= trg_orbit["period"] - 50 {
 			LOCK THROTTLE TO 0.
-			SET done TO 1.
+			UNLOCK STEERING.
 			HUDTEXT("CIRCULARISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).
 			RETURN true.
 		}
 		RETURN false. // return that the maneuver is not done
 	}
-	
-	LOCAL function getInitialized {
-		return initialized.
-	}
-	
-	LOCAL function getDone {
-		return done.
-	}
-	
 
 	LOCAL methods TO LEXICON(
 		"init", init@,
 		"burn", burn@,
-		"initialized", getInitialized@,
-		"done", getDone@,
 		"dV_change", dV_change@,
 		"burn_time", burn_time@,
 		"throttle", thrott@

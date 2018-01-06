@@ -68,15 +68,15 @@ function P_HandleStaging {
 		quiet_Timer["ready"](1, {
 			nextStage(res_type).
 		}).
+	}
+	
+	LOCAL function refresh {
 		staging_Timer["ready"](quiet_period, {
 			staging_Timer["reset"]().
 			stage_1s["reset"]().
 			SET quiet TO false.
 		}).
-	}
-	
-	LOCAL function refresh {
-		IF NOT done_staging {
+		IF NOT done_staging{
 			check("LIQUIDFUEL").
 			check("OXIDIZER").
 			check("SOLIDFUEL").

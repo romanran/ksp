@@ -93,7 +93,7 @@ function calcDeltaV {
 	// Takes target absolute altitude (desired orbit radius) as a parameter
 	PARAMETER target_alt.
 	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
-	LOCAL v2 IS SQRT( grav_param * (1 / target_alt) ).//speed in a circural orbit
+	LOCAL v2 IS SQRT( grav_param * (1 / target_alt) ).//speed in a circular orbit
 	//return speed difference
 	LOCAL trgv IS SHIP:VELOCITY:ORBIT:MAG - v2.
 	IF v2 > SHIP:VELOCITY:ORBIT:MAG {
