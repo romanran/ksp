@@ -1,0 +1,56 @@
+@default-colspan: 1;
+@margin: 30px;
+@default-total_cols: 12;
+
+@column-padding: (@margin * 2);
+
+.Row () {
+	margin: 0 -((@column-padding/2));
+	&:before,
+	&:after {
+		content: "";
+		display: table;
+	}
+	&:after {
+		clear: both;
+	}
+}
+
+.Cols ( @colspan : @default-colspan;
+	@total_cols : @default-total_cols ) {
+		width: (round( (( @colspan * round(100 / @total_cols, 3))), 2) + 0%);
+		float: left;
+		display: inline-block;
+		vertical-align: top;
+		margin: 0;
+		padding: 0 (@column-padding/2);
+}
+
+/* 
+USAGE :
+
+header, main, footer {
+.Row;
+}
+
+article {
+.Cols(8);
+}
+
+aside {
+.Cols(4);
+}
+*/
+
+.row {
+	.Row();	
+}
+
+.gridclasses (@col) when (@col > 0) {
+	.col-@{col} {
+		.Cols(@col);
+	}
+	.gridclasses((@col - 1));
+}
+
+.gridclasses(12);

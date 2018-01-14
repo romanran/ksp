@@ -1,0 +1,26 @@
+@anim-duration: 200ms;
+@input-h: 36px;
+.button_base{
+	display: block;
+	cursor: pointer;
+	text-decoration: none;
+	text-align: center;
+	transition: @anim-duration ease-in-out;
+	outline: none;
+	overflow: visible;
+	user-select: none;
+	border: none;
+	&:focus,
+	&:active {
+		outline: none;
+	}
+}
+
+//@socials: ;
+//.-(@i: length(@socials)) when (@i > 0) {
+//	@name: extract(@socials, @i);
+//	.@{name} {background-image: url('../images/@{name}.png');}
+//	.-((@i - 1));
+//} .-;
+
+//some sample button
