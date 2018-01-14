@@ -1,24 +1,33 @@
-class JournalChart {
-	constructor($canvas, data) {
+import randomColor from 'randomcolor'
+import Chart from 'chart.js'
+
+export default class JournalChart {
+	
+	constructor($canvas, data, parent) {
 		let x = [];
-		this.title = data.entries[0].SHIP ? data.entries[0].SHIP : data.entries[0].SPD;
-		for (let key in data.entries) {
+
+		this.title = data[0].SHIP ? data[0].SHIP : data[0].SPD;
+		for (let key in data) {
 			if (key == 0) {
 				continue;
 			}
-			x.push(data.entries[key].MISSIONTIME * 1000);
+			x.push(data[key].MISSIONTIME * 1000);
 		}
 		this.$canvas = $canvas;
-		deb(data.entries[0]);
-		let opts = this.getType('line', x, _.takeRight(data.entries, data.entries.length - 1));
+		this.parent = parent;
+
+		let opts = this.getType('line', x, _.takeRight(data, data.length - 1));
 		this.chart = new Chart($canvas, opts);
 	}
+	
 	getType(type, labels, data) {
 		let dataset = [];
 		let data_arr = [];
 		let desc_arr = [];
+		let status_arr = [];
 		let data_l = data.length;
 		let ai = 0;
+		deb(data)
 		_.each(data, (obj, i) => {
 			let obj_l = Object.keys(obj).length;
 			let ni = 0;
@@ -27,10 +36,16 @@ class JournalChart {
 					return;
 				}
 				if (key === "DESC") {
-					desc_arr.push(val);
+					status_arr.push(val);
 					return 0;
 				}
-				if (key === "TIME" || key === "MISSIONTIME" || key === "FACING") {
+				if (key === "STATUS") {
+					const last_status = _.last(status_arr);
+					if (last_status)
+						desc_arr.push(`${last_status}, ${key}: ${val}`);
+					return 0;
+				}
+				if (['TIME', 'MISSIONTIME', 'FACING'].indexOf(key) >= 0) {
 					return 0;
 				}
 				if (data_arr[key]) {
@@ -40,7 +55,7 @@ class JournalChart {
 				}
 			});
 		});
-		let r_colors = random.colors(Object.keys(data_arr).length);
+		let r_colors = _.times(Object.keys(data_arr).length, randomColor)
 		let ci = 0;
 		_.forIn(data_arr, (arr, key) => {
 			dataset.push({
@@ -76,7 +91,7 @@ class JournalChart {
 				},
 				hover: {
 					onHover: (e) => {
-						this.$canvas.css("cursor", e[0] ? "pointer" : "default");
+						this.parent.pointer = 0
 					},
 					animationDuration: 100
 				},
@@ -87,7 +102,7 @@ class JournalChart {
 						fontStyle: 'bold',
 					},
 					onHover: (e) => {
-						this.$canvas.css("cursor", e ? "pointer" : "default");
+						this.parent.pointer = 1					
 					}
 				},
 				tooltips: {
@@ -127,7 +142,6 @@ class JournalChart {
 						ticks: {
 							fontColor: 'white',
 							beginAtZero: true,
-
 						},
 						time: {
 							unit: 'second',
@@ -146,6 +160,5 @@ class JournalChart {
 			}
 		};
 	}
-};
-
-module.exports = JournalChart;
+	
+}

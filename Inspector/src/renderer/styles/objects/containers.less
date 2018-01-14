@@ -2,19 +2,8 @@ html, body {
 	height: 100%;
 }
 
-.container, .wrap{
-	width: 100%;
+.fluid-wrap {
+	max-width: calc(~"100% - 60px");
 	margin: 0 auto;
-	@media @smart-up{
-		max-width: 768px;
-	}
-	@media @archaic-up{
-		max-width: 970px;
-	}
-	@media @tablet-up{
-		max-width: 1060px;
-	}
-	@media @archaic{
-		padding: 0 @mobile-padding;
-	}
+	padding-top: 30px;
 }

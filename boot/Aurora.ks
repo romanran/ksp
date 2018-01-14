@@ -210,7 +210,7 @@ function Aurora {
 			}
 		}).
 		journal_Timer["ready"](10, {
-			ship_log["add"](phase + " phase").
+			ship_log["add"]().
 			journal_Timer["set"]().
 		}).
 		WAIT 0.

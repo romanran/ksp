@@ -37,7 +37,7 @@
 			this.msg = 'sad'
 		}
 	}
-
+	global.deb = console.log
 </script>
 
 <style scoped lang="less">
