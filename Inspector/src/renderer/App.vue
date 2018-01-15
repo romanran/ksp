@@ -14,7 +14,8 @@
 <style src="./styles/global.less" lang="less"></style>
 
 <style lang="less">
-	@import (css) url("https://fonts.googleapis.com/icon?family=Roboto");
+	@import (css) url("https://fonts.googleapis.com/css?family=Roboto:100,300,400");
+	@import (css) url("https://fonts.googleapis.com/css?family=Unica+One:300,400");
 	html,
 	body {
 		font-family: Roboto;
