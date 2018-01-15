@@ -1,5 +1,7 @@
-import randomColor from 'randomcolor'
+import shc from 'string-hash-colour'
 import Chart from 'chart.js'
+
+const generateColor = shc.convert;
 
 export default class JournalChart {
 	
@@ -11,13 +13,13 @@ export default class JournalChart {
 			if (key == 0) {
 				continue;
 			}
-			x.push(data[key].MISSIONTIME * 1000);
+			x.push(data[key].MISSIONTIME);
 		}
 		this.$canvas = $canvas;
 		this.parent = parent;
 
-		let opts = this.getType('line', x, _.takeRight(data, data.length - 1));
-		this.chart = new Chart($canvas, opts);
+		this.opts = this.getType('line', x, _.takeRight(data, data.length - 1));
+		this.chart = new Chart($canvas, this.opts);
 	}
 	
 	getType(type, labels, data) {
@@ -27,7 +29,7 @@ export default class JournalChart {
 		let status_arr = [];
 		let data_l = data.length;
 		let ai = 0;
-		deb(data)
+
 		_.each(data, (obj, i) => {
 			let obj_l = Object.keys(obj).length;
 			let ni = 0;
@@ -45,7 +47,7 @@ export default class JournalChart {
 						desc_arr.push(`${last_status}, ${key}: ${val}`);
 					return 0;
 				}
-				if (['TIME', 'MISSIONTIME', 'FACING'].indexOf(key) >= 0) {
+				if (['TIME', 'FACING'].indexOf(key) >= 0) {
 					return 0;
 				}
 				if (data_arr[key]) {
@@ -55,24 +57,25 @@ export default class JournalChart {
 				}
 			});
 		});
-		let r_colors = _.times(Object.keys(data_arr).length, randomColor)
-		let ci = 0;
+		
+		let last_color = '#FFF'
 		_.forIn(data_arr, (arr, key) => {
+			let color = generateColor(key, { avoid: last_color, proximity: 100 })
+			last_color = color
 			dataset.push({
 				label: key,
 				comment: desc_arr,
 				fill: false,
 				data: arr,
 				title: key,
-				borderColor: r_colors[ci],
-				backgroundColor: r_colors[ci],
-				chartColors: r_colors,
+				borderColor: color,
+				backgroundColor: color,
+//				chartColors: r_colors,
 				borderWidth: 1,
 				radius: 3,
 				borderWidth: 1,
 				tension: 0.3,
 			});
-			ci++;
 		});
 
 		return {
@@ -81,7 +84,6 @@ export default class JournalChart {
 				labels: labels,
 				datasets: dataset,
 			},
-			backgroundColor: "red",
 			options: {
 				title: {
 					display: true,
@@ -96,7 +98,7 @@ export default class JournalChart {
 					animationDuration: 100
 				},
 				legend: {
-					position: 'left',
+					position: 'top',
 					labels: {
 						fontColor: 'white',
 						fontStyle: 'bold',
@@ -127,10 +129,10 @@ export default class JournalChart {
 						},
 						ticks: {
 							fontColor: 'white',
-							beginAtZero: true
+//							beginAtZero: true
 						},
 						scaleLabel: {
-							display: true,
+//							display: 1,
 						}
 					}],
 					xAxes: [{
@@ -142,12 +144,18 @@ export default class JournalChart {
 						ticks: {
 							fontColor: 'white',
 							beginAtZero: true,
+//							maxTicksLimit: 30,
+							autoSkipPadding: 10,
+							autoSkip: 1
 						},
 						time: {
+							min: 0,
+							max: _.last(labels),
 							unit: 'second',
-							unitStepSize: 5,
+//							stepSize: 50000,
+//							unitStepSize: 50,
 							displayFormats: {
-								second: 'mm:ss'
+								second: 'd'
 							}
 						},
 						scaleLabel: {
