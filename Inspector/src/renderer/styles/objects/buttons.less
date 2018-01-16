@@ -1,0 +1,47 @@
+@anim-duration: 200ms;
+@input-h: 36px;
+.button_base{
+	display: inline-block;
+	background: none;
+	cursor: pointer;
+	text-decoration: none;
+	text-align: center;
+//	transition: @anim-duration ease-in-out;
+	outline: none;
+	overflow: visible;
+	user-select: none;
+	border: none;
+	&:focus,
+	&:active {
+		outline: none;
+	}
+}
+
+.btn {
+	.button_base;	
+	background: fade(#6F6, 80%);
+	padding: 10px 15px;
+	font-size: 12px;
+	letter-spacing: 2px;
+	color: black;
+	font-weight: normal;
+	vertical-align: middle;
+	&:hover {
+		background: fade(#6F6, 100%);
+		box-shadow: 0 1px 2px black;
+	}
+	&:active {
+		background: fade(#6F6, 70%);
+		box-shadow: 0 -1px 1px black;
+		transform: translateY(1px);
+	}
+}
+
+//@socials: ;
+//.-(@i: length(@socials)) when (@i > 0) {
+//	@name: extract(@socials, @i);
+//	.@{name} {background-image: url('../images/@{name}.png');}
+//	.-((@i - 1));
+//} .-;
+
+//some sample button

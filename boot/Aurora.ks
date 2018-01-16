@@ -151,7 +151,7 @@ function Aurora {
 			}
 		} ELSE IF phase = "COASTING" {
 			SET WARPMODE TO "RAILS".
-			LOCAL safe_t TO 120.
+			LOCAL safe_t TO 60.
 			warp_1s["do"]({
 				Display["clear"]().
 				HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
@@ -196,8 +196,8 @@ function Aurora {
 				IF NOT this_craft["CorrectionBurn"]["fore"](margin) {
 					HUDTEXT("ONLY 10% OF MONOPROP LEFT!", 3, 2, 42, RED, false).
 				}
-				Display["print"]("ORB. PERIOD:", SHIP:ORBIT:PERIOD).
-				Display["print"]("TRG ORB. PERIOD: ", trg_orbit["period"]).
+				Display["print"]("ORB PERIOD:", SHIP:ORBIT:PERIOD).
+				Display["print"]("TRG ORB PERIOD: ", trg_orbit["period"]).
 			}
 		} ELSE IF phase = "ORBITING" {
 			Display["print"]("ORB. PERIOD:", SHIP:ORBIT:PERIOD).
@@ -210,8 +210,8 @@ function Aurora {
 			}
 		}).
 		journal_Timer["ready"](10, {
-			ship_log["add"](phase + " phase").
-			journal_Timer["reset"]().
+			ship_log["add"]().
+			journal_Timer["set"]().
 		}).
 		WAIT 0.
 	}

@@ -1,0 +1,67 @@
+@i : ~"!important";
+@smooth: cubic-bezier(0.36, 0.82, 0.73, 0.99);
+@sep: 15px;
+
+html {
+	overflow: auto;
+	&.noscroll {
+		overflow-y: hidden @i;
+	}
+}
+
+body {}
+
+* {
+	box-sizing: border-box;
+}
+
+strong {
+	font-weight: bold;
+}
+
+.full-h {
+	height: 100%;
+}
+
+.full-w {
+	width: 100%;
+}
+
+.middle {
+	vertical-align: middle;
+} 
+
+.separate {
+	margin-left: @sep;
+	margin-right: @sep;
+}
+
+.separator {
+	width: @sep;
+	display: inline-block;
+}
+
+.show-scroll {
+	overflow: auto;
+}
+
+select::-ms-expand {
+	display: none;
+}
+
+.zero-margin {
+	width: calc( 100px / 2);
+	margin: 0!important;
+}
+
+.hidden {
+	display: none;
+	position: absolute;
+}
+
+a {
+	color: white;
+	&:hover {
+		color: grey;	
+	}
+}
