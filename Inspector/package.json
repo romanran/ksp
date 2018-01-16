@@ -51,7 +51,6 @@
     }
   },
   "dependencies": {
-    "chartjs-plugin-zoom": "^0.6.2",
     "color": "^2.0.1",
     "fs-extra": "^5.0.0",
     "highcharts": "^6.0.4",

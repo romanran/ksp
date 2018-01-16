@@ -7,7 +7,7 @@ function Journal {
 	
 	LOCAL row TO LEXICON().
 	LOCAL row_num TO 0.
-	row:add("T", TIME:SECONDS).
+	row:add("TIME", TIME:SECONDS).
 	row:add("SHIP", SHIPNAME).
 	LOCAL res_lex TO LEXICON().
 	FOR key IN ship_res:KEYS {

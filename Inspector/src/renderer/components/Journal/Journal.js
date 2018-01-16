@@ -56,59 +56,58 @@ export default class Journal {
 		}
 	}
 
-
-	handleData(data) {
-		let x = [];
-
-		const title = data[0].SHIP ? data[0].SHIP : data[0].SPD;
-		for (let key in data) {
-			if (key == 0) {
-				continue;
+	crawlData(obj, data_arr) {
+		_.each(obj, (val, key) => {
+			if (typeof (val) == "object") {
+				return data_arr = _.merge(this.crawlData(val, data_arr), data_arr)
 			}
-			x.push(data[key].MISSIONTIME);
-		}
+			if (key === "DESC") {
+				this.status_arr.push(val);
+				return 0;
+			}
+			if (key === "STATUS") {
+				const last_status = _.last(this.status_arr);
+				if (last_status)
+					this.desc_arr.push(`${last_status}, ${key}: ${val}`);
+				return 0;
+			}
 
-		const [type, labels] = ['line', x];
-
-		data = _.takeRight(data, data.length - 1)
-
-		let series = [];
-		let data_arr = [];
-		let desc_arr = [];
-		let status_arr = [];
-		let data_l = data.length;
-		let ai = 0;
-
-		_.each(data, (obj, i) => {
-			let obj_l = Object.keys(obj).length;
-			let ni = 0;
-			_.each(obj, (val, key) => {
-				if (typeof (val) == "object") {
-					return;
-				}
-				if (key === "DESC") {
-					status_arr.push(val);
-					return 0;
-				}
-				if (key === "STATUS") {
-					const last_status = _.last(status_arr);
-					if (last_status)
-						desc_arr.push(`${last_status}, ${key}: ${val}`);
-					return 0;
-				}
-//				if (['TIME', 'FACING'].indexOf(key) >= 0) {
-//					return 0;
-//				}
-				if (data_arr[key]) {
-					data_arr[key].push(val);
-				} else {
-					data_arr[key] = [];
-				}
-			});
+			if (!_.has(data_arr, key)) {
+				data_arr[key] = [];
+			}
+			data_arr[key].push(val);
 		});
 
+		return data_arr;
+	}
+
+	handleData(data) {
+		const title = data[0].SHIP ? data[0].SHIP : data[0].SPD;
+		data = _.takeRight(data, data.length - 1)
+		let res_left = data.map(obj => obj.RESOURCES_LEFT)
+		res_left = _.takeRight(res_left, res_left.length - 1)
+		let data_arr = [];
+		let res_arr = [];
+
+		this.status_arr = [];
+		this.desc_arr = [];
+
+		res_arr = this.crawlData(res_left, res_arr)
+		data_arr = this.crawlData(data, data_arr)
+		const series = this.buildSeries(data_arr);
+		res_left = this.buildSeries(res_arr)
+
+		return {
+			series: series,
+			title: title,
+			resources: res_left
+		}
+	}
+
+	buildSeries(obj) {
+		let series = [];
 		let last_color = '#FFF'
-		_.forIn(data_arr, (arr, key) => {
+		_.forIn(obj, (arr, key) => {
 			let color = generateColor(key, {
 				avoid: last_color,
 				proximity: 100
@@ -116,17 +115,12 @@ export default class Journal {
 			last_color = color
 			series.push({
 				name: key,
-				description: desc_arr,
+				description: this.desc_arr,
 				data: arr,
 				color: color,
 				lineWidth: 1,
 			});
 		});
-
-		return {
-			series: series,
-			labels: labels,
-			title: title
-		}
+		return series;
 	}
 }
