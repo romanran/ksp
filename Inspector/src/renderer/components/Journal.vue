@@ -83,6 +83,7 @@
                 this.$refs.lineChart.mergeOption(theme);
                 this.data = data
                 this.chart.hideLoading()
+                this.chart.xAxis[0].setCategories(data.series[0].data)
                 
                 this.$nextTick(() => {
                     _.each(data.resources, serie => {
@@ -119,26 +120,13 @@
             },
             moving(e) {
                 const curr_x = _.round(this.chart.xAxis[0].toValue(e.chartX));
-                //                                deb(curr_x)
-                //                deb(this.data)
-
                 _.each(this.data.resources, serie => {
                     const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
 
-                    let a = _.cloneDeep(serie)
-                    if (serie.data[curr_x]) {
-                        a.data = [serie.data[curr_x]]
-//                        this.resCharts[serie.name] = a
-//                        reschart.series[0].setData(serie.data[curr_x])
-//                        deb()
-                        reschart.update({series: a})
-//                        reschart.redraw()
-//                        reschart.series = a
-//                        deb(this.resCharts[serie.name])
-//                        reschart.addSeries(a)
-                    }
+                    let serie_clone = _.cloneDeep(serie)
+                    serie_clone.data = serie.data[curr_x] ? [serie.data[curr_x]] : [0]
+                    reschart.update({series: serie_clone})
                 })
-                //                deb(this.res)
 
             },
             toggleSeries(e) {
