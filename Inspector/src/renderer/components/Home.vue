@@ -13,6 +13,7 @@
 </template>
 
 <script>
+	global.deb = console.log
 	import glob from 'glob'
 	import path from 'path'
 	export default {
@@ -34,10 +35,9 @@
 				})
 				this.journals = res
 			})
-			this.msg = 'sad'
+			this.msg = 'Flight journals'
 		}
 	}
-	global.deb = console.log
 </script>
 
 <style scoped lang="less">

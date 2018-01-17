@@ -27,15 +27,14 @@
     //    import Highcharts from 'Highcharts'
     import VueHighcharts from 'vue2-highcharts'
     import Highcharts from 'highcharts'
-    import highchartsMore from 'highcharts/highcharts-more';
-    import solidgauge from "highcharts/modules/solid-gauge";
+    import highchartsMore from 'highcharts/highcharts-more'
+    import solidgauge from "highcharts/modules/solid-gauge"
     highchartsMore(Highcharts)
     solidgauge(Highcharts)
     import Color from 'color'
     import theme from './Journal/ChartTheme.js'
     import chart_opts from './Journal/chart_opts.js'
     import res_chart_opts from './Journal/res_chart_opts.js'
-    import vSelect from 'vue-select'
 
     export default {
         name: 'journal',
@@ -59,8 +58,7 @@
         },
         components: {
             vueSlider,
-            VueHighcharts,
-            vSelect
+            VueHighcharts
         },
         created() {
             global.App = this //for deb

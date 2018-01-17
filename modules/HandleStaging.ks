@@ -39,7 +39,11 @@ function P_HandleStaging {
 		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
 		SET done_staging TO doStage().
 		STEERINGMANAGER:RESETPIDS().
-
+		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
+			HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
+			this_craft["Thrusting"]["resetPID"]().
+		}
+ 
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
 	

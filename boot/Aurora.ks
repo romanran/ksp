@@ -140,13 +140,15 @@ function Aurora {
 				Display["clear"]().
 				this_craft["Injection"]["burn_time"]().
 			}
-			
+			IF ALTITUDE > 69000 AND globals["q_pressure"]() < 1 {
+				globals["ship_state"]["set"]("quiet", true).
+			} 
 			IF ALTITUDE > 70000 AND globals["q_pressure"]() < 1 {
 				this_craft["Deployables"]["fairing"]().
-				RCS ON.
 			} //eject fairing
-			IF ALTITUDE > 71000 {
-				//--vacuum, deploy panels and antennas, turn on lights
+			IF ALTITUDE > 72000 {
+				globals["ship_state"]["set"]("quiet", false).
+				RCS ON.
 				this_craft["Deployables"]["panels"]().
 			}
 		} ELSE IF phase = "COASTING" {
