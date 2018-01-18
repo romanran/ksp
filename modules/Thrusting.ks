@@ -29,7 +29,7 @@ function P_Thrusting {
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
 	LOCAL LOCK thrott TO throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()).
 	// LOCAL LOCK target4throttle TO interpolateLagrange(thrust_data, ALTITUDE).
-	 LOCAL LOCK target4throttle TO MAX(SIN(((-ALTITUDE + 45000) / 45000) * CONSTANT:RadToDeg) * 15, 1).
+	 LOCAL LOCK target4throttle TO MAX(SIN(((-ALTITUDE + 60000) / 60000) * CONSTANT:RadToDeg) * 26, 1).
 
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
@@ -58,16 +58,14 @@ function P_Thrusting {
 				logJ("Reached the safe altitude of " + safe_alt).
 			}).
 		}
-		IF globals["ship_state"]["get"]("quiet")  {
+		IF globals["ship_state"]["get"]("quiet") {
 			SET throttle_PID:MINOUTPUT TO 0.
 			SET throttle_PID:MAXOUTPUT TO 0.
 		} ELSE {
 			SET throttle_PID:MINOUTPUT TO 0.1.
 			SET throttle_PID:MAXOUTPUT TO 1.
 		}
-		IF ALTITUDE > 70000 {
-			LOCK THROTTLE TO 1.
-		}
+
 		SET throttle_PID:SETPOINT TO target4throttle.
 
 		FOR eng in eng_list {

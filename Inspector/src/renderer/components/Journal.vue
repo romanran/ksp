@@ -15,7 +15,7 @@
                 <option class="btn x-button" v-for="serie in data.series" :style="'background:' + serie.color" >{{serie.name}}</option>
             </select>
         </p>
-        <div v-for="res in data.resources" class="res_chart">
+        <div v-for="res in data.res" class="res_chart">
             <vue-highcharts :Highcharts="Highcharts" :options="res_chart_opts" :ref="'resChart_' + res.name"></vue-highcharts>
         </div>
     </div>
@@ -78,31 +78,35 @@
                 this.chart_opts.title = {
                     text: data.title
                 }
+//                data.series = _.sortBy(data.series, 'name')
                 _.each(data.series, serie => this.$refs.lineChart.addSeries(serie))
                 this.chart.update(this.chart_opts)
                 this.$refs.lineChart.mergeOption(theme);
                 this.data = data
                 this.chart.hideLoading()
-                this.chart.xAxis[0].setCategories(data.series[0].data)
-                
-                this.$nextTick(() => {
-                    _.each(data.resources, serie => {
-                        const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
-                        const max = _.max(serie.data)
-                        this.resCharts[serie.name] = serie;
-                        const a = _.cloneDeep(this.resCharts[serie.name])
-                        a.data = [a.data[0]]
-                        reschart.addSeries(a)
-                        this.$refs[`resChart_${serie.name}`][0].mergeOption({
-                            title: {
-                                text: serie.name
-                            },
-                            yAxis: {
-                                max: max
-                            }
-                        })
+                let x = _.find(data.series, {name: 'MTIME'}) 
+                x = x ? x : _.find(data.series, {name: 'MISSIONTIME'} )
+                this.chart.xAxis[0].setCategories(x.data)
+                this.$nextTick(this.loadRescharts)
+            },
+            loadRescharts() {
+                deb(this.data)
+                _.each(this.data.res, serie => {
+                    const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
+                    const max = _.max(serie.data)
+                    this.resCharts[serie.name] = serie;
+                    const a = _.cloneDeep(this.resCharts[serie.name])
+                    a.data = [a.data[0]]
+                    reschart.addSeries(a)
+                    this.$refs[`resChart_${serie.name}`][0].mergeOption({
+                        title: {
+                            text: serie.name
+                        },
+                        yAxis: {
+                            max: max
+                        }
                     })
-                }, 100)
+                })   
             },
             changeX(e) {
                 const serie = _.find(this.data.series, {
@@ -120,7 +124,7 @@
             },
             moving(e) {
                 const curr_x = _.round(this.chart.xAxis[0].toValue(e.chartX));
-                _.each(this.data.resources, serie => {
+                _.each(this.data.res, serie => {
                     const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
 
                     let serie_clone = _.cloneDeep(serie)

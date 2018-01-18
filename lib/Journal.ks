@@ -3,18 +3,19 @@
 function Journal {
 	LOCAL self TO LEXICON().
 	LOCAL ship_res TO getResources().
-	LOCAL save_path TO "1:flightlogs/journal_" + SHIPNAME + ".json".
+	LOCAL save_path TO "1:flightlogs/journal_" + SHIPNAME + "_" + ROUND(TIME:SECONDS)+ ".json".
 	
 	LOCAL row TO LEXICON().
 	LOCAL row_num TO 0.
 	row:add("TIME", TIME:SECONDS).
 	row:add("SHIP", SHIPNAME).
+	row:add("MTIME", ROUND(MISSIONTIME, 1)).
 	LOCAL res_lex TO LEXICON().
 	FOR key IN ship_res:KEYS {
 		res_lex:add(ship_res[key]:NAME, ship_res[key]:CAPACITY).
 	}
 	row:add("DESC", "On launchpad, waiting for countdown.").
-	row:add("RESOURCES", res_lex).
+	row:add("RES", res_lex).
 	self:add(row_num, row).
 	
 	LOCAL function addEntry {
@@ -22,23 +23,24 @@ function Journal {
 		SET row_num TO row_num + 1.
 		LOCAL ship_res TO getResources().
 		SET row TO LEXICON().
-		row:add("MISSIONTIME", ROUND(MISSIONTIME)).
-		row:add("TIME", ROUND(TIME:SECONDS)).
+		row:add("MTIME", ROUND(MISSIONTIME, 1)).
+		row:add("TIME", ROUND(TIME:SECONDS, 1)).
 		row:add("ALT", ROUND(ALT:RADAR)).
 		row:add("APO", ROUND(ALT:APOAPSIS)).
 		row:add("PER", ROUND(ALT:PERIAPSIS)).
-		row:add("ORBV", ROUND(VELOCITY:ORBIT:MAG)).
-		row:add("SURV", ROUND(VELOCITY:SURFACE:MAG)).
-		row:add("Q", ROUND(globals["q_pressure"]())).
+		row:add("ORBV", ROUND(VELOCITY:ORBIT:MAG, 1)).
+		row:add("SURV", ROUND(VELOCITY:SURFACE:MAG, 1)).
+		row:add("Q", ROUND(globals["q_pressure"](), 3)).
 		row:add("THROTT", ROUND(THROTTLE)).
 		row:add("PITCH", ROUND(this_craft["Thrusting"]["ship_p"]())).
 		row:add("FACING", FACING).
-		row:add("VERTICALSPEED", ROUND(VERTICALSPEED)).
+		row:add("VS", ROUND(VERTICALSPEED, 2)).
+		row:add("ORBP", ROUND(SHIP:ORBIT:PERIOD, 3)).
 		SET res_lex TO LEXICON().
 		FOR key IN ship_res:KEYS {
 			res_lex:add(ship_res[key]:NAME, ROUND(ship_res[key]:AMOUNT)).
 		}
-		row:add("RESOURCES_LEFT", res_lex).
+		row:add("RES", res_lex).
 		row:add("STATUS", SHIP:STATUS).
 		row:add("DESC", description).
 		self:add(row_num, row).
@@ -49,16 +51,11 @@ function Journal {
 	}
 	
 	LOCAL function saveToLog {
-		IF ADDONS:RT:HASKSCCONNECTION(SHIP) {
+		IF ADDONS:RT:HASKSCCONNECTION(SHIP) OR HOMECONNECTION:ISCONNECTED { 
 			COPYPATH(save_path, "0:flightlogs/").
-			HUDTEXT("Flight journal saved!", 3, 2, 40, green, false).
-			RETURN true.
-		} ELSE IF HOMECONNECTION:ISCONNECTED { 
-			COPYPATH(save_path, "0:flightlogs/").
-			HUDTEXT("Flight journal saved!", 3, 2, 40, green, false).
-			RETURN true.
+		RETURN true.
 		} ELSE {
-			HUDTEXT("Journal can't be send, no connection", 3, 2, 40, red, false).
+			HUDTEXT("Journal can't be send, no connection", 3, 2, 30, red, false).
 			RETURN false.
 		}
 	}

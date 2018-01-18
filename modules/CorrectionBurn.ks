@@ -17,7 +17,7 @@ function P_CorrectionBurn {
 	
 	LOCAL function moveFore {
 		PARAMETER val TO 1.
-		IF ship_res:HASKEY("MonoPropellant") AND (ship_res["MonoPropellant"]:AMOUNT / ship_res["MonoPropellant"]:CAPACITY) * 100 < 10 {
+		IF ship_res:HASKEY("MonoPropellant") AND (ship_res["MonoPropellant"]:AMOUNT / ship_res["MonoPropellant"]:CAPACITY) * 100 < 0 {
 			RETURN 0.
 		} ELSE {
 			SET val TO MAX(0, MIN(val, 1)).

@@ -84,6 +84,7 @@ function P_HandleStaging {
 			check("LIQUIDFUEL").
 			check("OXIDIZER").
 			check("SOLIDFUEL").
+			check("MONOPROPELLANT").
 		}
 		
 		LOCAL must_thrust_phase IS ship_state["get"]():HASKEY("phase") 

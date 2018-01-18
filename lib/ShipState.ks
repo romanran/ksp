@@ -3,9 +3,6 @@
 function ShipState {
 	LOCAL filename IS "1:ship-state".
 	LOCAL ship_state IS LEXICON().
-	IF (EXISTS(filename)) {
-		SET ship_state TO READJSON(filename).
-	}
 
 	LOCAL function setAndSave {
 		PARAMETER key.
@@ -16,6 +13,9 @@ function ShipState {
 	
 	LOCAL function shipState {
 		PARAMETER key IS "n0n".
+		IF (EXISTS(filename)) {
+			SET ship_state TO READJSON(filename).
+		}
 		IF key = "n0n" {
 			return ship_state.
 		} ELSE IF ship_state:HASKEY(key) {
