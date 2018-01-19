@@ -67,6 +67,7 @@ function P_HandleStaging {
 				staging_Timer["set"]().
 				quiet_Timer["set"]().
 				SET quiet TO true.
+				ship_state["set"]("quiet", quiet).
 			}).
 		}
 		quiet_Timer["ready"](1, {
@@ -79,6 +80,7 @@ function P_HandleStaging {
 			staging_Timer["reset"]().
 			stage_1s["reset"]().
 			SET quiet TO false.
+			ship_state["set"]("quiet", quiet).
 		}).
 		IF NOT done_staging{
 			check("LIQUIDFUEL").
@@ -89,7 +91,6 @@ function P_HandleStaging {
 		
 		LOCAL must_thrust_phase IS ship_state["get"]():HASKEY("phase") 
 		AND LIST("TAKEOFF", "THRUSTING"):CONTAINS(ship_state["get"]("phase")).
-		ship_state["set"]("quiet", quiet).
 		
 		IF NOT must_thrust_phase {
 			RETURN 2.

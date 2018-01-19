@@ -15,7 +15,7 @@
                 <option class="btn x-button" v-for="serie in data.series" :style="'background:' + serie.color" >{{serie.name}}</option>
             </select>
         </p>
-        <div v-for="res in data.res" class="res_chart">
+        <div v-for="res in data.resources" class="res_chart">
             <vue-highcharts :Highcharts="Highcharts" :options="res_chart_opts" :ref="'resChart_' + res.name"></vue-highcharts>
         </div>
     </div>
@@ -40,7 +40,7 @@
         name: 'journal',
         data() {
             return {
-                curr_x_axis: 'MISSIONTIME',
+                curr_x_axis: 'MTIME',
                 filename: '',
                 series_visible: 1,
                 chart_opts: chart_opts,
@@ -85,13 +85,12 @@
                 this.data = data
                 this.chart.hideLoading()
                 let x = _.find(data.series, {name: 'MTIME'}) 
-                x = x ? x : _.find(data.series, {name: 'MISSIONTIME'} )
                 this.chart.xAxis[0].setCategories(x.data)
                 this.$nextTick(this.loadRescharts)
             },
             loadRescharts() {
-                deb(this.data)
-                _.each(this.data.res, serie => {
+                deb('jestem', this.data)
+                _.each(this.data.resources, serie => {
                     const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
                     const max = _.max(serie.data)
                     this.resCharts[serie.name] = serie;
@@ -124,9 +123,8 @@
             },
             moving(e) {
                 const curr_x = _.round(this.chart.xAxis[0].toValue(e.chartX));
-                _.each(this.data.res, serie => {
+                _.each(this.data.resources, serie => {
                     const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
-
                     let serie_clone = _.cloneDeep(serie)
                     serie_clone.data = serie.data[curr_x] ? [serie.data[curr_x]] : [0]
                     reschart.update({series: serie_clone})
