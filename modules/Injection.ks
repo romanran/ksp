@@ -5,8 +5,8 @@ loadDeps(dependencies).
 
 function P_Injection {
 	PARAMETER trg_orbit.
-	LOCAL hundreds IS trg_orbit["period"] - (trg_orbit["period"] + 100).
-	LOCAL LOCK thrott TO MAX(1 - ((SHIP:ORBIT:PERIOD - hundreds) / (trg_orbit["period"] - hundreds - 10)) ^ 3, 0.1). //release acceleration at the end
+	LOCAL hundreds IS trg_orbit["period"] - (trg_orbit["period"] + 20).
+	LOCAL LOCK thrott TO MAX(1 - ((SHIP:ORBIT:PERIOD - hundreds) / (trg_orbit["period"] - hundreds - 10)) ^ 20, 0.1). //release acceleration at the end
 	LOCAL LOCK dV_change TO calcDeltaV(trg_orbit["altA"]).
 	LOCAL LOCK burn_time TO calcBurnTime(dV_change).
 	
@@ -24,7 +24,7 @@ function P_Injection {
 			IF globals["ship_state"]["get"]("quiet") {
 				SET THROTTLE TO 0.
 			} ELSE {
-				SET THROTTLE TO thrott.
+				LOCK THROTTLE TO thrott.
 			}
 			
 		}

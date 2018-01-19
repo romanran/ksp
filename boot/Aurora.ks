@@ -6,10 +6,13 @@ IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNE
 }
 RUNONCEPATH("Utils").
 
-SET STEERINGMANAGER:PITCHTS TO 6.
-SET STEERINGMANAGER:ROLLTS TO 6.
-SET STEERINGMANAGER:YAWTS TO 6.
-
+SET STEERINGMANAGER:PITCHTS TO 15.
+SET STEERINGMANAGER:ROLLTS TO 15.
+SET STEERINGMANAGER:YAWTS TO 15.
+SET STEERINGMANAGER:PITCHPID:KD TO 0.1.
+SET STEERINGMANAGER:YAWPID:KD TO 0.1.
+SET STEERINGMANAGER:ROLLPID:KD TO 0.1.
+SET STEERINGMANAGER:MAXSTOPPINGTIME TO 10.
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Programme", "ShipState", "ShipGlobals").
@@ -44,9 +47,9 @@ function Aurora {
 		ship_state["set"]("programme", "1:" + chosen_prog + ".json").
 		CS().
 	}
-	SET my_programme TO Programme(chosen_prog).
+	LOCAL my_programme TO Programme(ship_state["get"]("programme")).
 	// load the programme
-	LOCAL trg_prog TO my_programme["fetch"](chosen_prog).
+	LOCAL trg_prog TO my_programme["fetch"]().
 	LOCAL trg_orbit IS gettrgAlt(trg_prog["attributes"]["sats"], trg_prog["attributes"]["alt"]).
 
 	LOCAL done IS false.
@@ -143,7 +146,7 @@ function Aurora {
 				Display["clear"]().
 				this_craft["Injection"]["burn_time"]().
 			}
-			IF ALTITUDE > 60000 AND globals["q_pressure"]() < 0.3 {
+			IF ALTITUDE > 65000 AND globals["q_pressure"]() < 0.3 {
 				quiet1_1s["do"]({
 					this_craft["Deployables"]["fairing"]().
 				}).
@@ -188,9 +191,7 @@ function Aurora {
 				Display["clear"]().
 			}
 		} ELSE IF phase = "CORRECTION_BURN" {
-			Display["print"]("ORB P & TRG:", ROUND(SHIP:ORBIT:PERIOD) + " " + ROUND(trg_orbit["period"])).
-			Display["print"]("T=C:",ROUND(SHIP:ORBIT:PERIOD, 1) = ROUND(trg_orbit["period"], 1)).
-			IF ROUND(SHIP:ORBIT:PERIOD, 1) = ROUND(trg_orbit["period"], 1) {
+			IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
 				this_craft["CorrectionBurn"]["neutralize"]().
 				ship_state["set"]("phase", "ORBITING").
 				ship_log["add"]("CIRCURALISATION COMPLETE").
@@ -200,10 +201,12 @@ function Aurora {
 				conn_Timer["set"]().
 				Display["clear"]().
 			} ELSE {
-				LOCAL hundreds IS trg_orbit["period"] - (trg_orbit["period"] + 100).
-				LOCAL margin IS ROUND(1 - ((SHIP:ORBIT:PERIOD - hundreds) / (trg_orbit["period"] - hundreds)) ^ 50, 2).
+				LOCAL tail IS trg_orbit["period"] - 40.
+				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 10.
+				IF SHIP:ORBIT:PERIOD < trg_orbit["period"] - 30 {
+					SET margin TO 1.
+				}
 				Display["print"]("FORE:", margin).
-				Display["print"]("CALC:", (SHIP:ORBIT:PERIOD / trg_orbit["period"])^50).
 				this_craft["CorrectionBurn"]["fore"](margin).
 				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 				Display["print"]("TRG ORB P: ", trg_orbit["period"]).
