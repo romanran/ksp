@@ -152,11 +152,12 @@ function getTWR {
 }
 
 function calcTrajectory {
+	PARAMETER alt. 
 	PARAMETER target_alt IS 70000.
-	LOCAL twr TO getTWR().
-	LOCAL factor TO 0.7.
-	LOCAL factor TO MIN(0.9, MAX(factor, 0.1)).
-	RETURN ROUND(90 * (1 - (ALTITUDE / target_alt) ^ factor), 2).
+	// LOCAL twr TO getTWR().
+	// LOCAL factor TO 0.7.
+	LOCAL funcx TO ROUND(1 - (alt / target_alt) ^ 1.45, 3). 
+	RETURN ROUND(SIN(funcx * CONSTANT:RadToDeg) * (90 * 1.1884), 2). 
 }
 
 function getdV {   

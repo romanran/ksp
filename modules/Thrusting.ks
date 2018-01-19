@@ -6,24 +6,39 @@ loadDeps(dependencies).
 
 function P_Thrusting {
 	PARAMETER trg_orbit.
+	PARAMETER safe_alt IS 150. //safe altitude to release max thrust during a launch
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
 	}
+	LOCAL pid_timer TO TIME:SECONDS.
+	LOCAL throttle_PID to setPID(0, 0.5).
 	LOCAL using_rcs TO false.
 	LOCAL aborted TO false.
 	
 	LOCAL pitch_1s TO DoOnce().
+	LOCAL pid_1s TO DoOnce().
 	LOCAL rcs_1s TO DoOnce().
 	LOCAL abort_1s IS DoOnce().
 	LOCAL de_acc_1s IS DoOnce().
-
-	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(70000)).
+	LOCAL thrust_data IS LEXICON().
+	LOCAL thrust_data_file IS "0:datasets/thrust1.json".
+	IF (EXISTS(thrust_data_file)) {
+		SET thrust_data TO READJSON(thrust_data_file).
+	}
+	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE, 60000)).
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
-	LOCAL thrott TO 1.
+	LOCAL LOCK thrott TO throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()).
+	// LOCAL LOCK target4throttle TO interpolateLagrange(thrust_data, ALTITUDE).
+	 LOCAL LOCK target4throttle TO MAX((1 - (ALTITUDE / 50000) ^ 2 ) * 18, 1).
+
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
 	
 	LOCAL function takeOff {
+		SET throttle_PID:MAXOUTPUT TO 1.
+		SET throttle_PID:MINOUTPUT TO 1.
+		SET throttle_PID:SETPOINT TO 1.
+		SET pid_timer TO TIME:SECONDS.
 		LOCK THROTTLE TO thrott.
 		RETURN "Take off".
 	}
@@ -34,12 +49,24 @@ function P_Thrusting {
 			LOCK STEERING TO R(0, 0, 0) + HEADING(90, trg_pitch).
 		}).
 		
-		IF globals["ship_state"]["get"]("quiet")  {
-			SET thrott TO 0.
+		IF ALT:RADAR > safe_alt AND pid_1s["ready"]() {
+			pid_1s["do"]({
+				//reset pid from initial safe altitude gain 100% thrust
+				SET pid_timer TO TIME:SECONDS.
+				SET throttle_PID:MINOUTPUT TO 0.1.
+				throttle_PID:RESET.
+				logJ("Reached the safe altitude of " + safe_alt).
+			}).
+		}
+		IF globals["ship_state"]["get"]("quiet") {
+			SET throttle_PID:MINOUTPUT TO 0.
+			SET throttle_PID:MAXOUTPUT TO 0.
 		} ELSE {
-			SET thrott TO 1.
+			SET throttle_PID:MINOUTPUT TO 0.1.
+			SET throttle_PID:MAXOUTPUT TO 1.
 		}
 
+		SET throttle_PID:SETPOINT TO target4throttle.
 
 		FOR eng in eng_list {
 			IF eng:STAGE = STAGE:NUMBER {
@@ -47,7 +74,7 @@ function P_Thrusting {
 			}
 		}
 		IF total_thrust < 1 AND globals["q_pressure"]() < 1 AND NOT globals["ship_state"]["get"]("quiet")  {
-			SET using_rcs TO true.
+			// SET using_rcs TO true.
 		}
 		IF using_rcs {
 			rcs_1s["do"]({
@@ -81,7 +108,8 @@ function P_Thrusting {
 
 		//decrease acceleration to not to overshoot target apoapsis
 		de_acc_1s["do"]({
-			HUDTEXT("Decreasing acceleration", 2, 2, 42, green, false).
+			UNLOCK THROTTLE.
+			UNLOCK throttle_PID.
 			UNLOCK thrott.
 			logJ("Deacceleration").
 		}).
@@ -96,13 +124,21 @@ function P_Thrusting {
 		}
 	}
 	
+	LOCAL function resetPID {
+		SET pid_timer TO TIME:SECONDS.
+		throttle_PID:RESET.
+		pid_1s["reset"]().
+	}
 	
 	LOCAL methods TO LEXICON(
 		"takeOff", takeOff@,
 		"handleFlight", handleFlight@,
 		"decelerate", decelerate@,
+		"resetPID", resetPID@,
 		"trg_pitch", trg_pitch@, 
-		"ship_p", ship_p@
+		"ship_p", ship_p@, 
+		"target4throttle", target4throttle@, 
+		"thrott", thrott@
 	).
 	
 	RETURN methods.

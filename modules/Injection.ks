@@ -5,14 +5,15 @@ loadDeps(dependencies).
 
 function P_Injection {
 	PARAMETER trg_orbit.
-	LOCAL LOCK thrott TO MAX(1 - (SHIP:ORBIT:PERIOD / trg_orbit["period"]) ^ 100, 0.1). //release acceleration at the end
+	LOCAL hundreds IS trg_orbit["period"] - (trg_orbit["period"] + 20).
+	LOCAL LOCK thrott TO MAX(1 - ((SHIP:ORBIT:PERIOD - hundreds) / (trg_orbit["period"] - hundreds - 10)) ^ 20, 0.1). //release acceleration at the end
 	LOCAL LOCK dV_change TO calcDeltaV(trg_orbit["altA"]).
 	LOCAL LOCK burn_time TO calcBurnTime(dV_change).
 	
 	LOCAL function init {
 		RCS ON.
 		SET THROTTLE TO 0.
-		HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
+		//HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.
 		LOCK STEERING TO PROGRADE.
 		RETURN "RCS ON, Circularisation".
@@ -23,14 +24,13 @@ function P_Injection {
 			IF globals["ship_state"]["get"]("quiet") {
 				SET THROTTLE TO 0.
 			} ELSE {
-				SET THROTTLE TO thrott.
+				LOCK THROTTLE TO thrott.
 			}
 			
 		}
 		IF ROUND(SHIP:ORBIT:PERIOD) >= trg_orbit["period"] - 50 {
 			LOCK THROTTLE TO 0.
 			UNLOCK STEERING.
-			HUDTEXT("CIRCULARISATION PHASE I COMPLETE", 3, 2, 42, RGB(10,225,10), false).
 			RETURN true.
 		}
 		RETURN false. // return that the maneuver is not done

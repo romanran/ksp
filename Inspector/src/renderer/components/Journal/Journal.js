@@ -63,13 +63,13 @@ export default class Journal {
 			}
 			if (key === "DESC") {
 				this.status_arr.push(val);
-				return 0;
+//				return 0;
 			}
 			if (key === "STATUS") {
 				const last_status = _.last(this.status_arr);
 				if (last_status)
 					this.desc_arr.push(`${last_status}, ${key}: ${val}`);
-				return 0;
+//				return 0;
 			}
 
 			if (!_.has(data_arr, key)) {
@@ -84,7 +84,7 @@ export default class Journal {
 	handleData(data) {
 		const title = data[0].SHIP ? data[0].SHIP : data[0].SPD;
 		data = _.takeRight(data, data.length - 1)
-		let res_left = data.map(obj => obj.RESOURCES_LEFT)
+		let res_left = data.map(obj => obj.RES)
 		res_left = _.takeRight(res_left, res_left.length - 1)
 		let data_arr = [];
 		let res_arr = [];

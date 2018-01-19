@@ -6,10 +6,13 @@ IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNE
 }
 RUNONCEPATH("Utils").
 
-SET STEERINGMANAGER:PITCHTS TO 6.
-SET STEERINGMANAGER:ROLLTS TO 6.
-SET STEERINGMANAGER:YAWTS TO 6.
-
+SET STEERINGMANAGER:PITCHTS TO 15.
+SET STEERINGMANAGER:ROLLTS TO 15.
+SET STEERINGMANAGER:YAWTS TO 15.
+SET STEERINGMANAGER:PITCHPID:KD TO 0.1.
+SET STEERINGMANAGER:YAWPID:KD TO 0.1.
+SET STEERINGMANAGER:ROLLPID:KD TO 0.1.
+SET STEERINGMANAGER:MAXSTOPPINGTIME TO 10.
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Programme", "ShipState", "ShipGlobals").
@@ -28,7 +31,6 @@ function Aurora {
 	LOCAL ship_log TO globals["ship_log"].
 
 	// Get programme name from ship state or inquiry
-	LOCAL my_programme TO Programme().
 	LOCAL chosen_prog TO ship_state["get"]("programme").
 	IF NOT chosen_prog {
 		LOCAL pr_chooser TO LIST(
@@ -36,18 +38,18 @@ function Aurora {
 				"name", "program",
 				"type", "select",
 				"msg", "Choose a program",
-				"choices", my_programme["list"]()
+				"choices", Programme()["list"]()
 			)
 		).
 		SET chosen_prog TO Inquiry(pr_chooser).
 		SET chosen_prog TO chosen_prog["program"].
 		COPYPATH("0:program/" + chosen_prog + ".json", "1:" + chosen_prog + ".json").
 		ship_state["set"]("programme", "1:" + chosen_prog + ".json").
-		SET my_programme TO Programme(chosen_prog).
 		CS().
 	}
+	LOCAL my_programme TO Programme(ship_state["get"]("programme")).
 	// load the programme
-	LOCAL trg_prog TO my_programme["fetch"](chosen_prog).
+	LOCAL trg_prog TO my_programme["fetch"]().
 	LOCAL trg_orbit IS gettrgAlt(trg_prog["attributes"]["sats"], trg_prog["attributes"]["alt"]).
 
 	LOCAL done IS false.
@@ -56,6 +58,9 @@ function Aurora {
 	// Onces
 	LOCAL warp_1s IS doOnce().
 	LOCAL inject_init_1s IS doOnce().
+	LOCAL quiet1_1s IS doOnce().
+	// LOCAL quiet2_1s IS doOnce().
+	LOCAL quiet3_1s IS doOnce().
 
 	// Timers
 	LOCAL conn_Timer IS Timer(). // retry connection to KSC timer
@@ -89,12 +94,13 @@ function Aurora {
 	Display["imprint"](SHIP:NAME).
 	Display["imprint"]("Comm range:", trg_orbit["r"] + "m.").
 	Display["imprint"]("TRG ALT:", trg_orbit["alt"] + "m.").
-	Display["imprint"]("TRG ORB period:", trg_orbit["period"] + "s.").
+	Display["imprint"]("TRG ORB P:", trg_orbit["period"] + "s.").
 	
 	IF SHIP:STATUS = "PRELAUNCH" {
 		ship_state["set"]("phase", "PRELAUNCH").
 		this_craft["PreLaunch"]["init"](). // waits for user input, then countdowns, then on 0 it return and the script goes forward
 		ship_state["set"]("phase", "TAKEOFF").
+		ship_state["set"]("saved", false).
 	}
 	SET done TO 0.
 	SET from_save TO this_craft["PreLaunch"]["from_save"]().
@@ -105,7 +111,7 @@ function Aurora {
 		LOCAL stage_response IS this_craft["HandleStaging"]["refresh"]().
 		
 		Display["reset"]().
-		Display["print"]("Current phase", phase).
+		Display["print"]("PHASE", phase).
 		
 		IF stage_response {
 			this_craft["CheckCraftCondition"]["refresh"]().
@@ -119,12 +125,12 @@ function Aurora {
 			journal_Timer["set"]().
 		} ELSE IF phase = "THRUSTING" {
 			LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
-			Display["print"]("THR", THROTTLE * 100 + "%").
+			Display["print"]("THROTT:", ROUND(THROTTLE * 100, 1) + "%").
+			Display["print"]("TRG THROTT:", this_craft["Thrusting"]["target4throttle"]()).
 			Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
-			Display["print"]("T.PITCH:", this_craft["Thrusting"]["trg_pitch"]()).
 			Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
 			Display["print"]("TWR:", ROUND(getTWR(), 3)).
-			Display["print"]("Current v:", SHIP:VELOCITY:SURFACE:MAG).
+			Display["print"]("SFC V:", SHIP:VELOCITY:SURFACE:MAG).
 			Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
 			
 			this_craft["Thrusting"]["handleFlight"]().
@@ -134,27 +140,29 @@ function Aurora {
 			IF CEILING(APOAPSIS) >= trg_orbit["alt"] AND ALTITUDE > 50000 {
 				ship_state["set"]("phase", "COASTING").
 				SET THROTTLE TO 0.
-				HUDTEXT("COAST TRANSITION", 4, 2, 42, green, false).
+				// HUDTEXT("COAST TRANSITION", 4, 2, 20, green, false).
 				//leaving thrusting section at that time
 				ship_log["add"]("COAST TRANSITION phase").
 				Display["clear"]().
 				this_craft["Injection"]["burn_time"]().
 			}
-			
-			IF ALTITUDE > 70000 AND globals["q_pressure"]() < 1 {
-				this_craft["Deployables"]["fairing"]().
-				RCS ON.
+			IF ALTITUDE > 65000 AND globals["q_pressure"]() < 0.3 {
+				quiet1_1s["do"]({
+					this_craft["Deployables"]["fairing"]().
+				}).
 			} //eject fairing
 			IF ALTITUDE > 71000 {
-				//--vacuum, deploy panels and antennas, turn on lights
-				this_craft["Deployables"]["panels"]().
+				quiet3_1s["do"]({
+					RCS ON.
+					this_craft["Deployables"]["panels"]().
+				}).
 			}
 		} ELSE IF phase = "COASTING" {
 			SET WARPMODE TO "RAILS".
 			LOCAL safe_t TO 60.
 			warp_1s["do"]({
 				Display["clear"]().
-				HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 42, green, false).
+				// HUDTEXT("WARPING IN 2 SECONDS", 2, 2, 20, green, false).
 				warp_delay["set"]().
 				Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 			}).
@@ -172,9 +180,10 @@ function Aurora {
 				LOCAL init TO this_craft["Injection"]["init"]().
 				logJ(init). // initialize and get the response
 			}).
-			Display["print"]("THROTTLE: ", this_craft["Injection"]["throttle"]()).
+			Display["print"]("THROTT: ", this_craft["Injection"]["throttle"]()).
 			Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
 			Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
+			Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 			IF this_craft["Injection"]["burn"]() {
 				ship_state["set"]("phase", "CORRECTION_BURN").
 				ship_log["add"]("Injection complete").
@@ -182,37 +191,44 @@ function Aurora {
 				Display["clear"]().
 			}
 		} ELSE IF phase = "CORRECTION_BURN" {
-			IF SHIP:ORBIT:PERIOD >= trg_orbit["period"] {
+			IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
 				this_craft["CorrectionBurn"]["neutralize"]().
 				ship_state["set"]("phase", "ORBITING").
-				HUDTEXT("CIRCURALISATION COMPLETE", 3, 2, 42, RGB(10,225,10), false).
 				ship_log["add"]("CIRCURALISATION COMPLETE").
 				UNLOCK THROTTLE.
 				UNLOCK STEERING.
 				this_craft["Deployables"]["antennas"]().
 				conn_Timer["set"]().
+				Display["clear"]().
 			} ELSE {
-				LOCAL margin IS  SHIP:ORBIT:PERIOD / trg_orbit["period"].
-				IF NOT this_craft["CorrectionBurn"]["fore"](margin) {
-					HUDTEXT("ONLY 10% OF MONOPROP LEFT!", 3, 2, 42, RED, false).
+				LOCAL tail IS trg_orbit["period"] - 40.
+				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 10.
+				IF SHIP:ORBIT:PERIOD < trg_orbit["period"] - 30 {
+					SET margin TO 1.
 				}
-				Display["print"]("ORB PERIOD:", SHIP:ORBIT:PERIOD).
-				Display["print"]("TRG ORB PERIOD: ", trg_orbit["period"]).
+				Display["print"]("FORE:", margin).
+				this_craft["CorrectionBurn"]["fore"](margin).
+				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
+				Display["print"]("TRG ORB P: ", trg_orbit["period"]).
 			}
 		} ELSE IF phase = "ORBITING" {
-			Display["print"]("ORB. PERIOD:", SHIP:ORBIT:PERIOD).
+			Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 		}
-		conn_Timer["ready"](10, {
-			IF NOT ship_log["save"]() {
-				conn_Timer["set"]().
-			} ELSE {
-				my_programme["add"]().
-			}
-		}).
-		journal_Timer["ready"](10, {
-			ship_log["add"]().
-			journal_Timer["set"]().
-		}).
+		IF NOT ship_state["get"]("saved") {
+			conn_Timer["ready"](10, {
+				IF NOT ship_log["save"]() {
+					conn_Timer["set"]().
+				} ELSE {
+					my_programme["add"]().
+					ship_state["set"]("saved", true).
+				}
+			}).
+			journal_Timer["ready"](3, {
+				ship_log["add"]().
+				journal_Timer["set"]().
+				ship_log["save"]().
+			}).
+		}
 		WAIT 0.
 	}
 }

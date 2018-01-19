@@ -1,29 +1,23 @@
 @LAZYGLOBAL off.
 
 function Programme {
-	PARAMETER ptypeb IS "undefined".
-	LOCAL ptype TO ptypeb:REPLACE(".json", "").
-	LOCAL path TO "0:program/" + ptype + ".json".
+	PARAMETER path.
 	LOCAL filelist IS LIST().
 	
 	LOCAL function addVessel {
 		LOCAL obj TO READJSON(path).
 		FOR vsl IN obj["vessels"] {
 			IF vsl = SHIPNAME {
-				RETURN HUDTEXT(SHIPNAME + " already exists inside the " + ptype + " program", 4, 2, 30, red, false).
+				RETURN HUDTEXT(SHIPNAME + " already exists inside the " + path, 4, 2, 30, red, false).
 			}
 		}
 		obj["vessels"]:ADD(SHIPNAME).
 		WRITEJSON(obj, path).
-		HUDTEXT(SHIPNAME + " has been added to the " + ptype + " program", 4, 2, 30, green, false).
+		HUDTEXT(SHIPNAME + " has been added to the " + path, 4, 2, 30, green, false).
 	}
 
 	LOCAL function fetch {
-		PARAMETER npath IS path.
-		IF npath:FIND("json") < 0 {
-			SET npath TO "0:program/" + npath + ".json".
-		}
-		LOCAL obj TO READJSON(npath).
+		LOCAL obj TO READJSON(path).
 		RETURN obj.
 	}
 
@@ -48,7 +42,7 @@ function Programme {
 	LOCAL function create {
 		PARAMETER atts IS LEXICON().
 		
-		IF VOLUME(0):EXISTS("program/" + ptype + ".json") {
+		IF VOLUME(0):EXISTS("program/" + path + ".json") {
 			RETURN PRINT("Program already exists!").
 		}
 		

@@ -39,7 +39,11 @@ function P_HandleStaging {
 		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
 		SET done_staging TO doStage().
 		STEERINGMANAGER:RESETPIDS().
-
+		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
+			HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
+			this_craft["Thrusting"]["resetPID"]().
+		}
+ 
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
 	
@@ -63,6 +67,7 @@ function P_HandleStaging {
 				staging_Timer["set"]().
 				quiet_Timer["set"]().
 				SET quiet TO true.
+				ship_state["set"]("quiet", quiet).
 			}).
 		}
 		quiet_Timer["ready"](1, {
@@ -75,16 +80,17 @@ function P_HandleStaging {
 			staging_Timer["reset"]().
 			stage_1s["reset"]().
 			SET quiet TO false.
+			ship_state["set"]("quiet", quiet).
 		}).
 		IF NOT done_staging{
 			check("LIQUIDFUEL").
 			check("OXIDIZER").
 			check("SOLIDFUEL").
+			check("MONOPROPELLANT").
 		}
 		
 		LOCAL must_thrust_phase IS ship_state["get"]():HASKEY("phase") 
 		AND LIST("TAKEOFF", "THRUSTING"):CONTAINS(ship_state["get"]("phase")).
-		ship_state["set"]("quiet", quiet).
 		
 		IF NOT must_thrust_phase {
 			RETURN 2.

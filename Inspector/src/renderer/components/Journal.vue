@@ -27,21 +27,20 @@
     //    import Highcharts from 'Highcharts'
     import VueHighcharts from 'vue2-highcharts'
     import Highcharts from 'highcharts'
-    import highchartsMore from 'highcharts/highcharts-more';
-    import solidgauge from "highcharts/modules/solid-gauge";
+    import highchartsMore from 'highcharts/highcharts-more'
+    import solidgauge from "highcharts/modules/solid-gauge"
     highchartsMore(Highcharts)
     solidgauge(Highcharts)
     import Color from 'color'
     import theme from './Journal/ChartTheme.js'
     import chart_opts from './Journal/chart_opts.js'
     import res_chart_opts from './Journal/res_chart_opts.js'
-    import vSelect from 'vue-select'
 
     export default {
         name: 'journal',
         data() {
             return {
-                curr_x_axis: 'MISSIONTIME',
+                curr_x_axis: 'MTIME',
                 filename: '',
                 series_visible: 1,
                 chart_opts: chart_opts,
@@ -59,8 +58,7 @@
         },
         components: {
             vueSlider,
-            VueHighcharts,
-            vSelect
+            VueHighcharts
         },
         created() {
             global.App = this //for deb
@@ -80,30 +78,34 @@
                 this.chart_opts.title = {
                     text: data.title
                 }
+//                data.series = _.sortBy(data.series, 'name')
                 _.each(data.series, serie => this.$refs.lineChart.addSeries(serie))
                 this.chart.update(this.chart_opts)
                 this.$refs.lineChart.mergeOption(theme);
                 this.data = data
                 this.chart.hideLoading()
-                
-                this.$nextTick(() => {
-                    _.each(data.resources, serie => {
-                        const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
-                        const max = _.max(serie.data)
-                        this.resCharts[serie.name] = serie;
-                        const a = _.cloneDeep(this.resCharts[serie.name])
-                        a.data = [a.data[0]]
-                        reschart.addSeries(a)
-                        this.$refs[`resChart_${serie.name}`][0].mergeOption({
-                            title: {
-                                text: serie.name
-                            },
-                            yAxis: {
-                                max: max
-                            }
-                        })
+                let x = _.find(data.series, {name: 'MTIME'}) 
+                this.chart.xAxis[0].setCategories(x.data)
+                this.$nextTick(this.loadRescharts)
+            },
+            loadRescharts() {
+                deb('jestem', this.data)
+                _.each(this.data.resources, serie => {
+                    const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
+                    const max = _.max(serie.data)
+                    this.resCharts[serie.name] = serie;
+                    const a = _.cloneDeep(this.resCharts[serie.name])
+                    a.data = [a.data[0]]
+                    reschart.addSeries(a)
+                    this.$refs[`resChart_${serie.name}`][0].mergeOption({
+                        title: {
+                            text: serie.name
+                        },
+                        yAxis: {
+                            max: max
+                        }
                     })
-                }, 100)
+                })   
             },
             changeX(e) {
                 const serie = _.find(this.data.series, {
@@ -121,26 +123,12 @@
             },
             moving(e) {
                 const curr_x = _.round(this.chart.xAxis[0].toValue(e.chartX));
-                //                                deb(curr_x)
-                //                deb(this.data)
-
                 _.each(this.data.resources, serie => {
                     const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
-
-                    let a = _.cloneDeep(serie)
-                    if (serie.data[curr_x]) {
-                        a.data = [serie.data[curr_x]]
-//                        this.resCharts[serie.name] = a
-//                        reschart.series[0].setData(serie.data[curr_x])
-//                        deb()
-                        reschart.update({series: a})
-//                        reschart.redraw()
-//                        reschart.series = a
-//                        deb(this.resCharts[serie.name])
-//                        reschart.addSeries(a)
-                    }
+                    let serie_clone = _.cloneDeep(serie)
+                    serie_clone.data = serie.data[curr_x] ? [serie.data[curr_x]] : [0]
+                    reschart.update({series: serie_clone})
                 })
-                //                deb(this.res)
 
             },
             toggleSeries(e) {

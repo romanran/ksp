@@ -6,7 +6,6 @@ function ShipState {
 	IF (EXISTS(filename)) {
 		SET ship_state TO READJSON(filename).
 	}
-
 	LOCAL function setAndSave {
 		PARAMETER key.
 		PARAMETER val.
@@ -16,6 +15,9 @@ function ShipState {
 	
 	LOCAL function shipState {
 		PARAMETER key IS "n0n".
+		IF (EXISTS(filename)) {
+			SET ship_state TO READJSON(filename).
+		}
 		IF key = "n0n" {
 			return ship_state.
 		} ELSE IF ship_state:HASKEY(key) {
