@@ -89,7 +89,6 @@
                 this.$nextTick(this.loadRescharts)
             },
             loadRescharts() {
-                deb('jestem', this.data)
                 _.each(this.data.resources, serie => {
                     const reschart = this.$refs[`resChart_${serie.name}`][0].getChart()
                     const max = _.max(serie.data)

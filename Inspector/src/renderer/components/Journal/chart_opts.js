@@ -7,6 +7,9 @@ export default {
         align: 'left',
         text: 'Click and drag to zoom in. Hold down shift key to pan.'
     },
+    boost: {
+        useGPUTranslations: true
+    },
     chart: {
         marginTop: 100,
         type: 'spline',

@@ -15,7 +15,7 @@ function P_Injection {
 		SET THROTTLE TO 0.
 		//HUDTEXT("Circularisation...", 3, 2, 42, RGB(10,225,10), false).	
 		SAS OFF.
-		LOCK STEERING TO PROGRADE.
+		LOCK STEERING TO PROGRADE + R(0, 0, 90).
 		RETURN "RCS ON, Circularisation".
 	}
 

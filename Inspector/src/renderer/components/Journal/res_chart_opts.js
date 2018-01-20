@@ -8,6 +8,9 @@ export default {
         height: 200,
         margin: [10, 0]
     },
+    boost: {
+        useGPUTranslations: true
+    },
     title: {
         align: 'center',
         y: 5,

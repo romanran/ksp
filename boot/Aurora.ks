@@ -6,17 +6,18 @@ IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNE
 }
 RUNONCEPATH("Utils").
 
-SET STEERINGMANAGER:PITCHTS TO 15.
-SET STEERINGMANAGER:ROLLTS TO 15.
-SET STEERINGMANAGER:YAWTS TO 15.
-SET STEERINGMANAGER:PITCHPID:KD TO 0.1.
-SET STEERINGMANAGER:YAWPID:KD TO 0.1.
-SET STEERINGMANAGER:ROLLPID:KD TO 0.1.
-SET STEERINGMANAGER:MAXSTOPPINGTIME TO 10.
+SET STEERINGMANAGER:PITCHTS TO 8.
+SET STEERINGMANAGER:ROLLTS TO 5.
+SET STEERINGMANAGER:YAWTS TO 8.
+SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
+SET STEERINGMANAGER:YAWPID:KD TO 0.75.
+SET STEERINGMANAGER:ROLLPID:KD TO 0.75.
+SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8.
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Programme", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
+	SET PILOTMAINTHROTTLE TO 0.
 	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 	CS().
 	SET TERMINAL:WIDTH TO 42.
@@ -201,8 +202,8 @@ function Aurora {
 				conn_Timer["set"]().
 				Display["clear"]().
 			} ELSE {
-				LOCAL tail IS trg_orbit["period"] - 40.
-				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 10.
+				LOCAL tail IS trg_orbit["period"] - 20.
+				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 12.
 				IF SHIP:ORBIT:PERIOD < trg_orbit["period"] - 30 {
 					SET margin TO 1.
 				}

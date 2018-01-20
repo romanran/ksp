@@ -76,7 +76,6 @@ function P_PreLaunch {
 		
 		Display["print"]("COUNTDOWN STARTED").
 		doModuleAction("modulelight", "togglelight", true, ksc_light).
-		SET start TO TRUE.
 		logJ("Countdown start").
 		
 		FROM {LOCAL i IS 5.} UNTIL i = -1 STEP {SET i TO i - 1.} DO {
