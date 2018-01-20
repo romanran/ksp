@@ -1,7 +1,7 @@
 @LAZYGLOBAL off.
 
 function Programme {
-	PARAMETER path.
+	PARAMETER path is "".
 	LOCAL filelist IS LIST().
 	
 	LOCAL function addVessel {
