@@ -11,6 +11,7 @@ function ShipState {
 		PARAMETER val.
 		SET ship_state[key] TO val.
 		WRITEJSON(ship_state, filename).
+		RETURN val.
 	}
 	
 	LOCAL function shipState {

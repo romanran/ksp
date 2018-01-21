@@ -154,10 +154,14 @@ function getTWR {
 function calcTrajectory {
 	PARAMETER alt. 
 	PARAMETER target_alt IS 70000.
-	// LOCAL twr TO getTWR().
+	LOCAL twr TO MAX(1.4, getTWR()).
 	// LOCAL factor TO 0.7.
-	LOCAL funcx TO ROUND(1 - (alt / target_alt) ^ 1.45, 3). 
-	RETURN ROUND(SIN(funcx * CONSTANT:RadToDeg) * (90 * 1.1884), 2). 
+	IF alt >= target_alt {
+		RETURN 0.
+	}
+	//sin( 1 -(x/ 600)^(2-b^0.5) ) * (90 * 1.1884)
+	LOCAL funcx TO 1 - (alt / target_alt) ^ (2-twr^0.5). 
+	RETURN SIN(funcx * CONSTANT:RadToDeg) * (90 * 1.1884).
 }
 
 function getdV {   
@@ -257,15 +261,17 @@ function getPhaseAngle {
 		RETURN 0.
 	}
 	
-	LOCAL radius_percent IS ROUND(260 / trg_vessel:OBT:PERIOD, 3).
+	LOCAL radius_percent IS ROUND(200 / trg_vessel:OBT:PERIOD, 3).
 	LOCAL phase_ang IS calcPhaseAngle(600000 + ALTITUDE, trg_vessel:ORBIT:SEMIMAJORAXIS / 2).
 	LOCAL curr_angle IS calcAngleFromVec(SHIP:UP:STARVECTOR, trg_vessel:UP:STARVECTOR).
 	LOCAL ahead IS false.
-	IF curr_angle > last_angle {
+	LOCAL diff TO 360 * radius_percent.
+	IF curr_angle < last_angle {
 		//target is ahead
-		SET phase_ang TO - phase_ang.
+		SET phase_ang TO 0 - phase_ang.
+		// SET diff TO 0 - diff.
 	} 
-	LOCAL tphase_ang TO 360 / no_of_sats + phase_ang.
+	LOCAL tphase_ang TO 360 / no_of_sats + phase_ang + diff.
 	LOCAL last_angle TO curr_angle.
 
 	RETURN LEXICON(

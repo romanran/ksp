@@ -53,9 +53,8 @@ function Journal {
 	LOCAL function saveToLog {
 		IF ADDONS:RT:HASKSCCONNECTION(SHIP) OR HOMECONNECTION:ISCONNECTED { 
 			COPYPATH(save_path, "0:flightlogs/").
-		RETURN true.
+			RETURN true.
 		} ELSE {
-			HUDTEXT("Journal can't be send, no connection", 3, 2, 30, red, false).
 			RETURN false.
 		}
 	}

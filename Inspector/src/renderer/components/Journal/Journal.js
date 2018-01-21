@@ -57,19 +57,11 @@ export default class Journal {
 	}
 
 	crawlData(obj, data_arr) {
+		let i = -1;
 		_.each(obj, (val, key) => {
+			i++;
 			if (typeof (val) == "object") {
 				return data_arr = _.merge(this.crawlData(val, data_arr), data_arr)
-			}
-			if (key === "DESC") {
-				this.status_arr.push(val);
-//				return 0;
-			}
-			if (key === "STATUS") {
-				const last_status = _.last(this.status_arr);
-				if (last_status)
-					this.desc_arr.push(`${last_status}, ${key}: ${val}`);
-//				return 0;
 			}
 
 			if (!_.has(data_arr, key)) {

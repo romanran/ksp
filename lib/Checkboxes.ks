@@ -10,6 +10,11 @@ function Checkboxes {
 	LOCAL pointer TO 1.
 	LOCAL answers TO LIST().
 	LOCAL pos TO 0.
+	
+	LOCAL sign IS "x".
+	IF chtype = "select" {
+		SET sign TO "+".
+	}
 
 	LOCAL function _print {
 		PARAMETER str.
@@ -26,40 +31,29 @@ function Checkboxes {
 
 	LOCAL function movePointer {
 		PARAMETER char.
-		IF char = TERMINAL:INPUT:UPCURSORONE {
-			IF pointer > 1 {
-				PRINT " " AT (5, pointer).
-				SET pointer TO pointer - 1.
-				PRINT "<" AT (5, pointer).
-				IF chtype = "select" togglePos().
-				return true.
-			} ELSE {
-				PRINT " " AT (5, pointer).
-				SET pointer TO items_i.
-				PRINT "<" AT (5, pointer).
-				IF chtype = "select" togglePos().
-				RETURN true.
-			}
-		}
-		IF char = TERMINAL:INPUT:DOWNCURSORONE {
-			IF pointer < items_i {
-				PRINT " " AT (5, pointer).
-				SET pointer TO pointer + 1.
-				PRINT "<" AT (5, pointer).
-				IF chtype = "select" togglePos().
-				RETURN true.
-			} ELSE {
-				PRINT " " AT (5, pointer).
-				SET pointer TO 1.
-				PRINT "<" AT (5, pointer).
-				IF chtype = "select" togglePos().
-				RETURN true.
-			}
-		}
 		IF char = " " {
 			togglePos().
 			RETURN true.
 		}
+		LOCAL prev_pointer IS pointer.
+		IF char = TERMINAL:INPUT:UPCURSORONE {
+			IF pointer > 1 {
+				SET pointer TO pointer - 1.
+			} ELSE {
+				SET pointer TO items_i.
+			}
+		}
+		IF char = TERMINAL:INPUT:DOWNCURSORONE {
+			IF pointer < items_i {
+				SET pointer TO pointer + 1.
+			} ELSE {
+				SET pointer TO 1.
+			}
+		}
+		PRINT " " AT (6, prev_pointer).
+		PRINT "<" AT (6, pointer).
+		IF chtype = "select" togglePos().
+		RETURN true.
 	}
 
 	LOCAL function togglePos {
@@ -67,7 +61,7 @@ function Checkboxes {
 			LOCAL i IS 0.
 			UNTIL i = answers:LENGTH {
 				SET answers[i]["value"] TO false.
-				PRINT " " AT (3, i + 1).
+				PRINT " " AT (4, i + 1).
 				SET i TO i + 1.
 			}
 			SET answers[pointer - 1]["value"] TO true.
@@ -75,9 +69,9 @@ function Checkboxes {
 			SET answers[pointer - 1]["value"] TO NOT answers[pointer - 1]["value"].
 		}
 		IF answers[pointer - 1]["value"] {
-			PRINT "x" AT (3, pointer).
+			PRINT sign AT (4, pointer).
 		}ELSE{
-			PRINT " " AT (3, pointer).
+			PRINT " " AT (4, pointer).
 		}
 	}
 
@@ -94,16 +88,16 @@ function Checkboxes {
 				IF choice:HASKEY["name"] {
 					answers:ADD(LEXICON("name", choice["name"], "value", FALSE)).
 					IF choice:HASKEY["msg"] {
-						PRINT choice["msg"] AT (10, items_i + 1).
+						PRINT choice["msg"] AT (11, items_i + 1).
 					} ELSE {
-						PRINT choice["name"] AT (10, items_i + 1).
+						PRINT choice["name"] AT (11, items_i + 1).
 					}
 				}
 			} ELSE {
 				answers:ADD(LEXICON("name", choice, "value", FALSE)).
-				PRINT choice AT (10, items_i +1).
+				PRINT choice AT (11, items_i +1).
 			}
-			PRINT pos AT (0, items_i + 1).
+			PRINT pos:TOSTRING():PADLEFT(2) AT (0, items_i + 1).
 			IF chtype = "select" {
 				LOCAL default TO 0. 
 				IF choice:ISTYPE("LEXICON") {
@@ -113,18 +107,18 @@ function Checkboxes {
 				}
 				IF items_i = default {
 					SET answers[items_i]["value"] TO true.
-					PRINT ".(x) - " AT (1, items_i + 1).
+					PRINT ".(" + sign + ") - " AT (2, items_i + 1).
 				} ELSE {
-					PRINT ".( ) - " AT (1, items_i + 1).
+					PRINT ".( ) - " AT (2, items_i + 1).
 				}
 			} ELSE {
-				PRINT ".[ ] - " AT (1, items_i + 1).
+				PRINT ".[ ] - " AT (2, items_i + 1).
 			}
 			SET items_i TO items_i + 1.
 			SET print_i TO print_i + 1.
 			SET pos TO pos + 1.
 		}
-		PRINT "<" AT (5, pointer).
+		PRINT "<" AT (6, pointer).
 		_print("").
 		_print("up/down arrows to move, space to check, enter to confirm").
 	}

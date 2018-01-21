@@ -6,21 +6,23 @@ IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNE
 }
 RUNONCEPATH("Utils").
 
-SET STEERINGMANAGER:PITCHTS TO 15.
-SET STEERINGMANAGER:ROLLTS TO 15.
-SET STEERINGMANAGER:YAWTS TO 15.
-SET STEERINGMANAGER:PITCHPID:KD TO 0.1.
-SET STEERINGMANAGER:YAWPID:KD TO 0.1.
-SET STEERINGMANAGER:ROLLPID:KD TO 0.1.
-SET STEERINGMANAGER:MAXSTOPPINGTIME TO 10.
+SET STEERINGMANAGER:PITCHTS TO 8.
+SET STEERINGMANAGER:ROLLTS TO 5.
+SET STEERINGMANAGER:YAWTS TO 8.
+SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
+SET STEERINGMANAGER:YAWPID:KD TO 0.75.
+SET STEERINGMANAGER:ROLLPID:KD TO 0.75.
+SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8.
+
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Programme", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
+	SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
 	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 	CS().
 	SET TERMINAL:WIDTH TO 42.
-	SET TERMINAL:HEIGHT TO 30.
+	SET TERMINAL:HEIGHT TO 34.
 	IF SHIP:STATUS = "PRELAUNCH" {
 		SET SHIP:NAME TO generateID().
 	}
@@ -55,17 +57,19 @@ function Aurora {
 	LOCAL done IS false.
 	LOCAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 
+	
 	// Onces
 	LOCAL warp_1s IS doOnce().
 	LOCAL inject_init_1s IS doOnce().
 	LOCAL quiet1_1s IS doOnce().
-	// LOCAL quiet2_1s IS doOnce().
+	LOCAL misc_1s IS doOnce().
 	LOCAL quiet3_1s IS doOnce().
 
 	// Timers
 	LOCAL conn_Timer IS Timer(). // retry connection to KSC timer
 	LOCAL journal_Timer IS Timer(). // save to journal in this time
 	LOCAL warp_delay IS Timer(). // save to journal in this time
+	LOCAL phase_angle IS LEXICON("current", 0).
 
 	// Load the modules after all of the global variables are set
 	LOCAL phase_modules IS LIST(
@@ -90,16 +94,28 @@ function Aurora {
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 
-	Display["imprint"]("Aurora Space Program V1.5.0").
-	Display["imprint"](SHIP:NAME).
-	Display["imprint"]("Comm range:", trg_orbit["r"] + "m.").
-	Display["imprint"]("TRG ALT:", trg_orbit["alt"] + "m.").
-	Display["imprint"]("TRG ORB P:", trg_orbit["period"] + "s.").
-	
 	IF SHIP:STATUS = "PRELAUNCH" {
+		LOCAL usr_input TO Inquiry(LIST(
+			LEXICON(
+				"name", "target",
+				"type", "select",
+				"msg", "Choose a target vessel",
+				"choices", trg_prog["vessels"]
+			)
+		)).
+		CS().
+		ship_state["set"]("trg_vsl", usr_input["target"]).
+	
+		Display["imprint"]("Aurora Space Program V1.5.0").
+		Display["imprint"](SHIP:NAME).
+		Display["imprint"]("TRG_VSL", ship_state["get"]("trg_vsl")).
+		Display["imprint"]("Comm range:", trg_orbit["r"] + "m.").
+		Display["imprint"]("TRG ALT:", trg_orbit["alt"] + "m.").
+		Display["imprint"]("TRG ORB P:", trg_orbit["period"] + "s.").
+		
 		ship_state["set"]("phase", "PRELAUNCH").
-		this_craft["PreLaunch"]["init"](). // waits for user input, then countdowns, then on 0 it return and the script goes forward
-		ship_state["set"]("phase", "TAKEOFF").
+		this_craft["PreLaunch"]["init"]().
+		ship_state["set"]("phase", "WAITING").
 		ship_state["set"]("saved", false).
 	}
 	SET done TO 0.
@@ -117,8 +133,30 @@ function Aurora {
 			this_craft["CheckCraftCondition"]["refresh"]().
 			logJ(stage_response).
 		}
-			
-		IF phase = "TAKEOFF" {
+		IF phase = "WAITING" {
+			SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), phase_angle["current"]).	
+			Display["print"]("Degrees spread:", phase_angle["spread"]).
+			Display["print"]("Degrees traveled:", phase_angle["traveled"]).
+			Display["print"]("Target separation:", phase_angle["separation"]).
+			Display["print"]("Est. angle move:", phase_angle["move"]).
+			Display["print"]("Target phase angle:", phase_angle["target"]).
+			Display["print"]("Current phase angle:", phase_angle["current"]).
+			IF phase_angle["current"] + 0.5 * (KUNIVERSE:TIMEWARP:WARP + 1) >= phase_angle["target"] 
+				AND phase_angle["current"] - (KUNIVERSE:TIMEWARP:WARP + 1) <= phase_angle["target"] {
+				misc_1s["do"]({
+					KUNIVERSE:TIMEWARP:CANCELWARP().
+				}).
+				Display["print"]("Press ENTER to launch").
+				Display["print"]("Press ESC to abort").
+				IF this_craft["PreLaunch"]["refresh"]() {
+					ship_state["set"]("phase", "TAKEOFF").
+					misc_1s["reset"]().
+					Display["clear"]().
+				}
+			} ELSE {
+				misc_1s["reset"]().
+			}
+		} ELSE IF phase = "TAKEOFF" {
 			ship_state["set"]("phase", "THRUSTING").
 			this_craft["HandleStaging"]["takeOff"]().
 			this_craft["Thrusting"]["takeOff"]().
@@ -132,7 +170,7 @@ function Aurora {
 			Display["print"]("TWR:", ROUND(getTWR(), 3)).
 			Display["print"]("SFC V:", SHIP:VELOCITY:SURFACE:MAG).
 			Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
-			
+				
 			this_craft["Thrusting"]["handleFlight"]().
 			IF (ROUND(APOAPSIS) > trg_orbit["alt"] - 200000) AND ALTITUDE > 50000 {
 				this_craft["Thrusting"]["decelerate"]().
@@ -153,7 +191,7 @@ function Aurora {
 			} //eject fairing
 			IF ALTITUDE > 71000 {
 				quiet3_1s["do"]({
-					RCS ON.
+					// RCS ON.
 					this_craft["Deployables"]["panels"]().
 				}).
 			}
@@ -170,6 +208,7 @@ function Aurora {
 				ship_state["set"]("phase", "KERBINJECTION").
 				ship_log["add"]("KERBINJECTION phase").
 				KUNIVERSE:TIMEWARP:CANCELWARP().
+				RCS ON.
 			}
 			warp_delay["ready"](2, {
 				WARPTO(TIME:SECONDS + ETA:APOAPSIS - (this_craft["Injection"]["burn_time"]() + safe_t)).
@@ -201,8 +240,8 @@ function Aurora {
 				conn_Timer["set"]().
 				Display["clear"]().
 			} ELSE {
-				LOCAL tail IS trg_orbit["period"] - 40.
-				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 10.
+				LOCAL tail IS trg_orbit["period"] - 20.
+				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 12.
 				IF SHIP:ORBIT:PERIOD < trg_orbit["period"] - 30 {
 					SET margin TO 1.
 				}

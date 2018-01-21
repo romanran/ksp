@@ -25,7 +25,7 @@ function P_Thrusting {
 	IF (EXISTS(thrust_data_file)) {
 		SET thrust_data TO READJSON(thrust_data_file).
 	}
-	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE, 60000)).
+	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE, 65000)).
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
 	LOCAL LOCK thrott TO throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()).
 	// LOCAL LOCK target4throttle TO interpolateLagrange(thrust_data, ALTITUDE).
@@ -46,7 +46,7 @@ function P_Thrusting {
 	LOCAL function handleFlight {
 		LOCAL total_thrust IS 0.
 		pitch_1s["do"]({
-			LOCK STEERING TO R(0, 0, 0) + HEADING(90, trg_pitch).
+			LOCK STEERING TO HEADING(90, trg_pitch).
 		}).
 		
 		IF ALT:RADAR > safe_alt AND pid_1s["ready"]() {
