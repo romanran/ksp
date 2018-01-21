@@ -1,11 +1,17 @@
 COPYPATH("0:lib/Utils", "1:").
 RUNONCEPATH("UTILS").
-LOCAL dependencies IS LIST("Functions", "ShipGlobals").
+LOCAL dependencies IS LIST("Functions", "ShipGlobals", "Timer", "DoOnce").
 loadDeps(dependencies).
-
 
 function P_PreLaunch {
 	LOCAL from_save TO true.
+	LOCAL countdown_1s IS doOnce().
+	LOCAL staging_Timer IS Timer().
+	LOCAL countdown IS 5.
+	LOCAL start IS 0.
+	LOCAL ksc_light TO "".
+		LOCAL first_stage_engines IS LIST().
+	
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
 	}
@@ -18,7 +24,6 @@ function P_PreLaunch {
 		LOCAL ship_engines IS LIST().
 		LIST ENGINES IN ship_engines.
 
-		LOCAL first_stage_engines IS LIST().
 		LOCAL last_eng_i TO 0.
 		FOR eng IN ship_engines{
 			IF eng:STAGE > last_eng_i {
@@ -57,30 +62,30 @@ function P_PreLaunch {
 			preLaunchError("No gravimeter detected on the vessel").
 		}
 
-		LOCAL ksc_light TO SHIP:PARTSTAGGED("ksc_light").
-		IF ksc_light:LENGTH > 0{
-			SET ksc_m_light TO ksc_light[0]:GETMODULE("modulelight").
-		}
+		SET ksc_light TO SHIP:PARTSTAGGED("ksc_light").
 		Display["print"]("Checks passed").
-		Display["print"]("Press ENTER to launch").
-		Display["print"]("Press ESC to abort").
-
-		UNTIL start {
-			IF TERMINAL:INPUT:HASCHAR {
-				LOCAL char to TERMINAL:INPUT:GETCHAR().
-				IF char = TERMINAL:INPUT:ENTER {
-					SET start to true.
-				}
+	}
+	
+	function refresh {
+		IF TERMINAL:INPUT:HASCHAR {
+			LOCAL char to TERMINAL:INPUT:GETCHAR().
+			IF char = TERMINAL:INPUT:ENTER {
+				SET start to true.
 			}
+		} 
+		IF NOT start {
+			RETURN 0.
 		}
+		countdown_1s["do"]({
+			Display["print"]("COUNTDOWN STARTED").
+			doModuleAction("modulelight", "togglelight", true, ksc_light).
+			logJ("Countdown start").
+			staging_Timer["set"]().
+		}).
 		
-		Display["print"]("COUNTDOWN STARTED").
-		doModuleAction("modulelight", "togglelight", true, ksc_light).
-		logJ("Countdown start").
 		
-		FROM {LOCAL i IS 5.} UNTIL i = -1 STEP {SET i TO i - 1.} DO {
-			WAIT 1.
-			IF i = 4 {
+		RETURN staging_Timer["ready"](1, {
+			IF countdown = 4 {
 				LOCK THROTTLE TO 1.
 			}
 			IF TERMINAL:INPUT:HASCHAR {
@@ -90,16 +95,19 @@ function P_PreLaunch {
 					reboot.
 				}
 			}				
-			IF i = 1 {
+			IF countdown = 1 {
 				FOR eng IN first_stage_engines {
 					eng:ACTIVATE.
 				}
 				HUDTEXT("Engines ingnition", 1, 2, 40, green, false).
 			}
-			IF i > 0 { 
-				HUDTEXT(i + "...", 1, 2, 40, green, false).
+			IF countdown > 0 { 
+				HUDTEXT(countdown + "...", 1, 2, 40, green, false).
 			}
-		}
+			SET countdown TO countdown - 1.
+			staging_Timer["set"]().
+			return countdown < 0.
+		}).
 	}
 	
 	LOCAL function getFromSave {
@@ -108,6 +116,7 @@ function P_PreLaunch {
 	
 	LOCAL methods TO LEXICON(
 		"init", init@,
+		"refresh", refresh@,
 		"from_save", getFromSave@
 	).
 	

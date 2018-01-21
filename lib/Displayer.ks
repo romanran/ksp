@@ -73,7 +73,7 @@ function Displayer {
 
 	LOCAL function _clear {
 		LOCAL blank IS _genDots(0, 0, " ").
-		FROM {LOCAL i is imprint_i.} UNTIL i = print_i + imprint_i STEP {SET i TO i + 1.} DO {
+		FROM {LOCAL i is imprint_i.} UNTIL i = TERMINAL:HEIGHT - imprint_i STEP {SET i TO i + 1.} DO {
 			PRINT blank AT (0, i).
 		}
 		SET print_i TO 0.

@@ -261,15 +261,17 @@ function getPhaseAngle {
 		RETURN 0.
 	}
 	
-	LOCAL radius_percent IS ROUND(260 / trg_vessel:OBT:PERIOD, 3).
+	LOCAL radius_percent IS ROUND(200 / trg_vessel:OBT:PERIOD, 3).
 	LOCAL phase_ang IS calcPhaseAngle(600000 + ALTITUDE, trg_vessel:ORBIT:SEMIMAJORAXIS / 2).
 	LOCAL curr_angle IS calcAngleFromVec(SHIP:UP:STARVECTOR, trg_vessel:UP:STARVECTOR).
 	LOCAL ahead IS false.
-	IF curr_angle > last_angle {
+	LOCAL diff TO 360 * radius_percent.
+	IF curr_angle < last_angle {
 		//target is ahead
-		SET phase_ang TO - phase_ang.
+		SET phase_ang TO 0 - phase_ang.
+		// SET diff TO 0 - diff.
 	} 
-	LOCAL tphase_ang TO 360 / no_of_sats + phase_ang.
+	LOCAL tphase_ang TO 360 / no_of_sats + phase_ang + diff.
 	LOCAL last_angle TO curr_angle.
 
 	RETURN LEXICON(

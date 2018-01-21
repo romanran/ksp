@@ -20,3 +20,4 @@
  
  Create stages object, calculate needed dV and check if current stage and the next ones have necessary dV for the maneuver
  Write coasting module for specific target
+ Add first commsat apoapsis reach time to programm json
