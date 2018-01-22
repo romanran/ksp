@@ -39,7 +39,7 @@ function Creator {
 			 "msg", 	 "Altitude in km.",
 			 "filter", {
 				PARAMETER resolve, reject, val.
-					return resolve(val * 1000).
+				return resolve(val * 1000).
 			}
 		),
 		LEXICON( 

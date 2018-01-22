@@ -18,5 +18,7 @@
  - make a menu for testing all modules
  
  Create stages object, calculate needed dV and check if current stage and the next ones have necessary dV for the maneuver
- Write coasting module for specific target
+ Write coasting module for specific target (whole menu for phases)
  Add first commsat apoapsis reach time to programm json
+ Thrusting phase deceleration based on specific distance left
+ Communication interface, send a task to a probe 

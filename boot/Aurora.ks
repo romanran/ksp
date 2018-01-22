@@ -92,8 +92,7 @@ function Aurora {
 		"CorrectionBurn", P_CorrectionBurn(),
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
-
-	IF SHIP:STATUS = "PRELAUNCH" {
+	function askForTarget {
 		trg_prog["vessels"]:ADD("none").
 		LOCAL usr_input TO Inquiry(LIST(
 			LEXICON(
@@ -105,6 +104,10 @@ function Aurora {
 		)).
 		CS().
 		ship_state["set"]("trg_vsl", usr_input["target"]).
+	}
+
+	IF SHIP:STATUS = "PRELAUNCH" {
+		askForTarget().
 		IF ship_state["get"]("trg_vsl") = "none" {
 			ship_state["set"]("trg_vsl", false).
 		}
@@ -250,7 +253,7 @@ function Aurora {
 				}
 			}
 		} ELSE IF phase = "INJECTION" {
-		IF NOT trg_prog["attributes"]["modules"]["Injection"] {
+			IF NOT trg_prog["attributes"]["modules"]["Injection"] {
 				ship_state["set"]("phase", "ORBITING").
 			} ELSE {
 				inject_init_1s["do"]({
@@ -293,7 +296,7 @@ function Aurora {
 		} ELSE IF phase = "ORBITING" {
 			Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 		}
-		IF NOT ship_state["get"]("saved") {
+		IF NOT ship_state["get"]("saved") AND trg_prog["attributes"]["Journal"] {
 			conn_Timer["ready"](10, {
 				IF NOT ship_log["save"]() {
 					conn_Timer["set"]().

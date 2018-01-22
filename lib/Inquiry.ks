@@ -133,7 +133,7 @@ function Inquiry {
 	}
 
 
-	LOCAL function _promise {
+	function _promise {
 		PARAMETER filter, val.
 		LOCAL done IS true.
 		LOCAL err IS false.

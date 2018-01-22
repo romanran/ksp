@@ -17,7 +17,7 @@
                 "sats",
                 1,
                 "alt",
-                300,
+                300000,
                 "modules",
                 {
                     "entries": [

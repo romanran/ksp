@@ -40,18 +40,19 @@ function P_Thrusting {
 		SET throttle_PID:SETPOINT TO 1.
 		SET pid_timer TO TIME:SECONDS.
 		LOCK THROTTLE TO thrott.
+		LOCK STEERING TO HEADING(90, 0).
 		RETURN "Take off".
 	}
 	
 	LOCAL function handleFlight {
 		LOCAL total_thrust IS 0.
 		pitch_1s["do"]({
-			LOCK STEERING TO HEADING(90, trg_pitch).
 		}).
 		
 		IF ALT:RADAR > safe_alt AND pid_1s["ready"]() {
 			pid_1s["do"]({
 				//reset pid from initial safe altitude gain 100% thrust
+				LOCK STEERING TO HEADING(90, trg_pitch).
 				SET pid_timer TO TIME:SECONDS.
 				SET throttle_PID:MINOUTPUT TO 0.1.
 				throttle_PID:RESET.
