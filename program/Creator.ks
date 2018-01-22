@@ -53,6 +53,7 @@ function Creator {
 				"Thrusting",
 				"Deployables",
 				"Injection",
+				"Coasting",
 				"CorrectionBurn",
 				"CheckCraftCondition"
 			 )

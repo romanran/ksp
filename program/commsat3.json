@@ -19,24 +19,25 @@
                 "sats",
                 3,
                 "alt",
-                100000
+                100000,
+				"modules",
+				{
+					 "entries": [
+						"PreLaunch", true,
+						"TakeOff", true,
+						"HandleStaging", true,
+						"Thrusting", true,
+						"Deployables", true,
+						"Coasting", true,
+						"Injection", true,
+						"CorrectionBurn", true,
+						"CheckCraftCondition", true
+					],
+					"$type": "kOS.Safe.Encapsulation.Lexicon"
+				}
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
-        },
-		"modules",
-		{
-			 "entries": [
-				"PreLaunch", true,
-				"HandleStaging", true,
-				"Thrusting", true,
-				"Deployables", true,
-				"Coasting", true,
-				"Injection", true,
-				"CorrectionBurn", true,
-				"CheckCraftCondition", true
-            ],
-            "$type": "kOS.Safe.Encapsulation.Lexicon"
-		}
+        }
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }

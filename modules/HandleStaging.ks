@@ -6,9 +6,7 @@ loadDeps(dependencies).
 
 function P_HandleStaging {
 	
-	IF NOT(DEFINED globals) {
-		GLOBAL globals TO setGlobal().
-	}
+	IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
 	LOCAL LOCK stg_res TO globals["stg_res"]().
 	LOCAL staging_Timer IS Timer().
 	LOCAL quiet_Timer IS Timer().
@@ -23,9 +21,6 @@ function P_HandleStaging {
 	LOCAL no_acc_period IS 5.
 	LOCAL quiet IS false.
 	
-	IF NOT(DEFINED globals) {
-		GLOBAL globals TO setGlobal().
-	}
 	IF NOT(DEFINED ship_state) LOCAL ship_state TO globals["ship_state"].
 	
 	// --- METHODS ---

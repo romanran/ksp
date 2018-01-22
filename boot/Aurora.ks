@@ -27,13 +27,13 @@ function Aurora {
 		SET SHIP:NAME TO generateID().
 	}
 	
-	GLOBAL globals TO setGlobal().
+	IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
 	LOCAL ship_log TO globals["ship_log"].
 
-	// Get programme name from ship state or inquiry
-	LOCAL chosen_prog TO ship_state["get"]("programme").
+	// Get program name from ship state or inquiry
+	LOCAL chosen_prog TO ship_state["get"]("program").
 	IF NOT chosen_prog {
 		LOCAL pr_chooser TO LIST(
 			LEXICON(
@@ -49,14 +49,13 @@ function Aurora {
 		ship_state["set"]("program", "1:" + chosen_prog + ".json").
 		CS().
 	}
-	LOCAL my_programme TO Program(ship_state["get"]("program")).
-	// load the programme
-	LOCAL trg_prog TO my_programme["fetch"]().
+	LOCAL my_program TO Program(ship_state["get"]("program")).
+	// load the program
+	LOCAL trg_prog TO my_program["fetch"]().
 	LOCAL trg_orbit IS gettrgAlt(trg_prog["attributes"]["sats"], trg_prog["attributes"]["alt"]).
 
 	LOCAL done IS false.
 	LOCAL from_save IS true. //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
-
 
 	// Onces
 	LOCAL warp_1s IS doOnce().
@@ -129,13 +128,17 @@ function Aurora {
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
 		LOCAL phase IS ship_state["get"]("phase").
-		LOCAL stage_response IS this_craft["HandleStaging"]["refresh"]().
-		
+		LOCAL stage_response IS trg_prog["attributes"]["modules"]["HandleStaging"].
+		IF stage_response {
+			SET stage_response TO this_craft["HandleStaging"]["refresh"]().
+		}
 		Display["reset"]().
 		Display["print"]("PHASE", phase).
 		
 		IF stage_response {
-			this_craft["CheckCraftCondition"]["refresh"]().
+			IF trg_prog["attributes"]["modules"]["CheckCraftCondition"] {
+				this_craft["CheckCraftCondition"]["refresh"]().
+			}
 			logJ(stage_response).
 		}
 		IF phase = "WAITING" {
@@ -295,7 +298,7 @@ function Aurora {
 				IF NOT ship_log["save"]() {
 					conn_Timer["set"]().
 				} ELSE {
-					my_programme["add"]().
+					my_program["add"]().
 					ship_state["set"]("saved", true).
 				}
 			}).

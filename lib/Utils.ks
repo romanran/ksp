@@ -1,6 +1,6 @@
 @LAZYGLOBAL off.
 IF NOT (DEFINED env) {
-	GLOBAL env IS false.
+	GLOBAL env IS "live".
 }
 // Helper functions and utilities
 function loadDeps {
