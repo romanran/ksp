@@ -33,3 +33,11 @@ checks engines and sensors, starts a 5 seconds countdown on user input then fire
 - Injection - orbit insertion on apoapsis to a desired orbital period
 - Coasting - warp to a next maneuver (Injection)
 - CorrectionBurn - using RCS precisely achieve target orbital period
+
+## 6. Future plans
+- more program configuration like ascent slope, launch turn and throttle safe distance
+- running modules manually from a menu, switching target vessels
+- support of other bodies then Kerbin
+- more modules, like docking to a specific port
+- automatic stage/decouplers detection, no need for staging order
+- live telemetry Inspector

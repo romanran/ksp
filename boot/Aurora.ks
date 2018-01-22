@@ -111,7 +111,7 @@ function Aurora {
 		IF ship_state["get"]("trg_vsl") = "none" {
 			ship_state["set"]("trg_vsl", false).
 		}
-		Display["imprint"]("Aurora Space Program V1.6.3").
+		Display["imprint"]("Aurora Space Program V2.0.0").
 		Display["imprint"](SHIP:NAME).
 		IF ship_state["get"]("trg_vsl") {
 			Display["imprint"]("TRG_VSL", ship_state["get"]("trg_vsl")).
