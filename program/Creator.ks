@@ -20,14 +20,6 @@ function Creator {
 	PRINT pr["list"]().
 
 	LOCAL target_question TO LIST( 
-			LEXICON( 
-			 "name", 	 "Journal",  
-			 "type", 	 "checkbox",   
-			 "msg", 	 "Save flight telemetry?",
-			 "choices", LIST(
-				"Journal"
-			 )
-		),
 		LEXICON(   
 			"name", "sats",   
 			"type", "number",    
@@ -65,11 +57,16 @@ function Creator {
 				"CorrectionBurn",
 				"CheckCraftCondition"
 			 )
+		),
+		LEXICON( 
+			 "name", 	 "Journal",  
+			 "type", 	 "bool",   
+			 "msg", 	 "Save flight telemetry?"
 		)
 	).
 
 	pr["create"](Inquiry(target_question)).
-
+	CLEARSCREEN.
 	PRINT Program("0:program/" + name_inq["pr_name"] + ".json")["fetch"]().
 }
 Creator().

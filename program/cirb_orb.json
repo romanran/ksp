@@ -32,7 +32,8 @@
                         "CheckCraftCondition", true
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
-                }
+                },
+				"Journal", true
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
         }

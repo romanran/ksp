@@ -1,7 +1,7 @@
 // Pass a list of lexicons:
 // possible attributes of the lexicons
 // name - (string) name of the returned variable
-// type - (string) possible[number, letter, char(letters and numbers), checkbox, select]
+// type - (string) possible[number, letter, char(letters and numbers), checkbox, select, bool]
 // msg - (string) message to show on the input
 // choices - (list) list of lexicons for checkboxes, takes [name, msg] as before, or a list of strings
 // filter - (function delegate) it needs 3 parameters, 1st - success function, 2nd - failure function, 3rd - input value
@@ -64,10 +64,12 @@ function Inquiry {
 		LOCAL enters TO 0.
 		LOCAL done TO false.
 		LOCAL check_list TO false.
-		IF i_type = "checkbox" {
+		IF i_type = "bool" {
+			PRINT "  *press SPACE to toggle" AT (0, 2).
+			SET val TO true.
+		} ELSE IF i_type = "checkbox" {
 			SET check_list TO Checkboxes(msg, choices, "checkbox").
-		}
-		IF i_type = "select" {
+		} ELSE IF i_type = "select" {
 			SET check_list TO Checkboxes(msg, choices, "select").
 		}
 		
@@ -93,6 +95,9 @@ function Inquiry {
 				}
 				IF i_type = "number" AND NOT(val = "") {
 					SET val TO val:TONUMBER(onError).
+				}
+				IF i_type = "bool" {
+					PRINT "                        " AT (0,2).
 				}
 				LOCAL promise IS _promise(filter, val).
 				SET done TO promise["done"].
@@ -120,6 +125,8 @@ function Inquiry {
 				} ELSE {
 					Sounds:PLAY(err_s).
 				}
+			} ELSE IF i_type = "bool" AND char = " " {
+				SET val TO NOT val.
 			} ELSE {
 				Sounds:PLAY(err_s).
 			}

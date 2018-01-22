@@ -30,7 +30,6 @@ function P_PreLaunch {
 				first_stage_engines:ADD(eng).
 			}
 		}
-		PRINT first_stage_engines.
 		
 		LOCAL function preLaunchError {
 			PARAMETER err.
