@@ -71,7 +71,7 @@ function Inquiry {
 			SET check_list TO Checkboxes(msg, choices, "select").
 		}
 		
-		LOCAL function readInput {
+		function readInput {
 			IF NOT TERMINAL:INPUT:HASCHAR {
 				return 0.
 			}
@@ -94,10 +94,11 @@ function Inquiry {
 				IF i_type = "number" AND NOT(val = "") {
 					SET val TO val:TONUMBER(onError).
 				}
-				LOCAL promise IS _promise(filter@, val).
+				LOCAL promise IS _promise(filter, val).
 				SET done TO promise["done"].
 				IF promise["err"] = false {
 					Sounds:PLAY( enter_s ).
+					SET val TO promise["val"].
 					RETURN promise["val"].
 				} ELSE {
 					SET val TO val + "". //convert back to str
@@ -129,6 +130,7 @@ function Inquiry {
 			PRINT msg + ": " + val AT (0,0).
 			WAIT 0.
 		}
+		WAIT 0.
 		RETURN val.
 	}
 

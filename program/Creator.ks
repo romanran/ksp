@@ -20,6 +20,14 @@ function Creator {
 	PRINT pr["list"]().
 
 	LOCAL target_question TO LIST( 
+			LEXICON( 
+			 "name", 	 "Journal",  
+			 "type", 	 "checkbox",   
+			 "msg", 	 "Save flight telemetry?",
+			 "choices", LIST(
+				"Journal"
+			 )
+		),
 		LEXICON(   
 			"name", "sats",   
 			"type", "number",    

@@ -28,7 +28,7 @@ set prompt to LIST(
 			IF (val < 1 OR val > 10) {
 				return reject("Choose a number range of 1 to 10").
 			} ELSE {
-				return resolve(val * 1000).
+				return resolve((val * 1000)).
 			}
 		}
 	),
