@@ -215,15 +215,18 @@ function gettrgAlt {
 	IF trg_body_str <> "current" {
 		SET trg_body TO BODY(trg_body_str).
 	}
-	LOCAL ang TO 360 / (sat_num * 2). 
+	LOCAL ang TO 360 / (sat_num * 2).
 	LOCAL h TO trg_body:RADIUS + min_h.
 	LOCAL altA TO (h / COS(ang)). //absolute
+	IF sat_num = 1 {
+		SET altA TO min_h + trg_body:RADIUS.
+	}
 	LOCAL altR TO altA - trg_body:RADIUS. //relative altitude
 	LOCAL comm_r TO ROUND(SQRT((altA * altA) * 2)).//range
 	LOCAL orb_period TO calcOrbPeriod(altA, trg_body_str).
 
 	RETURN LEXICON(
-		"r", comm_r,
+		"range", comm_r,
 		"altA",  altA,
 		"alt", altR,
 		"period", orb_period

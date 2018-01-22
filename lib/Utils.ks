@@ -1,4 +1,7 @@
 @LAZYGLOBAL off.
+IF NOT (DEFINED env) {
+	GLOBAL env IS false.
+}
 // Helper functions and utilities
 function loadDeps {
 	PARAMETER libs.

@@ -22,7 +22,7 @@ function P_Injection {
 	LOCAL function burn {
 		IF FLOOR(ETA:APOAPSIS) <= FLOOR(burn_time / 2) {
 			IF globals["ship_state"]["get"]("quiet") {
-				SET THROTTLE TO 0.
+				LOCK THROTTLE TO 0.
 			} ELSE {
 				LOCK THROTTLE TO thrott.
 			}

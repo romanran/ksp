@@ -8,7 +8,7 @@ RUNONCEPATH("Utils").
 
 function Tester {
 	CD("1:").
-	LOCAL dependencies IS LIST("PID", "Timer", "Checkboxes", "DoOnce", "Functions", "Displayer", "Journal", "Inquiry", "Programme", "ShipState", "ShipGlobals").
+	LOCAL dependencies IS LIST("PID", "Timer", "Checkboxes", "DoOnce", "Functions", "Displayer", "Journal", "Inquiry", "Program", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
 	GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
@@ -23,7 +23,7 @@ function Tester {
 	SET SHIP:NAME TO generateID().
 
 	// Get programme name from ship state or inquiry
-	LOCAL my_programme TO Programme().
+	LOCAL my_programme TO Program().
 	LOCAL prlist TO my_programme["list"]().
 	LOCAL chosen_prog TO "".
 	IF ship_state["get"]():HASKEY("programme") {

@@ -1,6 +1,6 @@
 @LAZYGLOBAL off.
 
-function Programme {
+function Program {
 	PARAMETER path is "".
 	LOCAL filelist IS LIST().
 	
@@ -49,14 +49,14 @@ function Programme {
 		LIST FILES IN filelist.
 		LOCAL prev_path TO PATH().
 
-		SET new_program TO LEXICON(
-			"type", ptype,
-			"id", generateID(ptype),
+		LOCAL new_program TO LEXICON(
+			"type", path,
+			"id", generateID(path),
 			"vessels", LIST(),
 			"attributes", atts
 		).
 		CD("0:program").
-		WRITEJSON(new_program, path).
+		WRITEJSON(new_program, path + ".json").
 		CD(prev_path).
 	}
 

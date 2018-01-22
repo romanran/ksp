@@ -1,0 +1,48 @@
+{
+    "entries": [
+        "type",
+        "cirb_orb",
+        "id",
+        "cirb_orb 952",
+        "vessels",
+        {
+            "items": [
+                
+            ],
+            "$type": "kOS.Safe.Encapsulation.ListValue"
+        },
+        "attributes",
+        {
+            "entries": [
+                "sats",
+                1,
+                "alt",
+                300,
+                "modules",
+                {
+                    "entries": [
+                        "PreLaunch",
+                        true,
+						"TakeOff",
+                        true,
+                        "HandleStaging",
+                        true,
+                        "Thrusting",
+                        true,
+                        "Deployables",
+                        true,
+                        "Injection",
+                        true,
+                        "CorrectionBurn",
+                        true,
+                        "CheckCraftCondition",
+                        true
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                }
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        }
+    ],
+    "$type": "kOS.Safe.Encapsulation.Lexicon"
+}

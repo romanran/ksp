@@ -1,7 +1,7 @@
 // Pass a list of lexicons:
 // possible attributes of the lexicons
 // name - (string) name of the returned variable
-// type - (string) possible[number, letter, chars(letters and numbers), checkbox, select]
+// type - (string) possible[number, letter, char(letters and numbers), checkbox, select]
 // msg - (string) message to show on the input
 // choices - (list) list of lexicons for checkboxes, takes [name, msg] as before, or a list of strings
 // filter - (function delegate) it needs 3 parameters, 1st - success function, 2nd - failure function, 3rd - input value
@@ -77,28 +77,9 @@ function Inquiry {
 			}
 			PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,0).
 			LOCAL char to TERMINAL:INPUT:GETCHAR().
-			IF i_type = "number" AND numbers:CONTAINS(char) {
-				SET val TO val + "" + char.
-				Sounds:PLAY(correct_s).
-			} ELSE IF i_type = "letter" AND letters:CONTAINS(char) {
-				SET val TO val + "" + char.
-				Sounds:PLAY(correct_s).
-			} ELSE IF i_type = "char" {
-				SET val TO val + "" + char.
-				Sounds:PLAY(correct_s).
-			} ELSE IF i_type = "checkbox" OR i_type = "select" {
-				IF check_list["movePointer"](char) {
-					Sounds:PLAY(correct_s).
-				} ELSE {
-					Sounds:PLAY(err_s).
-				}
-			} ELSE {
-				Sounds:PLAY(err_s).
-			}
 			IF char = TERMINAL:INPUT:BACKSPACE {
 				IF val:LENGTH >= 1 {
 					SET val TO val:SUBSTRING(0, val:LENGTH - 1).
-					PRINT msg + ": " + val AT (0,0).
 					Sounds:PLAY(NOTE("d5",  0.1, 0, 0.3)).
 				} ELSE {
 					Sounds:PLAY(err_s).
@@ -123,6 +104,23 @@ function Inquiry {
 					onError(promise["val"]).
 					Sounds:PLAY(err_s).
 				}
+			} ELSE IF i_type = "number" AND numbers:CONTAINS(char) {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "letter" AND letters:CONTAINS(char) {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "char" {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "checkbox" OR i_type = "select" {
+				IF check_list["movePointer"](char) {
+					Sounds:PLAY(correct_s).
+				} ELSE {
+					Sounds:PLAY(err_s).
+				}
+			} ELSE {
+				Sounds:PLAY(err_s).
 			}
 		}
 		

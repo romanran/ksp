@@ -115,9 +115,9 @@ function P_Thrusting {
 		}).
 		IF NOT using_rcs {
 			IF globals["ship_state"]["get"]("quiet") {
-				SET THROTTLE TO 0.
+				LOCK THROTTLE TO 0.
 			} ELSE {
-				SET THROTTLE TO MAX(MIN(TAN(CONSTANT:Radtodeg * (1 - APOAPSIS/trg_orbit["alt"]) * 5 ), 1), 0.1).
+				LOCK THROTTLE TO MAX(MIN(TAN(CONSTANT:Radtodeg * (1 - APOAPSIS/trg_orbit["alt"]) * 5 ), 1), 0.1).
 			}
 		} ELSE {
 			SET SHIP:CONTROL:FORE TO MAX(MIN(TAN(CONSTANT:Radtodeg * (1 - (APOAPSIS/trg_orbit["alt"])) * 5 ), 1), 0.1).

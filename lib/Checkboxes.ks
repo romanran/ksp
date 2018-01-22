@@ -26,7 +26,11 @@ function Checkboxes {
 		IF chtype = "select" {
 			return answers[pointer - 1]["name"].
 		}
-		return answers.
+		LOCAL answers_obj IS LEXICON().
+		FOR answer IN answers {
+			SET answers_obj[answer["name"]] TO answer["value"].
+		}
+		return answers_obj.
 	}
 
 	LOCAL function movePointer {
