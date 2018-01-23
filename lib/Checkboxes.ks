@@ -13,7 +13,7 @@ function Checkboxes {
 	
 	LOCAL sign IS "x".
 	IF chtype = "select" {
-		SET sign TO "+".
+		SET sign TO "●".
 	}
 
 	LOCAL function _print {

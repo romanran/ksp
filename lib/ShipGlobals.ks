@@ -1,8 +1,8 @@
-  // Global/ Aurora scope variables 
+  // Aurora scope variables 
 @LAZYGLOBAL off.
 COPYPATH("0:lib/Utils", "1:").
 RUNONCEPATH("UTILS").
-LOCAL dependencies IS LIST("Journal", "Functions", "Displayer", "ShipState").
+LOCAL dependencies IS LIST("Journal", "Displayer", "ShipState").
 loadDeps(dependencies).
 
 function setGlobal {

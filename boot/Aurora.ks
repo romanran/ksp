@@ -68,7 +68,7 @@ function Aurora {
 	LOCAL conn_Timer IS Timer(). // retry connection to KSC timer
 	LOCAL journal_Timer IS Timer(). // save to journal in this time
 	LOCAL warp_delay IS Timer(). // save to journal in this time
-	LOCAL phase_angle IS LEXICON("current", 0).
+	//LOCAL phase_angle IS LEXICON("current", 0).
 
 	// Load the modules after all of the global variables are set
 	LOCAL phase_modules IS LIST(
@@ -151,7 +151,7 @@ function Aurora {
 				LOCAL phase_angle TO "".
 				LOCAL has_target TO false.
 				IF ship_state["get"]("trg_vsl") {
-					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), phase_angle["current"]).	
+					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), 0).	
 					Display["print"]("Degrees spread:", phase_angle["spread"]).
 					Display["print"]("Degrees traveled:", phase_angle["traveled"]).
 					Display["print"]("Target separation:", phase_angle["separation"]).
@@ -188,6 +188,7 @@ function Aurora {
 			} ELSE {
 				ship_state["set"]("phase", "THRUSTING").
 				this_craft["HandleStaging"]["takeOff"]().
+				this_craft["Thrusting"]["takeOff"]().
 				journal_Timer["set"]().
 			}
 		} ELSE IF phase = "THRUSTING" {
@@ -195,8 +196,9 @@ function Aurora {
 				ship_state["set"]("phase", "COASTING").
 			} ELSE {
 				LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
-				Display["print"]("THROTT:", ROUND(THROTTLE * 100, 1) + "%").
+				Display["print"]("THROTT:", ROUND(this_craft["Thrusting"]["thrott"]() * 100, 1) + "%").
 				Display["print"]("TRG THROTT:", this_craft["Thrusting"]["target4throttle"]()).
+				Display["print"]("TRG PITCH:", this_craft["Thrusting"]["trg_pitch"]()).
 				Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
 				Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
 				Display["print"]("TWR:", ROUND(getTWR(), 3)).
@@ -292,8 +294,8 @@ function Aurora {
 			UNLOCK THROTTLE.
 			UNLOCK STEERING.
 			Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
-			Display["clear"]().
 			misc_1s["do"]({
+				Display["clear"]().
 				conn_Timer["set"]().
 				this_craft["Deployables"]["antennas"]().
 			}).
