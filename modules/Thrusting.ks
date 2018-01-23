@@ -15,7 +15,6 @@ function P_Thrusting {
 	LOCAL using_rcs TO false.
 	LOCAL aborted TO false.
 	
-	LOCAL pitch_1s TO DoOnce().
 	LOCAL pid_1s TO DoOnce().
 	LOCAL rcs_1s TO DoOnce().
 	LOCAL abort_1s IS DoOnce().
@@ -28,8 +27,7 @@ function P_Thrusting {
 	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE, 65000)).
 	LOCAL LOCK ship_p TO 90 - VECTORANGLE(UP:FOREVECTOR, FACING:FOREVECTOR).
 	LOCAL LOCK thrott TO throttle_PID:UPDATE(TIME:SECONDS - pid_timer, globals["q_pressure"]()).
-	// LOCAL LOCK target4throttle TO interpolateLagrange(thrust_data, ALTITUDE).
-	 LOCAL LOCK target4throttle TO MAX((1 - (ALTITUDE / 50000) ^ 2 ) * 18, 1).
+	LOCAL LOCK target4throttle TO MAX((1 - (ALTITUDE / 50000) ^ 2 ) * 18, 1).
 
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
@@ -40,24 +38,26 @@ function P_Thrusting {
 		SET throttle_PID:SETPOINT TO 1.
 		SET pid_timer TO TIME:SECONDS.
 		LOCK THROTTLE TO thrott.
+		LOCK STEERING TO HEADING(0, 90).
 		RETURN "Take off".
 	}
 	
 	LOCAL function handleFlight {
 		LOCAL total_thrust IS 0.
-		pitch_1s["do"]({
-			LOCK STEERING TO HEADING(90, trg_pitch).
-		}).
-		
+
 		IF ALT:RADAR > safe_alt AND pid_1s["ready"]() {
 			pid_1s["do"]({
 				//reset pid from initial safe altitude gain 100% thrust
+				LOCK STEERING TO HEADING(90, trg_pitch).
 				SET pid_timer TO TIME:SECONDS.
 				SET throttle_PID:MINOUTPUT TO 0.1.
 				throttle_PID:RESET.
 				logJ("Reached the safe altitude of " + safe_alt).
 			}).
 		}
+		
+		SET throttle_PID:SETPOINT TO target4throttle.
+		
 		IF globals["ship_state"]["get"]("quiet") {
 			SET throttle_PID:MINOUTPUT TO 0.
 			SET throttle_PID:MAXOUTPUT TO 0.
@@ -65,8 +65,6 @@ function P_Thrusting {
 			SET throttle_PID:MINOUTPUT TO 0.1.
 			SET throttle_PID:MAXOUTPUT TO 1.
 		}
-
-		SET throttle_PID:SETPOINT TO target4throttle.
 
 		FOR eng in eng_list {
 			IF eng:STAGE = STAGE:NUMBER {
@@ -115,9 +113,9 @@ function P_Thrusting {
 		}).
 		IF NOT using_rcs {
 			IF globals["ship_state"]["get"]("quiet") {
-				SET THROTTLE TO 0.
+				LOCK THROTTLE TO 0.
 			} ELSE {
-				SET THROTTLE TO MAX(MIN(TAN(CONSTANT:Radtodeg * (1 - APOAPSIS/trg_orbit["alt"]) * 5 ), 1), 0.1).
+				LOCK THROTTLE TO MAX(MIN(1 - ((APOAPSIS) / (trg_orbit["alt"])) ^ 30, 1), 0.1).
 			}
 		} ELSE {
 			SET SHIP:CONTROL:FORE TO MAX(MIN(TAN(CONSTANT:Radtodeg * (1 - (APOAPSIS/trg_orbit["alt"])) * 5 ), 1), 0.1).

@@ -1,7 +1,7 @@
 // Pass a list of lexicons:
 // possible attributes of the lexicons
 // name - (string) name of the returned variable
-// type - (string) possible[number, letter, chars(letters and numbers), checkbox, select]
+// type - (string) possible[number, letter, char(letters and numbers), checkbox, select, bool]
 // msg - (string) message to show on the input
 // choices - (list) list of lexicons for checkboxes, takes [name, msg] as before, or a list of strings
 // filter - (function delegate) it needs 3 parameters, 1st - success function, 2nd - failure function, 3rd - input value
@@ -64,41 +64,24 @@ function Inquiry {
 		LOCAL enters TO 0.
 		LOCAL done TO false.
 		LOCAL check_list TO false.
-		IF i_type = "checkbox" {
+		IF i_type = "bool" {
+			PRINT "  *press SPACE to toggle" AT (0, 2).
+			SET val TO true.
+		} ELSE IF i_type = "checkbox" {
 			SET check_list TO Checkboxes(msg, choices, "checkbox").
-		}
-		IF i_type = "select" {
+		} ELSE IF i_type = "select" {
 			SET check_list TO Checkboxes(msg, choices, "select").
 		}
 		
-		LOCAL function readInput {
+		function readInput {
 			IF NOT TERMINAL:INPUT:HASCHAR {
 				return 0.
 			}
 			PRINT " ":PADLEFT(TERMINAL:WIDTH) AT (0,0).
 			LOCAL char to TERMINAL:INPUT:GETCHAR().
-			IF i_type = "number" AND numbers:CONTAINS(char) {
-				SET val TO val + "" + char.
-				Sounds:PLAY(correct_s).
-			} ELSE IF i_type = "letter" AND letters:CONTAINS(char) {
-				SET val TO val + "" + char.
-				Sounds:PLAY(correct_s).
-			} ELSE IF i_type = "char" {
-				SET val TO val + "" + char.
-				Sounds:PLAY(correct_s).
-			} ELSE IF i_type = "checkbox" OR i_type = "select" {
-				IF check_list["movePointer"](char) {
-					Sounds:PLAY(correct_s).
-				} ELSE {
-					Sounds:PLAY(err_s).
-				}
-			} ELSE {
-				Sounds:PLAY(err_s).
-			}
 			IF char = TERMINAL:INPUT:BACKSPACE {
 				IF val:LENGTH >= 1 {
 					SET val TO val:SUBSTRING(0, val:LENGTH - 1).
-					PRINT msg + ": " + val AT (0,0).
 					Sounds:PLAY(NOTE("d5",  0.1, 0, 0.3)).
 				} ELSE {
 					Sounds:PLAY(err_s).
@@ -113,16 +96,39 @@ function Inquiry {
 				IF i_type = "number" AND NOT(val = "") {
 					SET val TO val:TONUMBER(onError).
 				}
-				LOCAL promise IS _promise(filter@, val).
+				IF i_type = "bool" {
+					PRINT "                        " AT (0,2).
+				}
+				LOCAL promise IS _promise(filter, val).
 				SET done TO promise["done"].
 				IF promise["err"] = false {
 					Sounds:PLAY( enter_s ).
+					SET val TO promise["val"].
 					RETURN promise["val"].
 				} ELSE {
 					SET val TO val + "". //convert back to str
 					onError(promise["val"]).
 					Sounds:PLAY(err_s).
 				}
+			} ELSE IF i_type = "number" AND numbers:CONTAINS(char) {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "letter" AND letters:CONTAINS(char) {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "char" {
+				SET val TO val + "" + char.
+				Sounds:PLAY(correct_s).
+			} ELSE IF i_type = "checkbox" OR i_type = "select" {
+				IF check_list["movePointer"](char) {
+					Sounds:PLAY(correct_s).
+				} ELSE {
+					Sounds:PLAY(err_s).
+				}
+			} ELSE IF i_type = "bool" AND char = " " {
+				SET val TO NOT val.
+			} ELSE {
+				Sounds:PLAY(err_s).
 			}
 		}
 		
@@ -131,11 +137,12 @@ function Inquiry {
 			PRINT msg + ": " + val AT (0,0).
 			WAIT 0.
 		}
+		WAIT 0.
 		RETURN val.
 	}
 
 
-	LOCAL function _promise {
+	function _promise {
 		PARAMETER filter, val.
 		LOCAL done IS true.
 		LOCAL err IS false.

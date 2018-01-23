@@ -1,5 +1,10 @@
-  // Global/ Aurora scope variables 
+  // Aurora scope variables 
 @LAZYGLOBAL off.
+COPYPATH("0:lib/Utils", "1:").
+RUNONCEPATH("UTILS").
+LOCAL dependencies IS LIST("Journal", "Displayer", "ShipState").
+loadDeps(dependencies).
+
 function setGlobal {
 	LOCAL LOCK q_pressure TO ROUND(SHIP:Q * CONSTANT:ATMtokPa, 3). 
 	LOCAL LOCK acc_vec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV. 

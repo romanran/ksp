@@ -1,13 +1,14 @@
 <template>
   <div class="home">
     <h1>{{ msg }}</h1>
-		  <ul>
-			  <li v-for="obj in journals">
+	  	<p>Sorted by modified date</p>
+		<ul>
+			 <li v-for="obj in journals">
 				  <router-link
 							   :to="{ name: 'journal', params: { name: `${obj.name}` }}"
 					 class="truncate btn-flat waves-effect waves-teal"
 				   >{{obj.name}}</router-link>
-				</li>
+			</li>
 		</ul>
 	</div>
 </template>
@@ -16,6 +17,8 @@
 	global.deb = console.log
 	import glob from 'glob'
 	import path from 'path'
+	import fs from 'fs-extra'
+	import _ from 'lodash'
 	export default {
 		name: 'inspector',
 		data() {
@@ -26,14 +29,26 @@
 		},
 		methods: {},
 		created() {
-			glob('../flightlogs/*.json', {}, (err, res) => {
-				res = res.map(file => {
+			glob('../flightlogs/*.json', {}, (err, files) => {
+				files = files.map(file => {
 					return {
 						name: path.parse(file).name,
-						link: file
-					}
+						link: file					}
 				})
-				this.journals = res
+				let i = 0
+				_.forEach(files, file => {
+					fs.stat(file.link, (err, stat) => {
+						if (err) deb(err)
+						file.stat = stat
+						files[i] = file
+						i++
+						if (i === files.length) {
+							deb(files)
+							this.journals = _.chain(files).sortBy('stat.mtime').reverse().value()
+						}
+					})
+				})
+				
 			})
 			this.msg = 'Flight journals'
 		}

@@ -1,0 +1,52 @@
+{
+    "entries": [
+        "type",
+        "launcher",
+        "id",
+        "launcher 352",
+        "vessels",
+        {
+            "items": [
+                
+            ],
+            "$type": "kOS.Safe.Encapsulation.ListValue"
+        },
+        "attributes",
+        {
+            "entries": [
+                "sats",
+                1,
+                "alt",
+                100000,
+                "modules",
+                {
+                    "entries": [
+                        "PreLaunch",
+                        true,
+                        "TakeOff",
+                        true,
+                        "HandleStaging",
+                        true,
+                        "Thrusting",
+                        true,
+                        "Deployables",
+                        true,
+                        "Injection",
+                        false,
+                        "Coasting",
+                        false,
+                        "CorrectionBurn",
+                        false,
+                        "CheckCraftCondition",
+                        false
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "Journal",
+                false
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        }
+    ],
+    "$type": "kOS.Safe.Encapsulation.Lexicon"
+}

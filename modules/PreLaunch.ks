@@ -10,7 +10,7 @@ function P_PreLaunch {
 	LOCAL countdown IS 5.
 	LOCAL start IS 0.
 	LOCAL ksc_light TO "".
-		LOCAL first_stage_engines IS LIST().
+	LOCAL first_stage_engines IS LIST().
 	
 	IF NOT(DEFINED globals) {
 		GLOBAL globals TO setGlobal().
@@ -25,30 +25,27 @@ function P_PreLaunch {
 		LIST ENGINES IN ship_engines.
 
 		LOCAL last_eng_i TO 0.
-		FOR eng IN ship_engines{
-			IF eng:STAGE > last_eng_i {
-				SET last_eng_i TO eng:STAGE.
-			}
-		}
-		FOR eng IN ship_engines{
-			IF eng:STAGE = last_eng_i {
+		FOR eng IN ship_engines {
+			IF eng:STAGE = STAGE:NUMBER - 1 {
 				first_stage_engines:ADD(eng).
 			}
 		}
+		
 		LOCAL function preLaunchError {
 			PARAMETER err.
 			LOCAL Sounds TO GETVOICE(0).
 			HUDTEXT(err, 5, 4, 40, red, false).
 			Sounds:PLAY(NOTE(400, 0.1)).
 			Display["print"](err).
-			Display["print"]("REBOOT? AG2").
-			WAIT UNTIL AG2. 
+			Display["print"]("Press any key to REBOOT").
+			WAIT UNTIL TERMINAL:INPUT:HASCHAR. 
 			REBOOT.
 		}
 		
 		IF first_stage_engines:LENGTH = 0 {
 			preLaunchError("COULDN'T FIND 1st STAGE ENGINES").
 		}
+		
 		LOCAL sensors_list IS LIST().
 		LOCAL sensors_types IS LIST().
 		LIST SENSORS IN sensors_list.

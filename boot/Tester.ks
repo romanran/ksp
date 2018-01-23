@@ -8,13 +8,13 @@ RUNONCEPATH("Utils").
 
 function Tester {
 	CD("1:").
-	LOCAL dependencies IS LIST("PID", "Timer", "Checkboxes", "DoOnce", "Functions", "Displayer", "Journal", "Inquiry", "Programme", "ShipState", "ShipGlobals").
+	LOCAL dependencies IS LIST("PID", "Timer", "Checkboxes", "DoOnce", "Functions", "Displayer", "Journal", "Inquiry", "Program", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
 	GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
 
-	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
+	LOCK THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
 	CS().
 	//SET TERMINAL:WIDTH TO 42.
@@ -22,12 +22,12 @@ function Tester {
 
 	SET SHIP:NAME TO generateID().
 
-	// Get programme name from ship state or inquiry
-	LOCAL my_programme TO Programme().
-	LOCAL prlist TO my_programme["list"]().
+	// Get program name from ship state or inquiry
+	LOCAL my_program TO Program().
+	LOCAL prlist TO my_program["list"]().
 	LOCAL chosen_prog TO "".
-	IF ship_state["get"]():HASKEY("programme") {
-		SET chosen_prog TO ship_state["get"]("programme").
+	IF ship_state["get"]():HASKEY("program") {
+		SET chosen_prog TO ship_state["get"]("program").
 	} ELSE {
 		LOCAL pr_chooser TO LIST(
 			LEXICON(
@@ -38,10 +38,10 @@ function Tester {
 			)
 		).
 		SET chosen_prog TO Inquiry(pr_chooser)["program"].
-		ship_state["set"]("programme", chosen_prog).
+		ship_state["set"]("program", chosen_prog).
 	}
-	// load the programme
-	LOCAL trg_prog TO my_programme["fetch"](chosen_prog).
+	// load the program
+	LOCAL trg_prog TO my_program["fetch"](chosen_prog).
 	LOCAL trg_orbit IS gettrgAlt(trg_prog["attributes"]["sats"], trg_prog["attributes"]["alt"]).
 
 	// Load the modules after all of the global variables are set

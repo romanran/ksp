@@ -6,9 +6,7 @@ loadDeps(dependencies).
 
 function P_HandleStaging {
 	
-	IF NOT(DEFINED globals) {
-		GLOBAL globals TO setGlobal().
-	}
+	IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
 	LOCAL LOCK stg_res TO globals["stg_res"]().
 	LOCAL staging_Timer IS Timer().
 	LOCAL quiet_Timer IS Timer().
@@ -21,12 +19,7 @@ function P_HandleStaging {
     LIST ENGINES IN eng_list. 
 	LOCAL quiet_period IS 3.
 	LOCAL no_acc_period IS 5.
-	LOCAL quiet IS false.
-	
-	IF NOT(DEFINED globals) {
-		GLOBAL globals TO setGlobal().
-	}
-	IF NOT(DEFINED ship_state) LOCAL ship_state TO globals["ship_state"].
+	LOCAL ship_state TO globals["ship_state"].
 	
 	// --- METHODS ---
 	
@@ -36,13 +29,11 @@ function P_HandleStaging {
 	
 	LOCAL function nextStage {
 		PARAMETER res_type.
-		HUDTEXT("No " + res_type + " left, staging", 5, 2, 20, green, false).
 		SET done_staging TO doStage().
 		STEERINGMANAGER:RESETPIDS().
 		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
-			HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
 			this_craft["Thrusting"]["resetPID"]().
-		}
+		} 
  
 		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
 	}
@@ -66,22 +57,22 @@ function P_HandleStaging {
 			stage_1s["do"]({
 				staging_Timer["set"]().
 				quiet_Timer["set"]().
-				SET quiet TO true.
-				ship_state["set"]("quiet", quiet).
+				ship_state["set"]("quiet", true).
 			}).
 		}
 		quiet_Timer["ready"](1, {
 			nextStage(res_type).
 		}).
+		RETURN out_of_res.
 	}
 	
 	LOCAL function refresh {
 		staging_Timer["ready"](quiet_period, {
 			staging_Timer["reset"]().
 			stage_1s["reset"]().
-			SET quiet TO false.
-			ship_state["set"]("quiet", quiet).
+			ship_state["set"]("quiet", false).
 		}).
+		
 		IF NOT done_staging{
 			check("LIQUIDFUEL").
 			check("OXIDIZER").
@@ -123,15 +114,10 @@ function P_HandleStaging {
 		
 		RETURN done_staging.
 	}
-	
-	LOCAL function getQuiet {
-		return quiet.
-	}
 
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
-		"takeOff", takeOff@,
-		"quiet", getQuiet@
+		"takeOff", takeOff@
 	).
 	
 	RETURN methods.
