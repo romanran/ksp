@@ -14,7 +14,7 @@ function Tester {
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
 
-	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
+	LOCK THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 
 	CS().
 	//SET TERMINAL:WIDTH TO 42.

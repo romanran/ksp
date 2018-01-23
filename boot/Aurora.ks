@@ -19,7 +19,7 @@ function Aurora {
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Program", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
 	SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
-	SET THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
+	LOCK THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
 	CS().
 	SET TERMINAL:WIDTH TO 42.
 	SET TERMINAL:HEIGHT TO 34.
@@ -204,17 +204,17 @@ function Aurora {
 				Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
 					
 				this_craft["Thrusting"]["handleFlight"]().
-				IF (ROUND(APOAPSIS) > trg_orbit["alt"] - 200000) AND ALTITUDE > 50000 {
+				IF (ROUND(APOAPSIS) > trg_orbit["alt"] - trg_orbit["alt"] * 0.25) AND ALTITUDE > 50000 {
 					this_craft["Thrusting"]["decelerate"]().
 				}
 				IF CEILING(APOAPSIS) >= trg_orbit["alt"] AND ALTITUDE > 50000 {
-					ship_state["set"]("phase", "COASTING").
-					SET THROTTLE TO 0.
+					LOCK THROTTLE TO 0.
 					// HUDTEXT("COAST TRANSITION", 4, 2, 20, green, false).
 					//leaving thrusting section at that time
 					ship_log["add"]("COAST TRANSITION phase").
 					Display["clear"]().
 					this_craft["Injection"]["burn_time"]().
+					ship_state["set"]("phase", "COASTING").
 				}
 				IF ALTITUDE > 65000 AND globals["q_pressure"]() < 0.3 {
 					quiet1_1s["do"]({
@@ -254,7 +254,7 @@ function Aurora {
 			}
 		} ELSE IF phase = "INJECTION" {
 			IF NOT trg_prog["attributes"]["modules"]["Injection"] {
-				ship_state["set"]("phase", "ORBITING").
+				ship_state["set"]("phase", "END").
 			} ELSE {
 				inject_init_1s["do"]({
 					Display["clear"]().
@@ -275,13 +275,8 @@ function Aurora {
 		} ELSE IF phase = "CORRECTION_BURN" {
 			IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
 				this_craft["CorrectionBurn"]["neutralize"]().
-				ship_state["set"]("phase", "ORBITING").
 				ship_log["add"]("CIRCURALISATION COMPLETE").
-				UNLOCK THROTTLE.
-				UNLOCK STEERING.
-				this_craft["Deployables"]["antennas"]().
-				conn_Timer["set"]().
-				Display["clear"]().
+				ship_state["set"]("phase", "END").
 			} ELSE {
 				LOCAL tail IS trg_orbit["period"] - 20.
 				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 12.
@@ -293,8 +288,15 @@ function Aurora {
 				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 				Display["print"]("TRG ORB P: ", trg_orbit["period"]).
 			}
-		} ELSE IF phase = "ORBITING" {
+		} ELSE IF phase = "END" {
+			UNLOCK THROTTLE.
+			UNLOCK STEERING.
 			Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
+			Display["clear"]().
+			misc_1s["do"]({
+				conn_Timer["set"]().
+				this_craft["Deployables"]["antennas"]().
+			}).
 		}
 		IF NOT ship_state["get"]("saved") AND trg_prog["attributes"]["Journal"] {
 			conn_Timer["ready"](10, {

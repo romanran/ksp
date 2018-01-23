@@ -1,0 +1,52 @@
+{
+    "entries": [
+        "type",
+        "stager",
+        "id",
+        "stager 814",
+        "vessels",
+        {
+            "items": [
+                
+            ],
+            "$type": "kOS.Safe.Encapsulation.ListValue"
+        },
+        "attributes",
+        {
+            "entries": [
+                "sats",
+                1,
+                "alt",
+                0,
+                "modules",
+                {
+                    "entries": [
+                        "PreLaunch",
+                        true,
+                        "TakeOff",
+                        false,
+                        "HandleStaging",
+                        true,
+                        "Thrusting",
+                        false,
+                        "Deployables",
+                        true,
+                        "Injection",
+                        false,
+                        "Coasting",
+                        false,
+                        "CorrectionBurn",
+                        false,
+                        "CheckCraftCondition",
+                        false
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "Journal",
+                false
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        }
+    ],
+    "$type": "kOS.Safe.Encapsulation.Lexicon"
+}
