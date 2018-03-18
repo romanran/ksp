@@ -100,6 +100,8 @@ function P_PreLaunch {
 			}
 			IF countdown > 0 { 
 				HUDTEXT(countdown + "...", 1, 2, 40, green, false).
+			} ELSE {
+				HUDTEXT("Liftoff", 1, 2, 40, green, false).
 			}
 			SET countdown TO countdown - 1.
 			staging_Timer["set"]().

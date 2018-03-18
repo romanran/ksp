@@ -6,7 +6,7 @@ LOCAL dependencies IS LIST("Journal", "Displayer", "ShipState").
 loadDeps(dependencies).
 
 function setGlobal {
-	LOCAL LOCK q_pressure TO ROUND(SHIP:Q * CONSTANT:ATMtokPa, 3). 
+	LOCAL LOCK q_pressure TO ROUND(SHIP:Q * CONSTANT:AtmToKpa * SHIP:AIRSPEED / 1000, 3). 
 	LOCAL LOCK acc_vec TO SHIP:SENSORS:ACC - SHIP:SENSORS:GRAV. 
 	LOCAL ship_log TO Journal().
 	LOCAL Display TO Displayer().

@@ -146,22 +146,22 @@ function calcOrbPeriod {
 }
 
 function getTWR {
-	LOCAL radius TO SHIP:ALTITUDE + SHIP:ORBIT:BODY:RADIUS.
-	LOCAL weight TO CONSTANT:G * ((SHIP:MASS * SHIP:ORBIT:BODY:MASS) / (radius * radius)).
-	RETURN SHIP:MAXTHRUST / weight.
+	LOCAL radius TO SHIP:ALTITUDE + SHIP:ORBIT:BODY:RADIUS. 
+	LOCAL weight TO CONSTANT:G * ((SHIP:MASS * SHIP:ORBIT:BODY:MASS) / (radius ^ 2)).
+	RETURN SHIP:MAXTHRUST / weight + 0.0001.
 }
 
 function calcTrajectory {
 	PARAMETER alt. 
 	PARAMETER target_alt IS 70000.
-	LOCAL twr TO MAX(1.4, getTWR()).
-	// LOCAL factor TO 0.7.
+	LOCAL twr TO getTWR() * THROTTLE.
 	IF alt >= target_alt {
 		RETURN 0.
 	}
-	// sin( 1 -(x/ 600)^(2-b^0.5) ) * (90 * 1.1884)
-	LOCAL funcx TO 1 - (alt / target_alt) ^ (2 - twr ^0.5). 
-	RETURN SIN(funcx * CONSTANT:RadToDeg) * (90 * 1.1884).
+	// sin( 1 -(x/ 600)^(2-b^0.35) ) * 90 * 1.1884
+	// (1 - (x/40)^(0.5*(1-b/10)))*90
+	LOCAL funcx TO 1 - (alt / target_alt) ^ (1 - twr / 10). 
+	RETURN funcx * 90.
 }
 
 function getdV {   

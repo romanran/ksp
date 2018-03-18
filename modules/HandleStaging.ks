@@ -47,7 +47,7 @@ function P_HandleStaging {
 		IF res_type = "LIQUIDFUEL" {
 			SET out_of_res TO STAGE:LIQUIDFUEL < 1.
 		} ELSE IF res_type = "SOLIDFUEL" {
-			SET out_of_res TO STAGE:SOLIDFUEL < 1.
+			SET out_of_res TO STAGE:SOLIDFUEL < 10.
 		} ELSE IF res_type = "MONOPROPELLANT" {
 			SET out_of_res TO STAGE:MONOPROPELLANT < 1.
 		} ELSE IF res_type = "OXIDIZER" {
@@ -60,7 +60,7 @@ function P_HandleStaging {
 				ship_state["set"]("quiet", true).
 			}).
 		}
-		quiet_Timer["ready"](1, {
+		quiet_Timer["ready"](2, {
 			nextStage(res_type).
 		}).
 		RETURN out_of_res.
@@ -91,14 +91,12 @@ function P_HandleStaging {
 		//if not under accel
 		IF no_acceleration {
 			nacc_1s["do"]({
-				HUDTEXT("NO ACCELERATION DETECTED, WAITING FOR THRUST " + no_acc_period + " SECONDS...", 3, 3, 20, red, false).
 				no_acc_Timer["set"]().
-				logJ("NO ACCELERATION DETECTED, WAITING FOR THRUST 3 SECONDS...").
+				logJ("NO ACCELERATION DETECTED, WAITING FOR THRUST " + no_acc_period + " SECONDS...").
 			}).
 		}
 		
 		no_acc_Timer["ready"](no_acc_period, {
-			HUDTEXT("Waited " + no_acc_period + " SECONDS...", 3, 2, 20, blue, false).
 			//if there is still no acceleration, staging must have no engines available, stage again
 			IF no_acceleration {
 				HUDTEXT("Reset, do stage.", 3, 2, 20, green, false).

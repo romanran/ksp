@@ -10,7 +10,9 @@ SET STEERINGMANAGER:PITCHTS TO 8.
 SET STEERINGMANAGER:ROLLTS TO 5.
 SET STEERINGMANAGER:YAWTS TO 8.
 SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
-SET STEERINGMANAGER:YAWPID:KD TO 0.75.
+SET STEERINGMANAGER:PITCHPID:KI TO 0.0075.
+SET STEERINGMANAGER:YAWPID:KD TO 0.15.
+SET STEERINGMANAGER:YAWPID:KI TO 0.0075.
 SET STEERINGMANAGER:ROLLPID:KD TO 0.75.
 SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8.
 
@@ -197,28 +199,31 @@ function Aurora {
 			} ELSE {
 				LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 				Display["print"]("THROTT:", ROUND(this_craft["Thrusting"]["thrott"]() * 100, 1) + "%").
-				Display["print"]("TRG THROTT:", this_craft["Thrusting"]["target4throttle"]()).
+				Display["print"]("TRG THROTT:", this_craft["Thrusting"]["trg4thrott"]()).
+				Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
+				Display["print"]("TWR:", ROUND(getTWR() * THROTTLE, 3)).
 				Display["print"]("TRG PITCH:", this_craft["Thrusting"]["trg_pitch"]()).
 				Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
-				Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
-				Display["print"]("TWR:", ROUND(getTWR(), 3)).
 				Display["print"]("SFC V:", SHIP:VELOCITY:SURFACE:MAG).
 				Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
 					
 				this_craft["Thrusting"]["handleFlight"]().
-				IF (ROUND(APOAPSIS) > trg_orbit["alt"] - trg_orbit["alt"] * 0.25) AND ALTITUDE > 50000 {
+				IF (ROUND(APOAPSIS) > trg_orbit["alt"] - trg_orbit["alt"] * 0.25) AND ALTITUDE > 30000 {
 					this_craft["Thrusting"]["decelerate"]().
 				}
-				IF CEILING(APOAPSIS) >= trg_orbit["alt"] AND ALTITUDE > 50000 {
+				
+				LOCAL atm_clamp IS SHIP:SENSORS:PRES * trg_orbit["alt"] * 0.05.
+				IF CEILING(APOAPSIS) - atm_clamp >= trg_orbit["alt"] {
 					LOCK THROTTLE TO 0.
 					// HUDTEXT("COAST TRANSITION", 4, 2, 20, green, false).
-					//leaving thrusting section at that time
+				}
+				IF ALTITUDE > 73000 AND THROTTLE = 0 {
 					ship_log["add"]("COAST TRANSITION phase").
 					Display["clear"]().
 					this_craft["Injection"]["burn_time"]().
 					ship_state["set"]("phase", "COASTING").
 				}
-				IF ALTITUDE > 65000 AND globals["q_pressure"]() < 0.3 {
+				IF ALTITUDE > 55000 AND globals["q_pressure"]() < 0.3 {
 					quiet1_1s["do"]({
 						this_craft["Deployables"]["fairing"]().
 					}).
