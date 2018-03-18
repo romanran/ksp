@@ -40,18 +40,19 @@ function P_HandleStaging {
 	
 	LOCAL function check {
 		PARAMETER res_type.
+		PARAMETER tresh IS 1.
 		IF NOT res_type <> 0 {
 			RETURN -1.
 		}
 		LOCAL out_of_res TO false.
 		IF res_type = "LIQUIDFUEL" {
-			SET out_of_res TO STAGE:LIQUIDFUEL < 1.
+			SET out_of_res TO STAGE:LIQUIDFUEL < tresh.
 		} ELSE IF res_type = "SOLIDFUEL" {
-			SET out_of_res TO STAGE:SOLIDFUEL < 10.
+			SET out_of_res TO STAGE:SOLIDFUEL < tresh.
 		} ELSE IF res_type = "MONOPROPELLANT" {
-			SET out_of_res TO STAGE:MONOPROPELLANT < 1.
+			SET out_of_res TO STAGE:MONOPROPELLANT < tresh.
 		} ELSE IF res_type = "OXIDIZER" {
-			SET out_of_res TO STAGE:OXIDIZER < 1.
+			SET out_of_res TO STAGE:OXIDIZER < tresh.
 		}
 		IF out_of_res AND stg_res:HASKEY(res_type) {
 			stage_1s["do"]({
@@ -76,7 +77,7 @@ function P_HandleStaging {
 		IF NOT done_staging{
 			check("LIQUIDFUEL").
 			check("OXIDIZER").
-			check("SOLIDFUEL").
+			check("SOLIDFUEL", 10).
 			check("MONOPROPELLANT").
 		}
 		
@@ -115,7 +116,8 @@ function P_HandleStaging {
 
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
-		"takeOff", takeOff@
+		"takeOff", takeOff@,
+		"check", check@
 	).
 	
 	RETURN methods.
