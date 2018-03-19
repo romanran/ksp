@@ -1,4 +1,7 @@
-COPYPATH("0:lib/Utils", "1:").
+@LAZYGLOBAL off.
+IF NOT EXISTS("1:Utils") AND HOMECONNECTION:ISCONNECTED {
+	COPYPATH("0:lib/Utils", "1:").
+}
 RUNONCEPATH("UTILS").
 LOCAL dependencies IS LIST("Functions", "ShipGlobals", "Timer", "DoOnce").
 loadDeps(dependencies).

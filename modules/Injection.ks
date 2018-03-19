@@ -1,4 +1,7 @@
-COPYPATH("0:lib/Utils", "1:").
+@LAZYGLOBAL off.
+IF NOT EXISTS("1:Utils") AND HOMECONNECTION:ISCONNECTED {
+	COPYPATH("0:lib/Utils", "1:").
+}
 RUNONCEPATH("UTILS").
 LOCAL dependencies IS LIST("DoOnce", "Functions", "ShipGlobals").
 loadDeps(dependencies).
@@ -8,13 +11,12 @@ function P_Injection {
 	LOCAL LOCK thrott TO MAX(1 - ((SHIP:ORBIT:PERIOD - 20) / (trg_orbit["period"] - 20)) ^ 20, 0.1). //release acceleration at the end
 	LOCAL LOCK dV_change TO calcDeltaV(trg_orbit["altA"]).
 	LOCAL LOCK burn_time TO calcBurnTime(dV_change).
-	
 	LOCAL function init {
 		RCS ON.
 		SAS OFF.
 		LOCK THROTTLE TO 0.
 		LOCK STEERING TO PROGRADE + R(0, 0, 90).
-		IF getdV() < dV_change / 2 {
+		IF getdV() < dV_change / 10 {
 			doStage().
 		}
 		RETURN "RCS ON, Circularisation".

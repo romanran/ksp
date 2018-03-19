@@ -1,15 +1,15 @@
 @LAZYGLOBAL off.
 GLOBAL env TO "live".
 
-IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
+IF NOT EXISTS("1:Utils") AND HOMECONNECTION:ISCONNECTED {
 	COPYPATH("0:lib/Utils", "1:").
 }
 RUNONCEPATH("Utils").
 
 SET STEERINGMANAGER:PITCHTS TO 8.
-SET STEERINGMANAGER:ROLLTS TO 5.
+SET STEERINGMANAGER:ROLLTS TO 8.
 SET STEERINGMANAGER:YAWTS TO 8.
-SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
+SET STEERINGMANAGER:PITCHPID:KD TO 0.15.
 SET STEERINGMANAGER:PITCHPID:KI TO 0.0075.
 SET STEERINGMANAGER:YAWPID:KD TO 0.15.
 SET STEERINGMANAGER:YAWPID:KI TO 0.0075.
@@ -45,8 +45,7 @@ function Aurora {
 				"choices", Program()["list"]()
 			)
 		).
-		SET chosen_prog TO Inquiry(pr_chooser).
-		SET chosen_prog TO chosen_prog["program"].
+		SET chosen_prog TO Inquiry(pr_chooser)["program"].
 		COPYPATH("0:program/" + chosen_prog + ".json", "1:" + chosen_prog + ".json").
 		ship_state["set"]("program", "1:" + chosen_prog + ".json").
 		CS().
@@ -270,6 +269,7 @@ function Aurora {
 				}).
 				Display["print"]("THROTT: ", this_craft["Injection"]["throttle"]()).
 				Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
+				Display["print"]("stg dV: ", getdV()).
 				Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 				IF this_craft["Injection"]["burn"]() {
