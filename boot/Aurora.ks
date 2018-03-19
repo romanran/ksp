@@ -298,6 +298,7 @@ function Aurora {
 		} ELSE IF phase = "END" {
 			UNLOCK THROTTLE.
 			UNLOCK STEERING.
+			SET THROTTLE TO 0.
 			Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 			misc_1s["do"]({
 				Display["clear"]().

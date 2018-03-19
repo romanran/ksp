@@ -6,9 +6,10 @@ RUNONCEPATH("UTILS").
 LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "ShipGlobals").
 loadDeps(dependencies).
 
+IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
+
 function P_HandleStaging {
-	
-	IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
+
 	LOCAL LOCK stg_res TO globals["stg_res"]().
 	LOCAL staging_Timer IS Timer().
 	LOCAL quiet_Timer IS Timer().
@@ -24,7 +25,6 @@ function P_HandleStaging {
 	LOCAL ship_state TO globals["ship_state"].
 	
 	// --- METHODS ---
-	
 	LOCAL function takeOff {
 		SET done_staging TO doStage().
 	}
@@ -32,6 +32,7 @@ function P_HandleStaging {
 	LOCAL function nextStage {
 		PARAMETER res_type.
 		SET done_staging TO doStage().
+		LIST ENGINES IN eng_list. 
 		STEERINGMANAGER:RESETPIDS().
 		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 			this_craft["Thrusting"]["resetPID"]().
@@ -90,7 +91,13 @@ function P_HandleStaging {
 			RETURN 2.
 		}
 		
-		LOCAL no_acceleration TO SHIP:ALTITUDE < 70000 AND globals["acc_vec"]():MAG / g_base < 0.04.
+		LOCAL no_acceleration TO true.
+		FOR eng IN eng_list {
+			IF eng:THRUST > 0 {
+				SET no_acceleration TO false.
+			}
+		}
+
 		//if not under accel
 		IF no_acceleration {
 			nacc_1s["do"]({
@@ -102,14 +109,10 @@ function P_HandleStaging {
 		no_acc_Timer["ready"](no_acc_period, {
 			//if there is still no acceleration, staging must have no engines available, stage again
 			IF no_acceleration {
-				HUDTEXT("Reset, do stage.", 3, 2, 20, green, false).
-				SET done_staging TO doStage().
+				nextStage("ACCELERATION").
 				staging_Timer["set"]().
-				IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
-					HUDTEXT("Resetting engine PID", 5, 2, 20, green, false).
-				}
-				nacc_1s["reset"]().
 				logJ("Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase").
+				nacc_1s["reset"]().
 			}
 		}).
 		

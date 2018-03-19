@@ -165,13 +165,15 @@ function calcTrajectory {
 }
 
 function getdV {   
-	// https://www.reddit.com/r/Kos/comments/330yir/calculating_stage_deltav/
 	// cc: only_to_downvote
-    LOCAL fuels IS LIST("LiquidFuel", "Oxidizer", "SolidFuel", "MonoPropellant").
-
-    // fuel density list (order must match name list)
-    LOCAL fuelsDensity IS list(0.005, 0.005, 0.0075, 0.004).
-
+	//fuels with density
+    LOCAL fuels IS LEXICON(
+		"LiquidFuel", 0.005,
+		"Oxidizer",  0.005, 
+		"SolidFuel", 0.0075,
+		"MonoPropellant", 0.004,
+		"XenonGas", 0.0001
+	).
     // initialize fuel mass sums
     LOCAL fuel_mass IS 0.
 	LOCAL grav_param IS CONSTANT:G * SHIP:ORBIT:BODY:MASS. //GM
@@ -180,21 +182,18 @@ function getdV {
     LOCAL mDotTotal IS 0.
 
     // calculate total fuel mass
-    FOR res IN STAGE:RESOURCES {
-        LOCAL i is 0.
-        FOR fuel in fuels {
-            IF fuel = res:NAME {
-                SET fuel_mass TO fuel_mass + fuelsDensity[i] * res:AMOUNT.
-            }
-            SET i TO i + 1.
-        }
+	FOR fuel in fuels:KEYS {
+		IF STAGE:RESOURCESLEX:HASKEY(fuel) {
+			LOCAL res IS STAGE:RESOURCESLEX[fuel].
+			SET fuel_mass TO fuel_mass + fuels[fuel] * res:AMOUNT.
+		}
     }
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
     FOR eng in eng_list {
         IF eng:STAGE = STAGE:NUMBER {
-            SET thrustTotal TO thrustTotal + eng:maxthrust.
-			SET mDotTotal TO mDotTotal + eng:maxthrust / eng:ISP.
+            SET thrustTotal TO thrustTotal + eng:MAXTHRUST.
+			SET mDotTotal TO mDotTotal + eng:MAXTHRUST / eng:ISP.
         }
     }
 	LOCAL avgIsp IS 0.

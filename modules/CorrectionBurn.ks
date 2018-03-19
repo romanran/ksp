@@ -18,12 +18,17 @@ function P_CorrectionBurn {
 		RETURN 1.
 	}
 	
+	function checkStage {
+		IF ship_res["LIQUIDFUEL"]:CAPACITY > 0 AND STAGE:RESOURCESLEX["LIQUIDFUEL"]:AMOUNT / ship_res["LIQUIDFUEL"]:CAPACITY < 0.1 {
+			doStage().
+		}
+	}
+	
 	LOCAL function moveFore {
 		PARAMETER val TO 1.
 		IF ship_res:HASKEY("MonoPropellant") AND (ship_res["MonoPropellant"]:AMOUNT / ship_res["MonoPropellant"]:CAPACITY) * 100 < 5 {
 			HUDTEXT("NO MONOPROP", 3, 2, 42, RGB(10,225,10), false).
 			// RETURN 0.
-		} ELSE {
 		}
 		SET val TO MAX(MIN(val, 1), -1).
 		IF val > 0 {

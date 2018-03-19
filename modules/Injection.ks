@@ -16,7 +16,7 @@ function P_Injection {
 		SAS OFF.
 		LOCK THROTTLE TO 0.
 		LOCK STEERING TO PROGRADE + R(0, 0, 90).
-		IF getdV() < dV_change / 10 {
+		IF getdV() < dV_change / 2 {
 			doStage().
 		}
 		RETURN "RCS ON, Circularisation".
