@@ -19,9 +19,7 @@ function P_CorrectionBurn {
 	}
 	
 	function checkStage {
-		IF ship_res["LIQUIDFUEL"]:CAPACITY > 0 AND STAGE:RESOURCESLEX["LIQUIDFUEL"]:AMOUNT / ship_res["LIQUIDFUEL"]:CAPACITY < 0.1 {
-			doStage().
-		}
+		RETURN ship_res["LIQUIDFUEL"]:CAPACITY > 0 AND STAGE:RESOURCESLEX["LIQUIDFUEL"]:AMOUNT / ship_res["LIQUIDFUEL"]:CAPACITY < 0.1.
 	}
 	
 	LOCAL function moveFore {
@@ -42,6 +40,7 @@ function P_CorrectionBurn {
 		
 	LOCAL methods TO LEXICON(
 		"fore", moveFore@,
+		"checkStage", checkStage@,
 		"neutralize", neutralizeControls@
 	).
 	

@@ -20,8 +20,8 @@ function P_HandleStaging {
 	LOCAL done_staging IS true. //we dont need to stage when on launchpad or if loaded from a save to already staged rocket
 	LOCAL eng_list IS LIST().
     LIST ENGINES IN eng_list. 
-	LOCAL quiet_period IS 3.
-	LOCAL no_acc_period IS 5.
+	LOCAL quiet_period IS 5.
+	LOCAL no_acc_period IS 7.
 	LOCAL ship_state TO globals["ship_state"].
 	
 	// --- METHODS ---
@@ -30,7 +30,7 @@ function P_HandleStaging {
 	}
 	
 	LOCAL function nextStage {
-		PARAMETER res_type.
+		PARAMETER stype IS "staging".
 		SET done_staging TO doStage().
 		LIST ENGINES IN eng_list. 
 		STEERINGMANAGER:RESETPIDS().
@@ -38,7 +38,7 @@ function P_HandleStaging {
 			this_craft["Thrusting"]["resetPID"]().
 		} 
  
-		RETURN "Stage " + STAGE:NUMBER + " - out of " + res_type.
+		RETURN "Stage " + STAGE:NUMBER + " - " + stype.
 	}
 	
 	LOCAL function check {
@@ -65,7 +65,7 @@ function P_HandleStaging {
 			}).
 		}
 		quiet_Timer["ready"](2, {
-			nextStage(res_type).
+			nextStage("out of " + res_type).
 		}).
 		RETURN out_of_res.
 	}
@@ -109,7 +109,7 @@ function P_HandleStaging {
 		no_acc_Timer["ready"](no_acc_period, {
 			//if there is still no acceleration, staging must have no engines available, stage again
 			IF no_acceleration {
-				nextStage("ACCELERATION").
+				nextStage("no acceleration during " + ship_state["get"]("phase") + "phase").
 				staging_Timer["set"]().
 				logJ("Stage " + STAGE:NUMBER + " - no acceleration detected during the thrusting phase").
 				nacc_1s["reset"]().
@@ -122,7 +122,8 @@ function P_HandleStaging {
 	LOCAL methods TO LEXICON(
 		"refresh", refresh@,
 		"takeOff", takeOff@,
-		"check", check@
+		"check", check@,
+		"stage", nextStage@
 	).
 	
 	RETURN methods.

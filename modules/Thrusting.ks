@@ -26,7 +26,7 @@ function P_Thrusting {
 	LOCAL de_acc_1s IS DoOnce().
 	LOCAL thrust_data IS LEXICON().
 	LOCAL thrust_data_file IS "0:datasets/thrust1.json".
-	IF (EXISTS(thrust_data_file)) {
+	IF HOMECONNECTION:ISCONNECTED AND EXISTS(thrust_data_file) {
 		SET thrust_data TO READJSON(thrust_data_file).
 	}
 	LOCAL LOCK trg_pitch TO MAX(0, calcTrajectory(SHIP:ALTITUDE, 60000)).

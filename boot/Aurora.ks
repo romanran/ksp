@@ -9,9 +9,9 @@ RUNONCEPATH("Utils").
 SET STEERINGMANAGER:PITCHTS TO 8.
 SET STEERINGMANAGER:ROLLTS TO 8.
 SET STEERINGMANAGER:YAWTS TO 8.
-SET STEERINGMANAGER:PITCHPID:KD TO 0.15.
+SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
 SET STEERINGMANAGER:PITCHPID:KI TO 0.0075.
-SET STEERINGMANAGER:YAWPID:KD TO 0.15.
+SET STEERINGMANAGER:YAWPID:KD TO 0.75.
 SET STEERINGMANAGER:YAWPID:KI TO 0.0075.
 SET STEERINGMANAGER:ROLLPID:KD TO 0.75.
 SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8.
@@ -69,6 +69,7 @@ function Aurora {
 	LOCAL conn_Timer IS Timer(). // retry connection to KSC timer
 	LOCAL journal_Timer IS Timer(). // save to journal in this time
 	LOCAL warp_delay IS Timer(). // save to journal in this time
+	LOCAL stage_delay IS Timer(). // satellite release delay for throttle cutoff
 	//LOCAL phase_angle IS LEXICON("current", 0).
 
 	// Load the modules after all of the global variables are set
@@ -132,8 +133,8 @@ function Aurora {
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
 		LOCAL phase IS ship_state["get"]("phase").
-		LOCAL stage_response IS trg_prog["attributes"]["modules"]["HandleStaging"].
-		IF stage_response {
+		LOCAL stage_response IS false.
+		IF trg_prog["attributes"]["modules"]["HandleStaging"] {
 			SET stage_response TO this_craft["HandleStaging"]["refresh"]().
 		}
 		Display["reset"]().
@@ -231,6 +232,7 @@ function Aurora {
 					quiet3_1s["do"]({
 						// RCS ON.
 						this_craft["Deployables"]["panels"]().
+						RCS ON.
 					}).
 				}
 			}
@@ -251,7 +253,6 @@ function Aurora {
 						ship_state["set"]("phase", "INJECTION").
 						ship_log["add"]("INJECTION phase").
 						KUNIVERSE:TIMEWARP:CANCELWARP().
-						RCS ON.
 					}
 					warp_delay["ready"](2, {
 						WARPTO(TIME:SECONDS + ETA:APOAPSIS - (this_craft["Injection"]["burn_time"]() + safe_t)).
@@ -271,18 +272,35 @@ function Aurora {
 				Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
 				Display["print"]("stg dV: ", getdV()).
 				Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
+				
+				Display["print"]("T-: ", this_craft["Injection"]["t_minus"]()).
 				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 				IF this_craft["Injection"]["burn"]() {
-					ship_state["set"]("phase", "CORRECTION_BURN").
-					ship_log["add"]("Injection complete").
-					ship_log["save"]().
-					Display["clear"]().
+					misc_1s["do"]({
+						IF this_craft["CorrectionBurn"]["checkStage"]() {
+							SET THROTTLE TO 0.
+							stage_delay["set"]().
+						} ELSE {
+							ship_state["set"]("phase", "CORRECTION_BURN").
+							ship_log["add"]("Injection complete").
+							ship_log["save"]().
+							Display["clear"]().
+						}
+					}).
+					stage_delay["ready"](2, {
+						this_craft["HandleStaging"]["stage"]("RELEASE").
+						ship_state["set"]("phase", "CORRECTION_BURN").
+						ship_log["add"]("Injection complete").
+						ship_log["save"]().
+						Display["clear"]().
+					}).
 				}
 			}
 		} ELSE IF phase = "CORRECTION_BURN" {
 			IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
 				this_craft["CorrectionBurn"]["neutralize"]().
 				ship_log["add"]("CIRCURALISATION COMPLETE").
+				misc_1s["reset"]().
 				ship_state["set"]("phase", "END").
 			} ELSE {
 				LOCAL tail IS trg_orbit["period"] - 20.

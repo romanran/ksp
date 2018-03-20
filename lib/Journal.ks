@@ -3,7 +3,7 @@
 function Journal {
 	LOCAL self TO LEXICON().
 	LOCAL ship_res TO getResources().
-	LOCAL save_path TO "1:flightlogs/journal_" + SHIPNAME + "_" + ROUND(TIME:SECONDS)+ ".json".
+	LOCAL save_path TO "1:flightlogs/journal_" + SHIPNAME + ".json".
 	
 	LOCAL row TO LEXICON().
 	LOCAL row_num TO 0.
@@ -51,6 +51,7 @@ function Journal {
 	}
 	
 	LOCAL function saveToLog {
+		WRITEJSON(self, save_path).
 		IF ADDONS:RT:HASKSCCONNECTION(SHIP) OR HOMECONNECTION:ISCONNECTED { 
 			COPYPATH(save_path, "0:flightlogs/").
 			RETURN true.
