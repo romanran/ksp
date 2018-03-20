@@ -7,9 +7,8 @@
         "vessels",
         {
             "items": [
-				"Sat 328"
-				"Sat 607",
-				"Sat 981",
+                "Sat LKO 740",
+                "Sat LKO 229"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -20,22 +19,32 @@
                 3,
                 "alt",
                 100000,
-				"modules",
-				{
-					 "entries": [
-						"PreLaunch", true,
-						"TakeOff", true,
-						"HandleStaging", true,
-						"Thrusting", true,
-						"Deployables", true,
-						"Coasting", true,
-						"Injection", true,
-						"CorrectionBurn", true,
-						"CheckCraftCondition", true
-					],
-					"$type": "kOS.Safe.Encapsulation.Lexicon"
-				},
-				"Journal", true
+                "modules",
+                {
+                    "entries": [
+                        "PreLaunch",
+                        true,
+                        "TakeOff",
+                        true,
+                        "HandleStaging",
+                        true,
+                        "Thrusting",
+                        true,
+                        "Deployables",
+                        true,
+                        "Coasting",
+                        true,
+                        "Injection",
+                        true,
+                        "CorrectionBurn",
+                        true,
+                        "CheckCraftCondition",
+                        true
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "Journal",
+                true
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
         }

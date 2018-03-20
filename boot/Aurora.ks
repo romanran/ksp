@@ -1,16 +1,18 @@
 @LAZYGLOBAL off.
 GLOBAL env TO "live".
 
-IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
+IF NOT EXISTS("1:Utils") AND HOMECONNECTION:ISCONNECTED {
 	COPYPATH("0:lib/Utils", "1:").
 }
 RUNONCEPATH("Utils").
 
 SET STEERINGMANAGER:PITCHTS TO 8.
-SET STEERINGMANAGER:ROLLTS TO 5.
+SET STEERINGMANAGER:ROLLTS TO 8.
 SET STEERINGMANAGER:YAWTS TO 8.
 SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
+SET STEERINGMANAGER:PITCHPID:KI TO 0.0075.
 SET STEERINGMANAGER:YAWPID:KD TO 0.75.
+SET STEERINGMANAGER:YAWPID:KI TO 0.0075.
 SET STEERINGMANAGER:ROLLPID:KD TO 0.75.
 SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8.
 
@@ -43,8 +45,7 @@ function Aurora {
 				"choices", Program()["list"]()
 			)
 		).
-		SET chosen_prog TO Inquiry(pr_chooser).
-		SET chosen_prog TO chosen_prog["program"].
+		SET chosen_prog TO Inquiry(pr_chooser)["program"].
 		COPYPATH("0:program/" + chosen_prog + ".json", "1:" + chosen_prog + ".json").
 		ship_state["set"]("program", "1:" + chosen_prog + ".json").
 		CS().
@@ -68,6 +69,7 @@ function Aurora {
 	LOCAL conn_Timer IS Timer(). // retry connection to KSC timer
 	LOCAL journal_Timer IS Timer(). // save to journal in this time
 	LOCAL warp_delay IS Timer(). // save to journal in this time
+	LOCAL stage_delay IS Timer(). // satellite release delay for throttle cutoff
 	//LOCAL phase_angle IS LEXICON("current", 0).
 
 	// Load the modules after all of the global variables are set
@@ -83,22 +85,25 @@ function Aurora {
 	
 	loadDeps(phase_modules, "modules").
 
-	GLOBAL this_craft IS LEXICON(
-		"PreLaunch", P_PreLaunch(),
-		"HandleStaging", P_HandleStaging(),
-		"Thrusting", P_Thrusting(trg_orbit),
-		"Deployables", P_Deployables(),
-		"Injection", P_Injection(trg_orbit),
-		"CorrectionBurn", P_CorrectionBurn(),
-		"CheckCraftCondition", P_CheckCraftCondition()
-	).
+	IF NOT (DEFINED this_craft) {
+		GLOBAL this_craft IS LEXICON(
+			"PreLaunch", P_PreLaunch(),
+			"HandleStaging", P_HandleStaging(),
+			"Thrusting", P_Thrusting(trg_orbit),
+			"Deployables", P_Deployables(),
+			"Injection", P_Injection(trg_orbit),
+			"CorrectionBurn", P_CorrectionBurn(),
+			"CheckCraftCondition", P_CheckCraftCondition()
+		).
+	}
 	function askForTarget {
 		trg_prog["vessels"]:ADD("none").
+		SET TARGET TO SUN.
 		LOCAL usr_input TO Inquiry(LIST(
 			LEXICON(
 				"name", "target",
 				"type", "select",
-				"msg", "Choose a target vessel",
+				"msg", "Choose a target vessel or target manually",
 				"choices", trg_prog["vessels"]
 			)
 		)).
@@ -108,13 +113,18 @@ function Aurora {
 
 	IF SHIP:STATUS = "PRELAUNCH" {
 		askForTarget().
-		IF ship_state["get"]("trg_vsl") = "none" {
+		
+		IF ship_state["get"]("trg_vsl") = "none" AND TARGET:NAME = "SUN" {
 			ship_state["set"]("trg_vsl", false).
+		} ELSE IF ship_state["get"]("trg_vsl") = "none" AND NOT (TARGET:NAME = "SUN") {
+			ship_state["set"]("trg_vsl", TARGET:NAME).
+		} ELSE {
+			SET TARGET TO ship_state["get"]("trg_vsl").
 		}
 		Display["imprint"]("Aurora Space Program V2.0.0").
 		Display["imprint"](SHIP:NAME).
 		IF ship_state["get"]("trg_vsl") {
-			Display["imprint"]("TRG_VSL", ship_state["get"]("trg_vsl")).
+			Display["imprint"]("TRG Vessel", ship_state["get"]("trg_vsl")).
 		}
 		Display["imprint"]("Comm range:", trg_orbit["range"] + "m.").
 		Display["imprint"]("TRG ALT:", trg_orbit["alt"] + "m.").
@@ -131,8 +141,8 @@ function Aurora {
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
 		LOCAL phase IS ship_state["get"]("phase").
-		LOCAL stage_response IS trg_prog["attributes"]["modules"]["HandleStaging"].
-		IF stage_response {
+		LOCAL stage_response IS false.
+		IF trg_prog["attributes"]["modules"]["HandleStaging"] {
 			SET stage_response TO this_craft["HandleStaging"]["refresh"]().
 		}
 		Display["reset"]().
@@ -197,28 +207,31 @@ function Aurora {
 			} ELSE {
 				LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 				Display["print"]("THROTT:", ROUND(this_craft["Thrusting"]["thrott"]() * 100, 1) + "%").
-				Display["print"]("TRG THROTT:", this_craft["Thrusting"]["target4throttle"]()).
+				Display["print"]("TRG THROTT:", this_craft["Thrusting"]["trg4thrott"]()).
+				Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
+				Display["print"]("TWR:", ROUND(getTWR() * THROTTLE, 3)).
 				Display["print"]("TRG PITCH:", this_craft["Thrusting"]["trg_pitch"]()).
 				Display["print"]("PITCH:", this_craft["Thrusting"]["ship_p"]()).
-				Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
-				Display["print"]("TWR:", ROUND(getTWR(), 3)).
 				Display["print"]("SFC V:", SHIP:VELOCITY:SURFACE:MAG).
 				Display["print"]("ACC:", ROUND(globals["acc_vec"]():MAG / g_base, 3) + "G").
 					
 				this_craft["Thrusting"]["handleFlight"]().
-				IF (ROUND(APOAPSIS) > trg_orbit["alt"] - trg_orbit["alt"] * 0.25) AND ALTITUDE > 50000 {
+				IF (ROUND(APOAPSIS) > trg_orbit["alt"] - trg_orbit["alt"] * 0.25) AND ALTITUDE > 30000 {
 					this_craft["Thrusting"]["decelerate"]().
 				}
-				IF CEILING(APOAPSIS) >= trg_orbit["alt"] AND ALTITUDE > 50000 {
+				
+				LOCAL atm_clamp IS SHIP:SENSORS:PRES * trg_orbit["alt"] * 0.05.
+				IF CEILING(APOAPSIS) - atm_clamp >= trg_orbit["alt"] {
 					LOCK THROTTLE TO 0.
 					// HUDTEXT("COAST TRANSITION", 4, 2, 20, green, false).
-					//leaving thrusting section at that time
+				}
+				IF ALTITUDE > 73000 AND THROTTLE = 0 {
 					ship_log["add"]("COAST TRANSITION phase").
 					Display["clear"]().
 					this_craft["Injection"]["burn_time"]().
 					ship_state["set"]("phase", "COASTING").
 				}
-				IF ALTITUDE > 65000 AND globals["q_pressure"]() < 0.3 {
+				IF ALTITUDE > 55000 AND globals["q_pressure"]() < 0.3 {
 					quiet1_1s["do"]({
 						this_craft["Deployables"]["fairing"]().
 					}).
@@ -227,6 +240,7 @@ function Aurora {
 					quiet3_1s["do"]({
 						// RCS ON.
 						this_craft["Deployables"]["panels"]().
+						RCS ON.
 					}).
 				}
 			}
@@ -247,7 +261,6 @@ function Aurora {
 						ship_state["set"]("phase", "INJECTION").
 						ship_log["add"]("INJECTION phase").
 						KUNIVERSE:TIMEWARP:CANCELWARP().
-						RCS ON.
 					}
 					warp_delay["ready"](2, {
 						WARPTO(TIME:SECONDS + ETA:APOAPSIS - (this_craft["Injection"]["burn_time"]() + safe_t)).
@@ -265,19 +278,37 @@ function Aurora {
 				}).
 				Display["print"]("THROTT: ", this_craft["Injection"]["throttle"]()).
 				Display["print"]("Est. dV: ", this_craft["Injection"]["dV_change"]()).
+				Display["print"]("stg dV: ", getdV()).
 				Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
+				
+				Display["print"]("T-: ", this_craft["Injection"]["t_minus"]()).
 				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 				IF this_craft["Injection"]["burn"]() {
-					ship_state["set"]("phase", "CORRECTION_BURN").
-					ship_log["add"]("Injection complete").
-					ship_log["save"]().
-					Display["clear"]().
+					misc_1s["do"]({
+						IF this_craft["CorrectionBurn"]["checkStage"]() {
+							SET THROTTLE TO 0.
+							stage_delay["set"]().
+						} ELSE {
+							ship_state["set"]("phase", "CORRECTION_BURN").
+							ship_log["add"]("Injection complete").
+							ship_log["save"]().
+							Display["clear"]().
+						}
+					}).
+					stage_delay["ready"](2, {
+						this_craft["HandleStaging"]["stage"]("RELEASE").
+						ship_state["set"]("phase", "CORRECTION_BURN").
+						ship_log["add"]("Injection complete").
+						ship_log["save"]().
+						Display["clear"]().
+					}).
 				}
 			}
 		} ELSE IF phase = "CORRECTION_BURN" {
 			IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
 				this_craft["CorrectionBurn"]["neutralize"]().
 				ship_log["add"]("CIRCURALISATION COMPLETE").
+				misc_1s["reset"]().
 				ship_state["set"]("phase", "END").
 			} ELSE {
 				LOCAL tail IS trg_orbit["period"] - 20.
@@ -293,6 +324,7 @@ function Aurora {
 		} ELSE IF phase = "END" {
 			UNLOCK THROTTLE.
 			UNLOCK STEERING.
+			SET THROTTLE TO 0.
 			Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 			misc_1s["do"]({
 				Display["clear"]().

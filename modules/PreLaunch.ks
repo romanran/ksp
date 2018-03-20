@@ -1,4 +1,7 @@
-COPYPATH("0:lib/Utils", "1:").
+@LAZYGLOBAL off.
+IF NOT EXISTS("1:Utils") AND HOMECONNECTION:ISCONNECTED {
+	COPYPATH("0:lib/Utils", "1:").
+}
 RUNONCEPATH("UTILS").
 LOCAL dependencies IS LIST("Functions", "ShipGlobals", "Timer", "DoOnce").
 loadDeps(dependencies).
@@ -100,6 +103,8 @@ function P_PreLaunch {
 			}
 			IF countdown > 0 { 
 				HUDTEXT(countdown + "...", 1, 2, 40, green, false).
+			} ELSE {
+				HUDTEXT("Liftoff", 1, 2, 40, green, false).
 			}
 			SET countdown TO countdown - 1.
 			staging_Timer["set"]().

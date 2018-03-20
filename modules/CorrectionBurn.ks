@@ -1,4 +1,7 @@
-COPYPATH("0:lib/Utils", "1:").
+@LAZYGLOBAL off.
+IF NOT EXISTS("1:Utils") AND HOMECONNECTION:ISCONNECTED {
+	COPYPATH("0:lib/Utils", "1:").
+}
 RUNONCEPATH("UTILS").
 LOCAL dependencies IS LIST("ShipGlobals").
 loadDeps(dependencies).
@@ -15,12 +18,15 @@ function P_CorrectionBurn {
 		RETURN 1.
 	}
 	
+	function checkStage {
+		RETURN ship_res["LIQUIDFUEL"]:CAPACITY > 0 AND STAGE:RESOURCESLEX["LIQUIDFUEL"]:AMOUNT / ship_res["LIQUIDFUEL"]:CAPACITY < 0.1.
+	}
+	
 	LOCAL function moveFore {
 		PARAMETER val TO 1.
 		IF ship_res:HASKEY("MonoPropellant") AND (ship_res["MonoPropellant"]:AMOUNT / ship_res["MonoPropellant"]:CAPACITY) * 100 < 5 {
 			HUDTEXT("NO MONOPROP", 3, 2, 42, RGB(10,225,10), false).
 			// RETURN 0.
-		} ELSE {
 		}
 		SET val TO MAX(MIN(val, 1), -1).
 		IF val > 0 {
@@ -34,6 +40,7 @@ function P_CorrectionBurn {
 		
 	LOCAL methods TO LEXICON(
 		"fore", moveFore@,
+		"checkStage", checkStage@,
 		"neutralize", neutralizeControls@
 	).
 	

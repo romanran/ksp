@@ -1,47 +1,48 @@
 @LAZYGLOBAL off.
 GLOBAL env TO "live".
 
-IF NOT(EXISTS("1:Utils")) AND ((ADDONS:AVAILABLE("RT") AND ADDONS:RT:HASKSCCONNECTION(SHIP)) OR HOMECONNECTION:ISCONNECTED) {
+IF NOT(EXISTS("1:Utils")) AND HOMECONNECTION:ISCONNECTED {
 	COPYPATH("0:lib/Utils", "1:").
 }
 RUNONCEPATH("Utils").
 
 function Tester {
 	CD("1:").
-	LOCAL dependencies IS LIST("PID", "Timer", "Checkboxes", "DoOnce", "Functions", "Displayer", "Journal", "Inquiry", "Program", "ShipState", "ShipGlobals").
+	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Program", "ShipState", "ShipGlobals").
 	loadDeps(dependencies).
-	GLOBAL globals TO setGlobal().
+	SET SHIP:CONTROL:PILOTMAINTHROTTLE TO 0.
+	LOCK THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
+	CS().
+	SET TERMINAL:WIDTH TO 42.
+	SET TERMINAL:HEIGHT TO 34.
+	IF SHIP:STATUS = "PRELAUNCH" {
+		SET SHIP:NAME TO generateID().
+	}
+	
+	IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
-
-	LOCK THROTTLE TO 0. //safety measure for float point values of throttle when loading from a save
-
-	CS().
-	//SET TERMINAL:WIDTH TO 42.
-	//SET TERMINAL:HEIGHT TO 30.
-
-	SET SHIP:NAME TO generateID().
+	LOCAL ship_log TO globals["ship_log"].
 
 	// Get program name from ship state or inquiry
-	LOCAL my_program TO Program().
-	LOCAL prlist TO my_program["list"]().
-	LOCAL chosen_prog TO "".
-	IF ship_state["get"]():HASKEY("program") {
-		SET chosen_prog TO ship_state["get"]("program").
-	} ELSE {
+	LOCAL chosen_prog TO ship_state["get"]("program").
+	IF NOT chosen_prog {
 		LOCAL pr_chooser TO LIST(
 			LEXICON(
 				"name", "program",
 				"type", "select",
 				"msg", "Choose a program",
-				"choices", prlist
+				"choices", Program()["list"]()
 			)
 		).
 		SET chosen_prog TO Inquiry(pr_chooser)["program"].
-		ship_state["set"]("program", chosen_prog).
+		COPYPATH("0:program/" + chosen_prog + ".json", "1:" + chosen_prog + ".json").
+		ship_state["set"]("program", "1:" + chosen_prog + ".json").
+		CS().
 	}
+	LOCAL my_program TO Program(ship_state["get"]("program")).
 	// load the program
-	LOCAL trg_prog TO my_program["fetch"](chosen_prog).
+	LOCAL trg_prog TO my_program["fetch"]().
 	LOCAL trg_orbit IS gettrgAlt(trg_prog["attributes"]["sats"], trg_prog["attributes"]["alt"]).
 
 	// Load the modules after all of the global variables are set
@@ -67,7 +68,7 @@ function Tester {
 		"CheckCraftCondition", P_CheckCraftCondition()
 	).
 	
-	LOCAL f_list IS LIST("getPhaseAngle", "gettrgAlt", "calcBurnTime", "gbase", "interpolate", "BACK").
+	LOCAL f_list IS LIST("getPhaseAngle", "gettrgAlt", "calcBurnTime", "gbase", "interpolate", "getdV", "BACK").
 
 	LOCAL from_save TO this_craft["PreLaunch"]["from_save"](). //this value will be false, if a script runs from the launch of a ship. If ship is loaded from a save, it will be set to true inside prelaunch phase
 		
@@ -232,6 +233,8 @@ function Tester {
 			LOCAL target4throttle TO interpolateLagrange(thrust_data, trg["alt"]).
 			CS().
 			Display["print"]("Interpolated target for " + trg["alt"] + "m", target4throttle).
+		} ELSE IF func = "getdV" {
+			Display["print"]("dv", getdV()).
 		}
 		LOCAL done IS false.
 		Display["print"]("Press enter to continue").

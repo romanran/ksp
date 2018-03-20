@@ -5,6 +5,7 @@ function Program {
 	LOCAL filelist IS LIST().
 	
 	LOCAL function addVessel {
+		SET path TO "0:program/" + path:REMOVE(0, 2).
 		LOCAL obj TO READJSON(path).
 		FOR vsl IN obj["vessels"] {
 			IF vsl = SHIPNAME {
