@@ -85,22 +85,25 @@ function Aurora {
 	
 	loadDeps(phase_modules, "modules").
 
-	GLOBAL this_craft IS LEXICON(
-		"PreLaunch", P_PreLaunch(),
-		"HandleStaging", P_HandleStaging(),
-		"Thrusting", P_Thrusting(trg_orbit),
-		"Deployables", P_Deployables(),
-		"Injection", P_Injection(trg_orbit),
-		"CorrectionBurn", P_CorrectionBurn(),
-		"CheckCraftCondition", P_CheckCraftCondition()
-	).
+	IF NOT (DEFINED this_craft) {
+		GLOBAL this_craft IS LEXICON(
+			"PreLaunch", P_PreLaunch(),
+			"HandleStaging", P_HandleStaging(),
+			"Thrusting", P_Thrusting(trg_orbit),
+			"Deployables", P_Deployables(),
+			"Injection", P_Injection(trg_orbit),
+			"CorrectionBurn", P_CorrectionBurn(),
+			"CheckCraftCondition", P_CheckCraftCondition()
+		).
+	}
 	function askForTarget {
 		trg_prog["vessels"]:ADD("none").
+		SET TARGET TO SUN.
 		LOCAL usr_input TO Inquiry(LIST(
 			LEXICON(
 				"name", "target",
 				"type", "select",
-				"msg", "Choose a target vessel",
+				"msg", "Choose a target vessel or target manually",
 				"choices", trg_prog["vessels"]
 			)
 		)).
@@ -110,13 +113,18 @@ function Aurora {
 
 	IF SHIP:STATUS = "PRELAUNCH" {
 		askForTarget().
-		IF ship_state["get"]("trg_vsl") = "none" {
+		
+		IF ship_state["get"]("trg_vsl") = "none" AND TARGET:NAME = "SUN" {
 			ship_state["set"]("trg_vsl", false).
+		} ELSE IF ship_state["get"]("trg_vsl") = "none" AND NOT (TARGET:NAME = "SUN") {
+			ship_state["set"]("trg_vsl", TARGET:NAME).
+		} ELSE {
+			SET TARGET TO ship_state["get"]("trg_vsl").
 		}
 		Display["imprint"]("Aurora Space Program V2.0.0").
 		Display["imprint"](SHIP:NAME).
 		IF ship_state["get"]("trg_vsl") {
-			Display["imprint"]("TRG_VSL", ship_state["get"]("trg_vsl")).
+			Display["imprint"]("TRG Vessel", ship_state["get"]("trg_vsl")).
 		}
 		Display["imprint"]("Comm range:", trg_orbit["range"] + "m.").
 		Display["imprint"]("TRG ALT:", trg_orbit["alt"] + "m.").
