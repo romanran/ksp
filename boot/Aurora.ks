@@ -138,6 +138,12 @@ function Aurora {
 	SET done TO 0.
 	SET from_save TO this_craft["PreLaunch"]["from_save"]().
 	
+	LOCAL phase_angle TO LEXICON("current", 0).
+	LOCAL exec_time TO 200. // default exec time at about 200seconds
+	IF trg_prog:HASKEY("exec_time") {
+		SET exec_time TO trg_prog["exec_time"].
+	}
+	
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
 		LOCAL phase IS ship_state["get"]("phase").
@@ -158,19 +164,19 @@ function Aurora {
 			IF NOT trg_prog["attributes"]["modules"]["PreLaunch"] {
 				ship_state["set"]("phase", "TAKEOFF").
 			} ELSE {
-				LOCAL phase_angle TO "".
+				
 				LOCAL has_target TO false.
 				IF ship_state["get"]("trg_vsl") {
-					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), 0).	
-					Display["print"]("Degrees spread:", phase_angle["spread"]).
-					Display["print"]("Degrees traveled:", phase_angle["traveled"]).
-					Display["print"]("Target separation:", phase_angle["separation"]).
-					Display["print"]("Est. angle move:", phase_angle["move"]).
-					Display["print"]("Target phase angle:", phase_angle["target"]).
-					Display["print"]("Current phase angle:", phase_angle["current"]).
+					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), phase_angle["current"], exec_time).	
+					Display["print"]("Spread:", phase_angle["spread"] + "°").
+					Display["print"]("Travel:", phase_angle["traveled"] + "°").
+					Display["print"]("Target separation:", phase_angle["separation"] + "°").
+					Display["print"]("Est. angle move:", phase_angle["move"] + "°").
+					Display["print"]("Target phase angle:", phase_angle["target"] + "°").
+					Display["print"]("Current phase angle:", phase_angle["current"] + "°").
 					SET has_target TO true.
 				}
-				IF has_target AND phase_angle["current"] + 0.5 * (KUNIVERSE:TIMEWARP:WARP + 1) >= phase_angle["target"] 
+				IF has_target AND phase_angle["current"] * (KUNIVERSE:TIMEWARP:WARP + 1) >= phase_angle["target"] 
 					AND phase_angle["current"] - (KUNIVERSE:TIMEWARP:WARP + 1) <= phase_angle["target"] {
 					misc_1s["do"]({
 						KUNIVERSE:TIMEWARP:CANCELWARP().
@@ -331,6 +337,7 @@ function Aurora {
 				conn_Timer["set"]().
 				this_craft["Deployables"]["antennas"]().
 			}).
+			my_program["append"]("exec_time", MISSIONTIME).
 		}
 		IF NOT ship_state["get"]("saved") AND trg_prog["attributes"]["Journal"] {
 			conn_Timer["ready"](10, {

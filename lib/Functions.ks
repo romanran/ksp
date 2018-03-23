@@ -258,12 +258,13 @@ function getPhaseAngle {
 	PARAMETER no_of_sats.
 	PARAMETER trg_vessel.
 	PARAMETER last_angle IS 0.
+	PARAMETER launch_duration IS 0.
 	
 	IF NOT trg_vessel:ISTYPE("VESSEL") {
 		RETURN 0.
 	}
 	
-	LOCAL radius_percent IS ROUND(200 / trg_vessel:OBT:PERIOD, 3).
+	LOCAL radius_percent IS ROUND(launch_duration / trg_vessel:OBT:PERIOD, 3).
 	LOCAL phase_ang IS calcPhaseAngle(SHIP:ORBIT:BODY:RADIUS + ALTITUDE, trg_vessel:ORBIT:SEMIMAJORAXIS / 2).
 	LOCAL curr_angle IS calcAngleFromVec(SHIP:UP:STARVECTOR, trg_vessel:UP:STARVECTOR).
 	LOCAL ahead IS false.
@@ -280,9 +281,9 @@ function getPhaseAngle {
 		"spread", 360 / no_of_sats,
 		"traveled", 360 * radius_percent,
 		"separation", 360 * radius_percent +  360 / no_of_sats,
-		"move", phase_ang,
-		"target", tphase_ang,
-		"current", curr_angle
+		"move", ROUND(phase_ang, 2),
+		"target", ROUND(tphase_ang, 2),
+		"current", ROUND(curr_angle, 2)
 	).
 }
 

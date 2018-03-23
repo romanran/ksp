@@ -60,13 +60,22 @@ function Program {
 		WRITEJSON(new_program, path + ".json").
 		CD(prev_path).
 	}
+	
+	function append {
+		PARAMETER key.
+		PARAMETER val.
+		LOCAL obj TO fetch(path).
+		SET obj[key] TO val.
+		WRITEJSON(obj, path).
+	}
 
 	LOCAL methods TO LEXICON(
 		"create", create@,
 		"add", addVessel@,
 		"list", listPrograms@,
 		"fetch", fetch@,
-		"read", fetch@
+		"read", fetch@,
+		"append", append@ 
 	).
 	
 	RETURN methods.
