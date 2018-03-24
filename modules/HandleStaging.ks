@@ -22,6 +22,7 @@ function P_HandleStaging {
     LIST ENGINES IN eng_list. 
 	LOCAL quiet_period IS 5.
 	LOCAL no_acc_period IS 7.
+	LOCAL stage_delay IS 1.
 	LOCAL ship_state TO globals["ship_state"].
 	
 	// --- METHODS ---
@@ -33,10 +34,20 @@ function P_HandleStaging {
 		PARAMETER stype IS "staging".
 		SET done_staging TO doStage().
 		LIST ENGINES IN eng_list. 
-		STEERINGMANAGER:RESETPIDS().
+		// STEERINGMANAGER:RESETPIDS().
 		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 			this_craft["Thrusting"]["resetPID"]().
 		} 
+		
+		// SET STEERINGMANAGER:PITCHTS TO 8.
+		// SET STEERINGMANAGER:ROLLTS TO 8.
+		// SET STEERINGMANAGER:YAWTS TO 8.
+		// SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
+		// SET STEERINGMANAGER:PITCHPID:KI TO 0.0075.
+		// SET STEERINGMANAGER:YAWPID:KD TO 0.75.
+		// SET STEERINGMANAGER:YAWPID:KI TO 0.0075.
+		// SET STEERINGMANAGER:ROLLPID:KD TO 0.75.
+		// SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8.
  
 		RETURN "Stage " + STAGE:NUMBER + " - " + stype.
 	}
@@ -64,13 +75,22 @@ function P_HandleStaging {
 				ship_state["set"]("quiet", true).
 			}).
 		}
-		quiet_Timer["ready"](2, {
+		quiet_Timer["ready"](stage_delay, {
 			nextStage("out of " + res_type).
 		}).
 		RETURN out_of_res.
 	}
 	
 	LOCAL function refresh {
+		IF ALT:RADAR < 2000 {
+			SET quiet_period TO 1.
+			SET no_acc_period TO 5.
+			SET stage_delay TO 1.
+		} ELSE {
+			SET quiet_period TO 5.
+			SET no_acc_period TO 7.
+			SET stage_delay TO 2.
+		}
 		staging_Timer["ready"](quiet_period, {
 			staging_Timer["reset"]().
 			stage_1s["reset"]().

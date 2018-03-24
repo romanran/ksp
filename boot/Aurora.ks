@@ -6,16 +6,6 @@ IF NOT EXISTS("1:Utils") AND HOMECONNECTION:ISCONNECTED {
 }
 RUNONCEPATH("Utils").
 
-SET STEERINGMANAGER:PITCHTS TO 8.
-SET STEERINGMANAGER:ROLLTS TO 8.
-SET STEERINGMANAGER:YAWTS TO 8.
-SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
-SET STEERINGMANAGER:PITCHPID:KI TO 0.0075.
-SET STEERINGMANAGER:YAWPID:KD TO 0.75.
-SET STEERINGMANAGER:YAWPID:KI TO 0.0075.
-SET STEERINGMANAGER:ROLLPID:KD TO 0.75.
-SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8.
-
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Program", "ShipState", "ShipGlobals").
@@ -311,21 +301,25 @@ function Aurora {
 				}
 			}
 		} ELSE IF phase = "CORRECTION_BURN" {
-			IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
-				this_craft["CorrectionBurn"]["neutralize"]().
-				ship_log["add"]("CIRCURALISATION COMPLETE").
-				misc_1s["reset"]().
+			IF NOT trg_prog["attributes"]["modules"]["CorrectionBurn"] {
 				ship_state["set"]("phase", "END").
 			} ELSE {
-				LOCAL tail IS trg_orbit["period"] - 20.
-				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 12.
-				IF SHIP:ORBIT:PERIOD < trg_orbit["period"] - 30 {
-					SET margin TO 1.
+				IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
+					this_craft["CorrectionBurn"]["neutralize"]().
+					ship_log["add"]("CIRCURALISATION COMPLETE").
+					misc_1s["reset"]().
+					ship_state["set"]("phase", "END").
+				} ELSE {
+					LOCAL tail IS trg_orbit["period"] - 20.
+					LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 12.
+					IF SHIP:ORBIT:PERIOD < trg_orbit["period"] - 30 {
+						SET margin TO 1.
+					}
+					Display["print"]("FORE:", margin).
+					this_craft["CorrectionBurn"]["fore"](margin).
+					Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
+					Display["print"]("TRG ORB P: ", trg_orbit["period"]).
 				}
-				Display["print"]("FORE:", margin).
-				this_craft["CorrectionBurn"]["fore"](margin).
-				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
-				Display["print"]("TRG ORB P: ", trg_orbit["period"]).
 			}
 		} ELSE IF phase = "END" {
 			UNLOCK THROTTLE.

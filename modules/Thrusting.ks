@@ -51,7 +51,25 @@ function P_Thrusting {
 		//limit to max 4 twr
 		LOCAL limit IS MIN(4 / getTWR() * 100, 100).
 		FOR eng in eng_list {
-			SET eng:THRUSTLIMIT TO limit.
+			IF eng:STAGE = STAGE:NUMBER {
+				SET eng:THRUSTLIMIT TO limit.
+			}
+		}
+	}
+	
+	function checkGimbal {
+		LOCAL gimbals IS false.
+		FOR eng in eng_list {
+			IF eng:STAGE = STAGE:NUMBER  {
+				IF eng:HASGIMBAL {
+					IF NOT eng:GIMBAL:LOCK {
+						SET gimbals TO true.
+					}
+				}
+			}
+		}
+		IF NOT gimbals {
+			RCS ON.
 		}
 	}
 	
@@ -70,6 +88,7 @@ function P_Thrusting {
 		}
 		
 		limitThrust().
+		checkGimbal().
 		
 		SET throttle_PID:SETPOINT TO trg4thrott.
 		
@@ -153,7 +172,8 @@ function P_Thrusting {
 		"trg_pitch", trg_pitch@, 
 		"ship_p", ship_p@, 
 		"trg4thrott", trg4thrott@, 
-		"thrott", thrott@
+		"thrott", thrott@,
+		"checkGimbal", checkGimbal@
 	).
 	
 	RETURN methods.

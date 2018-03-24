@@ -1,10 +1,10 @@
-- set states in root part tag and check status from there 
+ - set states in root part tag and check status from there 
  - add sats cloud, next launched sat takes orbital period of previous sats and aims for the same orbital period  
  -if energy low, start fuel cell 
-- rotate craft with pid for maximum sun exposure 
- check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere 
-- make program creator 
-- move all of the ifs to function and load them on program checklist. for example, in altitude ifs, call a function "deployantennas", so the function can be called even from ground. 
+ - rotate craft with pid for maximum sun exposure 
+ - check for gimbals, if there are non in current stage,  enable RCS while in vacuum, or vernier engines while in atmosphere 
+ - make program creator 
+ - move all of the ifs to function and load them on program checklist. for example, in altitude ifs, call a function "deployantennas", so the function can be called even from ground. 
  - save created programs in json 
  check if comm range is within max ranges of antennas on board 
  - check different gravity turns slopes by comparing dV and resources used 
@@ -19,6 +19,7 @@
  
   Create stages object, calculate needed dV and check if current stage and the next ones have necessary dV for the maneuver 
  Write coasting module for specific target (whole menu for phases) 
- Add first commsat apoapsis reach time to programm json 
- Thrusting phase deceleration based on specific distance left 
+ -Add first commsat apoapsis reach time to programm json 
+ -Thrusting phase deceleration based on specific distance left 
  Communication interface, send a task to a probe 
+ Recalculate Steeringmanager PID based on craft weight

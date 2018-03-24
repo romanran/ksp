@@ -1,0 +1,52 @@
+{
+    "entries": [
+        "type",
+        "Station-A",
+        "id",
+        "Station-A 170",
+        "vessels",
+        {
+            "items": [
+                
+            ],
+            "$type": "kOS.Safe.Encapsulation.ListValue"
+        },
+        "attributes",
+        {
+            "entries": [
+                "sats",
+                1,
+                "alt",
+                20000000,
+                "modules",
+                {
+                    "entries": [
+                        "PreLaunch",
+                        true,
+                        "TakeOff",
+                        true,
+                        "HandleStaging",
+                        true,
+                        "Thrusting",
+                        true,
+                        "Deployables",
+                        true,
+                        "Injection",
+                        true,
+                        "Coasting",
+                        true,
+                        "CorrectionBurn",
+                        false,
+                        "CheckCraftCondition",
+                        true
+                    ],
+                    "$type": "kOS.Safe.Encapsulation.Lexicon"
+                },
+                "Journal",
+                true
+            ],
+            "$type": "kOS.Safe.Encapsulation.Lexicon"
+        }
+    ],
+    "$type": "kOS.Safe.Encapsulation.Lexicon"
+}
