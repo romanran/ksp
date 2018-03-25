@@ -64,7 +64,7 @@ function Program {
 	function append {
 		PARAMETER key.
 		PARAMETER val.
-		LOCAL obj TO fetch(path).
+		LOCAL obj TO fetch().
 		SET obj[key] TO val.
 		WRITEJSON(obj, path).
 	}

@@ -281,7 +281,7 @@ function Aurora {
 				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 				IF this_craft["Injection"]["burn"]() {
 					misc_1s["do"]({
-						IF this_craft["CorrectionBurn"]["checkStage"]() {
+						IF this_craft["CorrectionBurn"]["checkStage"]() AND trg_prog["attributes"]["release"]  {
 							SET THROTTLE TO 0.
 							stage_delay["set"]().
 						} ELSE {

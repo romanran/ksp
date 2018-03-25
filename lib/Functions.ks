@@ -243,39 +243,42 @@ function calcOrbitRadius {
 function calcPhaseAngle {
 	PARAMETER r1.
 	PARAMETER r2.
-	RETURN 180 * (1 - (r1 / (2 * r2) + 1 / 2) ^ (ROUND(3 / 2, 2))).
+	RETURN 180 * (1 - (r1 / (2 * r2) + 1 / 2) ^ (3 / 2)).
 }
 
-function calcAngleFromVec {
+function calcCraftsAngle {
 	PARAMETER v1.
 	PARAMETER v2.
-	SET v1 TO v1:NORMALIZED.
-	SET v2 TO v2:NORMALIZED.
-	RETURN ARCCOS(v1 * v2).
+	SET v1 TO v1:UP:STARVECTOR:NORMALIZED.
+	LOCAL v2_right TO v2:UP:STARVECTOR:NORMALIZED.
+	SET v2 TO v2:UP:VECTOR:NORMALIZED.
+	IF VDOT(v1, v2) > 0 {
+		RETURN 360 - ARCCOS(v1 * v2_right).
+	} ELSE {
+		RETURN ARCCOS(v1 * v2).
+	}
 }
 
 function getPhaseAngle {
 	PARAMETER no_of_sats.
 	PARAMETER trg_vessel.
 	PARAMETER last_angle IS 0.
-	PARAMETER launch_duration IS 0.
+	PARAMETER launch_duration IS 200.
 	
+	SET launch_duration TO 200.
 	IF NOT trg_vessel:ISTYPE("VESSEL") {
 		RETURN 0.
 	}
 	
 	LOCAL radius_percent IS ROUND(launch_duration / trg_vessel:OBT:PERIOD, 3).
 	LOCAL phase_ang IS calcPhaseAngle(SHIP:ORBIT:BODY:RADIUS + ALTITUDE, trg_vessel:ORBIT:SEMIMAJORAXIS / 2).
-	LOCAL curr_angle IS calcAngleFromVec(SHIP:UP:STARVECTOR, trg_vessel:UP:STARVECTOR).
+	LOCAL curr_angle IS calcCraftsAngle(SHIP, trg_vessel).
 	LOCAL ahead IS false.
 	LOCAL diff TO 360 * radius_percent.
-	IF curr_angle < last_angle {
-		//target is ahead
-		SET phase_ang TO 0 - phase_ang.
-		// SET diff TO 0 - diff.
-	} 
 	LOCAL tphase_ang TO 360 / no_of_sats + phase_ang + diff.
-	LOCAL last_angle TO curr_angle.
+	IF tphase_ang > 360 {
+		SET tphase_ang TO tphase_ang - 360.
+	}
 
 	RETURN LEXICON(
 		"spread", 360 / no_of_sats,

@@ -43,6 +43,11 @@ function Creator {
 			}
 		),
 		LEXICON( 
+			"name", 	 "release",  
+			 "type", 	 "bool",   
+			 "msg", 	 "Release craft at the end of the injection?",
+		),
+		LEXICON( 
 			 "name", 	 "modules",  
 			 "type", 	 "checkbox",   
 			 "msg", 	 "Choose modules",

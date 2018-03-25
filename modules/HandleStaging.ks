@@ -82,7 +82,7 @@ function P_HandleStaging {
 	}
 	
 	LOCAL function refresh {
-		IF ALT:RADAR < 2000 {
+		IF ALT:RADAR < 10000 {
 			SET quiet_period TO 1.
 			SET no_acc_period TO 5.
 			SET stage_delay TO 1.

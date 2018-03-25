@@ -17,7 +17,7 @@
                 "sats",
                 1,
                 "alt",
-                300000,
+                250000,
 				"release",
 				false,
                 "modules",
@@ -30,7 +30,7 @@
                         "Deployables", true,
 						"Coasting", true,
                         "Injection", true,
-                        "CorrectionBurn", true,
+                        "CorrectionBurn", false,
                         "CheckCraftCondition", true
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"

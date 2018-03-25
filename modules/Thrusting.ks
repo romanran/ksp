@@ -88,7 +88,9 @@ function P_Thrusting {
 		}
 		
 		limitThrust().
-		checkGimbal().
+		IF ALTITUDE > 19000 {
+			checkGimbal().
+		}
 		
 		SET throttle_PID:SETPOINT TO trg4thrott.
 		
