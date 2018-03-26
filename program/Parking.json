@@ -7,7 +7,7 @@
         "vessels",
         {
             "items": [
-                
+                "Station Coriolis 892"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -18,27 +18,39 @@
                 1,
                 "alt",
                 250000,
-				"release",
-				false,
+                "release",
+                false,
                 "modules",
                 {
                     "entries": [
-                        "PreLaunch", true,
-						"TakeOff", true,
-                        "HandleStaging", true,
-                        "Thrusting", true,
-                        "Deployables", true,
-						"Coasting", true,
-                        "Injection", true,
-                        "CorrectionBurn", false,
-                        "CheckCraftCondition", true
+                        "PreLaunch",
+                        true,
+                        "TakeOff",
+                        true,
+                        "HandleStaging",
+                        true,
+                        "Thrusting",
+                        true,
+                        "Deployables",
+                        true,
+                        "Coasting",
+                        true,
+                        "Injection",
+                        true,
+                        "CorrectionBurn",
+                        false,
+                        "CheckCraftCondition",
+                        true
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
                 },
-				"Journal", true
+                "Journal",
+                true
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
-        }
+        },
+        "exec_time",
+        1751.1019139296841
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }

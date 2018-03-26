@@ -19,7 +19,7 @@ function Aurora {
 		SET SHIP:NAME TO generateID().
 	}
 	
-	IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
+	GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
 	LOCAL ship_log TO globals["ship_log"].
@@ -75,17 +75,16 @@ function Aurora {
 	
 	loadDeps(phase_modules, "modules").
 
-	IF NOT (DEFINED this_craft) {
-		GLOBAL this_craft IS LEXICON(
-			"PreLaunch", P_PreLaunch(),
-			"HandleStaging", P_HandleStaging(),
-			"Thrusting", P_Thrusting(trg_orbit),
-			"Deployables", P_Deployables(),
-			"Injection", P_Injection(trg_orbit),
-			"CorrectionBurn", P_CorrectionBurn(),
-			"CheckCraftCondition", P_CheckCraftCondition()
-		).
-	}
+	GLOBAL this_craft IS LEXICON(
+		"PreLaunch", P_PreLaunch(),
+		"HandleStaging", P_HandleStaging(),
+		"Thrusting", P_Thrusting(trg_orbit),
+		"Deployables", P_Deployables(),
+		"Injection", P_Injection(trg_orbit),
+		"CorrectionBurn", P_CorrectionBurn(),
+		"CheckCraftCondition", P_CheckCraftCondition()
+	).
+	
 	function askForTarget {
 		trg_prog["vessels"]:ADD("none").
 		SET TARGET TO SUN.

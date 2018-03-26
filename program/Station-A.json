@@ -7,7 +7,8 @@
         "vessels",
         {
             "items": [
-                "Station core 344"
+                "Station core 344",
+                "Station Utility Module 393"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -18,8 +19,8 @@
                 1,
                 "alt",
                 20000000,
-				"release",
-				false,
+                "release",
+                false,
                 "modules",
                 {
                     "entries": [
@@ -48,7 +49,9 @@
                 true
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
-        }
+        },
+        "exec_time",
+        95246.155430168612
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }
