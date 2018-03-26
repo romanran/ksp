@@ -6,16 +6,6 @@ IF NOT EXISTS("1:Utils") AND HOMECONNECTION:ISCONNECTED {
 }
 RUNONCEPATH("Utils").
 
-SET STEERINGMANAGER:PITCHTS TO 8.
-SET STEERINGMANAGER:ROLLTS TO 8.
-SET STEERINGMANAGER:YAWTS TO 8.
-SET STEERINGMANAGER:PITCHPID:KD TO 0.75.
-SET STEERINGMANAGER:PITCHPID:KI TO 0.0075.
-SET STEERINGMANAGER:YAWPID:KD TO 0.75.
-SET STEERINGMANAGER:YAWPID:KI TO 0.0075.
-SET STEERINGMANAGER:ROLLPID:KD TO 0.75.
-SET STEERINGMANAGER:MAXSTOPPINGTIME TO 8.
-
 function Aurora {
 	CD("1:").
 	LOCAL dependencies IS LIST("PID", "Timer", "DoOnce", "Functions", "Displayer", "Journal", "Checkboxes","Inquiry", "Program", "ShipState", "ShipGlobals").
@@ -29,7 +19,7 @@ function Aurora {
 		SET SHIP:NAME TO generateID().
 	}
 	
-	IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
+	GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
 	LOCAL ship_log TO globals["ship_log"].
@@ -85,17 +75,16 @@ function Aurora {
 	
 	loadDeps(phase_modules, "modules").
 
-	IF NOT (DEFINED this_craft) {
-		GLOBAL this_craft IS LEXICON(
-			"PreLaunch", P_PreLaunch(),
-			"HandleStaging", P_HandleStaging(),
-			"Thrusting", P_Thrusting(trg_orbit),
-			"Deployables", P_Deployables(),
-			"Injection", P_Injection(trg_orbit),
-			"CorrectionBurn", P_CorrectionBurn(),
-			"CheckCraftCondition", P_CheckCraftCondition()
-		).
-	}
+	GLOBAL this_craft IS LEXICON(
+		"PreLaunch", P_PreLaunch(),
+		"HandleStaging", P_HandleStaging(),
+		"Thrusting", P_Thrusting(trg_orbit),
+		"Deployables", P_Deployables(),
+		"Injection", P_Injection(trg_orbit),
+		"CorrectionBurn", P_CorrectionBurn(),
+		"CheckCraftCondition", P_CheckCraftCondition()
+	).
+	
 	function askForTarget {
 		trg_prog["vessels"]:ADD("none").
 		SET TARGET TO SUN.
@@ -138,6 +127,12 @@ function Aurora {
 	SET done TO 0.
 	SET from_save TO this_craft["PreLaunch"]["from_save"]().
 	
+	LOCAL phase_angle TO LEXICON("current", 0).
+	LOCAL exec_time TO 200. // default exec time at about 200seconds
+	IF trg_prog:HASKEY("exec_time") {
+		SET exec_time TO trg_prog["exec_time"].
+	}
+	
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
 		LOCAL phase IS ship_state["get"]("phase").
@@ -158,26 +153,24 @@ function Aurora {
 			IF NOT trg_prog["attributes"]["modules"]["PreLaunch"] {
 				ship_state["set"]("phase", "TAKEOFF").
 			} ELSE {
-				LOCAL phase_angle TO "".
+				
 				LOCAL has_target TO false.
 				IF ship_state["get"]("trg_vsl") {
-					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), 0).	
-					Display["print"]("Degrees spread:", phase_angle["spread"]).
-					Display["print"]("Degrees traveled:", phase_angle["traveled"]).
-					Display["print"]("Target separation:", phase_angle["separation"]).
-					Display["print"]("Est. angle move:", phase_angle["move"]).
-					Display["print"]("Target phase angle:", phase_angle["target"]).
-					Display["print"]("Current phase angle:", phase_angle["current"]).
+					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), phase_angle["current"], exec_time).	
+					Display["print"]("Spread:", phase_angle["spread"] + "°").
+					Display["print"]("Target travel:", phase_angle["traveled"] + "°").
+					Display["print"]("Est. angle move:", phase_angle["move"] + "°").
+					Display["print"]("Current phase angle:", phase_angle["current"] + "°").
 					SET has_target TO true.
 				}
-				IF has_target AND phase_angle["current"] + 0.5 * (KUNIVERSE:TIMEWARP:WARP + 1) >= phase_angle["target"] 
-					AND phase_angle["current"] - (KUNIVERSE:TIMEWARP:WARP + 1) <= phase_angle["target"] {
-					misc_1s["do"]({
-						KUNIVERSE:TIMEWARP:CANCELWARP().
-					}).
-				} ELSE IF has_target {
-					misc_1s["reset"]().
-				}
+				// IF has_target AND phase_angle["current"] * KUNIVERSE:TIMEWARP:WARP >= phase_angle["target"] 
+					// AND phase_angle["current"] - KUNIVERSE:TIMEWARP:WARP <= phase_angle["target"] {
+					// misc_1s["do"]({
+						// KUNIVERSE:TIMEWARP:CANCELWARP().
+					// }).
+				// } ELSE IF has_target {
+					// misc_1s["reset"]().
+				// }
 				Display["print"]("Press ENTER to launch").
 				Display["print"]("Press ESC to abort").
 				IF this_craft["PreLaunch"]["refresh"]() {
@@ -285,7 +278,7 @@ function Aurora {
 				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
 				IF this_craft["Injection"]["burn"]() {
 					misc_1s["do"]({
-						IF this_craft["CorrectionBurn"]["checkStage"]() {
+						IF this_craft["CorrectionBurn"]["checkStage"]() AND trg_prog["attributes"]["release"]  {
 							SET THROTTLE TO 0.
 							stage_delay["set"]().
 						} ELSE {
@@ -305,21 +298,25 @@ function Aurora {
 				}
 			}
 		} ELSE IF phase = "CORRECTION_BURN" {
-			IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
-				this_craft["CorrectionBurn"]["neutralize"]().
-				ship_log["add"]("CIRCURALISATION COMPLETE").
-				misc_1s["reset"]().
+			IF NOT trg_prog["attributes"]["modules"]["CorrectionBurn"] {
 				ship_state["set"]("phase", "END").
 			} ELSE {
-				LOCAL tail IS trg_orbit["period"] - 20.
-				LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 12.
-				IF SHIP:ORBIT:PERIOD < trg_orbit["period"] - 30 {
-					SET margin TO 1.
+				IF SHIP:ORBIT:PERIOD < trg_orbit["period"] + 0.01 AND SHIP:ORBIT:PERIOD > trg_orbit["period"] - 0.01 {
+					this_craft["CorrectionBurn"]["neutralize"]().
+					ship_log["add"]("CIRCURALISATION COMPLETE").
+					misc_1s["reset"]().
+					ship_state["set"]("phase", "END").
+				} ELSE {
+					LOCAL tail IS trg_orbit["period"] - 20.
+					LOCAL margin IS 1 - ((SHIP:ORBIT:PERIOD - tail) / (trg_orbit["period"] - tail)) ^ 12.
+					IF SHIP:ORBIT:PERIOD < trg_orbit["period"] - 30 {
+						SET margin TO 1.
+					}
+					Display["print"]("FORE:", margin).
+					this_craft["CorrectionBurn"]["fore"](margin).
+					Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
+					Display["print"]("TRG ORB P: ", trg_orbit["period"]).
 				}
-				Display["print"]("FORE:", margin).
-				this_craft["CorrectionBurn"]["fore"](margin).
-				Display["print"]("ORB P:", SHIP:ORBIT:PERIOD).
-				Display["print"]("TRG ORB P: ", trg_orbit["period"]).
 			}
 		} ELSE IF phase = "END" {
 			UNLOCK THROTTLE.
@@ -331,6 +328,7 @@ function Aurora {
 				conn_Timer["set"]().
 				this_craft["Deployables"]["antennas"]().
 			}).
+			my_program["append"]("exec_time", MISSIONTIME).
 		}
 		IF NOT ship_state["get"]("saved") AND trg_prog["attributes"]["Journal"] {
 			conn_Timer["ready"](10, {

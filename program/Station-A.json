@@ -1,13 +1,14 @@
 {
     "entries": [
         "type",
-        "stager",
+        "Station-A",
         "id",
-        "stager 814",
+        "Station-A 170",
         "vessels",
         {
             "items": [
-                
+                "Station core 344",
+                "Station Utility Module 393"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -17,38 +18,40 @@
                 "sats",
                 1,
                 "alt",
-                0,
-				"release",
-				false,
+                20000000,
+                "release",
+                false,
                 "modules",
                 {
                     "entries": [
                         "PreLaunch",
                         true,
                         "TakeOff",
-                        false,
+                        true,
                         "HandleStaging",
                         true,
                         "Thrusting",
-                        false,
+                        true,
                         "Deployables",
                         true,
                         "Injection",
-                        false,
+                        true,
                         "Coasting",
-                        false,
+                        true,
                         "CorrectionBurn",
                         false,
                         "CheckCraftCondition",
-                        false
+                        true
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
                 },
                 "Journal",
-                false
+                true
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
-        }
+        },
+        "exec_time",
+        95246.155430168612
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }

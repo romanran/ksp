@@ -1,13 +1,13 @@
 {
     "entries": [
         "type",
-        "stager",
+        "circ_orb",
         "id",
-        "stager 814",
+        "circ_orb 952",
         "vessels",
         {
             "items": [
-                
+                "Station Coriolis 892"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -17,38 +17,40 @@
                 "sats",
                 1,
                 "alt",
-                0,
-				"release",
-				false,
+                250000,
+                "release",
+                false,
                 "modules",
                 {
                     "entries": [
                         "PreLaunch",
                         true,
                         "TakeOff",
-                        false,
+                        true,
                         "HandleStaging",
                         true,
                         "Thrusting",
-                        false,
+                        true,
                         "Deployables",
                         true,
-                        "Injection",
-                        false,
                         "Coasting",
-                        false,
+                        true,
+                        "Injection",
+                        true,
                         "CorrectionBurn",
                         false,
                         "CheckCraftCondition",
-                        false
+                        true
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
                 },
                 "Journal",
-                false
+                true
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
-        }
+        },
+        "exec_time",
+        1751.1019139296841
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }

@@ -1,4 +1,4 @@
-# Aurora Space Program v2.0.0
+# Aurora Space Program v2.0.2
 
 Modular of scripts to launch a ship in a set program.
 ## 1. Installation

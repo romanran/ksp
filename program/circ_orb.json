@@ -18,6 +18,8 @@
                 1,
                 "alt",
                 300000,
+				"release",
+				false,
                 "modules",
                 {
                     "entries": [

@@ -19,7 +19,7 @@ function Tester {
 		SET SHIP:NAME TO generateID().
 	}
 	
-	IF NOT(DEFINED globals) GLOBAL globals TO setGlobal().
+	GLOBAL globals TO setGlobal().
 	LOCAL ship_state TO globals["ship_state"].
 	LOCAL Display TO globals["Display"].
 	LOCAL ship_log TO globals["ship_log"].
@@ -166,12 +166,10 @@ function Tester {
 			)).
 			CS().
 			SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], usr_input["target"], phase_angle["current"]).
-			Display["print"]("Degrees spread:", phase_angle["spread"]).
-			Display["print"]("Degrees traveled:", phase_angle["traveled"]).
-			Display["print"]("Target separation:", phase_angle["separation"]).
-			Display["print"]("Est. angle move:", phase_angle["move"]).
-			Display["print"]("Target phase angle:", phase_angle["target"]).
-			Display["print"]("Current phase angle:", phase_angle["current"]).
+			Display["print"]("Spread:", phase_angle["spread"] + "°").
+			Display["print"]("Target travel:", phase_angle["traveled"] + "°").
+			Display["print"]("Est. angle move:", phase_angle["move"] + "°").
+			Display["print"]("Current phase angle:", phase_angle["current"] + "°").
 			
 		} ELSE IF func = "calcBurnTime" {
 			LOCAL usr_input TO Inquiry(LIST(
