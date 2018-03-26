@@ -8,8 +8,8 @@
         {
             "items": [
                 "Sat LKO 740",
-                "Sat LKO 229",
-                "Sat LKO 756"
+                "Sat LKO 756",
+                "Sat LKO"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -20,8 +20,8 @@
                 3,
                 "alt",
                 100000,
-				"release",
-				true,
+                "release",
+                true,
                 "modules",
                 {
                     "entries": [
@@ -50,7 +50,9 @@
                 true
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
-        }
+        },
+        "exec_time",
+        1699.3547551492229
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }

@@ -159,21 +159,19 @@ function Aurora {
 				IF ship_state["get"]("trg_vsl") {
 					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), phase_angle["current"], exec_time).	
 					Display["print"]("Spread:", phase_angle["spread"] + "°").
-					Display["print"]("Travel:", phase_angle["traveled"] + "°").
-					Display["print"]("Target separation:", phase_angle["separation"] + "°").
+					Display["print"]("Target travel:", phase_angle["traveled"] + "°").
 					Display["print"]("Est. angle move:", phase_angle["move"] + "°").
-					Display["print"]("Target phase angle:", phase_angle["target"] + "°").
 					Display["print"]("Current phase angle:", phase_angle["current"] + "°").
 					SET has_target TO true.
 				}
-				IF has_target AND phase_angle["current"] * (KUNIVERSE:TIMEWARP:WARP + 1) >= phase_angle["target"] 
-					AND phase_angle["current"] - (KUNIVERSE:TIMEWARP:WARP + 1) <= phase_angle["target"] {
-					misc_1s["do"]({
-						KUNIVERSE:TIMEWARP:CANCELWARP().
-					}).
-				} ELSE IF has_target {
-					misc_1s["reset"]().
-				}
+				// IF has_target AND phase_angle["current"] * KUNIVERSE:TIMEWARP:WARP >= phase_angle["target"] 
+					// AND phase_angle["current"] - KUNIVERSE:TIMEWARP:WARP <= phase_angle["target"] {
+					// misc_1s["do"]({
+						// KUNIVERSE:TIMEWARP:CANCELWARP().
+					// }).
+				// } ELSE IF has_target {
+					// misc_1s["reset"]().
+				// }
 				Display["print"]("Press ENTER to launch").
 				Display["print"]("Press ESC to abort").
 				IF this_craft["PreLaunch"]["refresh"]() {

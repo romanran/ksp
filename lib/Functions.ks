@@ -165,7 +165,6 @@ function calcTrajectory {
 }
 
 function getdV {   
-	// cc: only_to_downvote
 	//fuels with density
     LOCAL fuels IS LEXICON(
 		"LiquidFuel", 0.005,
@@ -243,7 +242,8 @@ function calcOrbitRadius {
 function calcPhaseAngle {
 	PARAMETER r1.
 	PARAMETER r2.
-	RETURN 180 * (1 - (r1 / (2 * r2) + 1 / 2) ^ (3 / 2)).
+	//180° * ( 1 - ( (r1/r2 + 1) / 2)^3/2)
+	RETURN 180 * (1 - ((r1 / r2 + 1) / 2) ^ (3 / 2)).
 }
 
 function calcCraftsAngle {
@@ -253,9 +253,9 @@ function calcCraftsAngle {
 	LOCAL v2_right TO v2:UP:STARVECTOR:NORMALIZED.
 	SET v2 TO v2:UP:VECTOR:NORMALIZED.
 	IF VDOT(v1, v2) > 0 {
-		RETURN 360 - ARCCOS(v1 * v2_right).
+		RETURN 360 - ARCCOS(VDOT(v1, v2_right)).
 	} ELSE {
-		RETURN ARCCOS(v1 * v2).
+		RETURN ARCCOS(VDOT(v1, v2_right)).
 	}
 }
 
@@ -263,29 +263,31 @@ function getPhaseAngle {
 	PARAMETER no_of_sats.
 	PARAMETER trg_vessel.
 	PARAMETER last_angle IS 0.
-	PARAMETER launch_duration IS 200.
 	
-	SET launch_duration TO 200.
+	LOCAL tphase_ang TO 0.
+	LOCAL launch_duration TO 200.
 	IF NOT trg_vessel:ISTYPE("VESSEL") {
 		RETURN 0.
 	}
 	
-	LOCAL radius_percent IS ROUND(launch_duration / trg_vessel:OBT:PERIOD, 3).
+	LOCAL radius_percent IS ROUND(launch_duration / trg_vessel:OBT:PERIOD, 3). // targets angle traveled during launch
 	LOCAL phase_ang IS calcPhaseAngle(SHIP:ORBIT:BODY:RADIUS + ALTITUDE, trg_vessel:ORBIT:SEMIMAJORAXIS / 2).
 	LOCAL curr_angle IS calcCraftsAngle(SHIP, trg_vessel).
-	LOCAL ahead IS false.
 	LOCAL diff TO 360 * radius_percent.
-	LOCAL tphase_ang TO 360 / no_of_sats + phase_ang + diff.
-	IF tphase_ang > 360 {
-		SET tphase_ang TO tphase_ang - 360.
+	IF last_angle > phase_ang {
+		// clockwise
 	}
+	SET tphase_ang TO phase_ang - 360 / no_of_sats + diff.
+	// SET tphase_ang TO phase_ang + 360 / no_of_sats - diff.
+	// IF tphase_ang > 360 {
+		// SET tphase_ang TO tphase_ang - 360.
+	// }
 
 	RETURN LEXICON(
 		"spread", 360 / no_of_sats,
-		"traveled", 360 * radius_percent,
-		"separation", 360 * radius_percent +  360 / no_of_sats,
-		"move", ROUND(phase_ang, 2),
-		"target", ROUND(tphase_ang, 2),
+		"traveled", diff,
+		"move", ROUND(phase_ang + diff, 2),
+		// "target", ROUND(tphase_ang, 2),
 		"current", ROUND(curr_angle, 2)
 	).
 }
