@@ -7,7 +7,8 @@
         "vessels",
         {
             "items": [
-                "Station Coriolis 892"
+                "Station Coriolis 892",
+                "Station Coriolis 109"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -50,7 +51,7 @@
             "$type": "kOS.Safe.Encapsulation.Lexicon"
         },
         "exec_time",
-        1751.1019139296841
+        63425.282753311563
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }

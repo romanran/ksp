@@ -136,18 +136,18 @@ function Aurora {
 	//--- MAIN FLIGHT BODY
 	UNTIL done {
 		LOCAL phase IS ship_state["get"]("phase").
-		LOCAL stage_response IS false.
+		LOCAL done_staging IS false.
 		IF trg_prog["attributes"]["modules"]["HandleStaging"] {
-			SET stage_response TO this_craft["HandleStaging"]["refresh"]().
+			SET done_staging TO this_craft["HandleStaging"]["refresh"]().
 		}
 		Display["reset"]().
 		Display["print"]("PHASE", phase).
 		
-		IF stage_response {
+		IF done_staging {
 			IF trg_prog["attributes"]["modules"]["CheckCraftCondition"] {
 				this_craft["CheckCraftCondition"]["refresh"]().
 			}
-			logJ(stage_response).
+			logJ(done_staging).
 		}
 		IF phase = "WAITING" {
 			IF NOT trg_prog["attributes"]["modules"]["PreLaunch"] {
@@ -200,7 +200,6 @@ function Aurora {
 			} ELSE {
 				LOCAL g_base TO KERBIN:MU / KERBIN:RADIUS ^ 2.
 				Display["print"]("THROTT:", ROUND(this_craft["Thrusting"]["thrott"]() * 100, 1) + "%").
-				Display["print"]("TRG THROTT:", this_craft["Thrusting"]["trg4thrott"]()).
 				Display["print"]("kPa:", ROUND(globals["q_pressure"](), 3)). 
 				Display["print"]("TWR:", ROUND(getTWR() * THROTTLE, 3)).
 				Display["print"]("TRG PITCH:", this_craft["Thrusting"]["trg_pitch"]()).
