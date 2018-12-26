@@ -23,6 +23,7 @@ function P_HandleStaging {
 	LOCAL quiet_period IS 5.
 	LOCAL no_acc_period IS 7.
 	LOCAL stage_delay IS 1.
+	LOCAL stage_fired to false.
 	LOCAL ship_state TO globals["ship_state"].
 	
 	// --- METHODS ---
@@ -33,7 +34,9 @@ function P_HandleStaging {
 	LOCAL function nextStage {
 		PARAMETER stype IS "staging".
 		SET done_staging TO doStage().
+		SET stage_fired TO false.
 		LIST ENGINES IN eng_list. 
+		nacc_1s["reset"]().
 		// STEERINGMANAGER:RESETPIDS().
 		IF DEFINED this_craft AND this_craft:HASKEY("Thrusting") {
 			this_craft["Thrusting"]["resetPID"]().
@@ -91,13 +94,14 @@ function P_HandleStaging {
 			SET no_acc_period TO 7.
 			SET stage_delay TO 2.
 		}
+
 		staging_Timer["ready"](quiet_period, {
 			staging_Timer["reset"]().
 			stage_1s["reset"]().
 			ship_state["set"]("quiet", false).
 		}).
 		
-		IF NOT done_staging{
+		IF NOT done_staging {
 			check("LIQUIDFUEL").
 			check("OXIDIZER").
 			check("SOLIDFUEL", 10).
@@ -110,7 +114,6 @@ function P_HandleStaging {
 		IF NOT must_thrust_phase {
 			RETURN 2.
 		}
-		
 		LOCAL no_acceleration TO true.
 		FOR eng IN eng_list {
 			IF eng:THRUST > 0 {
@@ -119,11 +122,14 @@ function P_HandleStaging {
 		}
 
 		//if not under accel
-		IF no_acceleration {
+		IF no_acceleration AND NOT stage_fired {
 			nacc_1s["do"]({
 				no_acc_Timer["set"]().
 				logJ("NO ACCELERATION DETECTED, WAITING FOR THRUST " + no_acc_period + " SECONDS...").
 			}).
+		} ELSE {
+			nacc_1s["reset"]().
+			SET stage_fired TO true.
 		}
 		
 		no_acc_Timer["ready"](no_acc_period, {

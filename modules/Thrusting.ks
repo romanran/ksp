@@ -50,6 +50,10 @@ function P_Thrusting {
 	function limitThrust {
 		//limit to max 4 twr
 		LOCAL limit IS MIN(4 / getTWR() * 100, 100).
+		// Limit to 1g on fairing deploy
+		IF ALTITUDE > 54500 AND globals["q_pressure"]() < 0.35 AND ALTITUDE < 55500 AND globals["q_pressure"]() > 0.25{
+			SET limit TO 1 / getTWR() * 100.
+		}
 		FOR eng in eng_list {
 			IF eng:STAGE = STAGE:NUMBER {
 				SET eng:THRUSTLIMIT TO limit.
@@ -60,12 +64,8 @@ function P_Thrusting {
 	function checkGimbal {
 		LOCAL gimbals IS false.
 		FOR eng in eng_list {
-			IF eng:STAGE = STAGE:NUMBER  {
-				IF eng:HASGIMBAL {
-					IF NOT eng:GIMBAL:LOCK {
-						SET gimbals TO true.
-					}
-				}
+			IF eng:STAGE = STAGE:NUMBER AND eng:HASGIMBAL AND NOT eng:GIMBAL:LOCK {
+				SET gimbals TO true.
 			}
 		}
 		IF NOT gimbals {

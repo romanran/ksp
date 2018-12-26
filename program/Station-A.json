@@ -8,7 +8,8 @@
         {
             "items": [
                 "Station core 344",
-                "Station Utility Module 393"
+                "Station Utility Module 393",
+                "Station Coriolis 109"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -51,7 +52,7 @@
             "$type": "kOS.Safe.Encapsulation.Lexicon"
         },
         "exec_time",
-        95246.155430168612
+        82262.9883608853
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }
