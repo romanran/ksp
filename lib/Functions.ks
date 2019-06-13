@@ -263,6 +263,7 @@ function getPhaseAngle {
 	PARAMETER no_of_sats.
 	PARAMETER trg_vessel.
 	PARAMETER last_angle IS 0.
+	PARAMETER exec_time IS 0.
 	
 	LOCAL tphase_ang TO 0.
 	LOCAL launch_duration TO 200.

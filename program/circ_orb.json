@@ -7,7 +7,8 @@
         "vessels",
         {
             "items": [
-                
+                "Fueler 628",
+                "Fueler 925"
             ],
             "$type": "kOS.Safe.Encapsulation.ListValue"
         },
@@ -18,27 +19,39 @@
                 1,
                 "alt",
                 300000,
-				"release",
-				false,
+                "release",
+                false,
                 "modules",
                 {
                     "entries": [
-                        "PreLaunch", true,
-						"TakeOff", true,
-                        "HandleStaging", true,
-                        "Thrusting", true,
-                        "Deployables", true,
-						"Coasting", true,
-                        "Injection", true,
-                        "CorrectionBurn", true,
-                        "CheckCraftCondition", true
+                        "PreLaunch",
+                        true,
+                        "TakeOff",
+                        true,
+                        "HandleStaging",
+                        true,
+                        "Thrusting",
+                        true,
+                        "Deployables",
+                        true,
+                        "Coasting",
+                        true,
+                        "Injection",
+                        true,
+                        "CorrectionBurn",
+                        true,
+                        "CheckCraftCondition",
+                        true
                     ],
                     "$type": "kOS.Safe.Encapsulation.Lexicon"
                 },
-				"Journal", true
+                "Journal",
+                true
             ],
             "$type": "kOS.Safe.Encapsulation.Lexicon"
-        }
+        },
+        "exec_time",
+        990.36264270346646
     ],
     "$type": "kOS.Safe.Encapsulation.Lexicon"
 }

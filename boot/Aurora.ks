@@ -128,9 +128,9 @@ function Aurora {
 	SET from_save TO this_craft["PreLaunch"]["from_save"]().
 	
 	LOCAL phase_angle TO LEXICON("current", 0).
-	LOCAL exec_time TO 200. // default exec time at about 200seconds
-	IF trg_prog:HASKEY("exec_time") {
-		SET exec_time TO trg_prog["exec_time"].
+	LOCAL time_to_apoapsis TO 900. // default exec time at about 200seconds
+	IF trg_prog:HASKEY("time_to_apoapsis") {
+		SET time_to_apoapsis TO trg_prog["time_to_apoapsis"].
 	}
 	
 	//--- MAIN FLIGHT BODY
@@ -156,7 +156,7 @@ function Aurora {
 				
 				LOCAL has_target TO false.
 				IF ship_state["get"]("trg_vsl") {
-					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), phase_angle["current"], exec_time).	
+					SET phase_angle TO getPhaseAngle(trg_prog["attributes"]["sats"], VESSEL(ship_state["get"]("trg_vsl")), phase_angle["current"], time_to_apoapsis).	
 					Display["print"]("Spread:", phase_angle["spread"] + "°").
 					Display["print"]("Target travel:", phase_angle["traveled"] + "°").
 					Display["print"]("Est. angle move:", phase_angle["move"] + "°").
@@ -223,7 +223,7 @@ function Aurora {
 					this_craft["Injection"]["burn_time"]().
 					ship_state["set"]("phase", "COASTING").
 				}
-				IF ALTITUDE > 55000 AND globals["q_pressure"]() < 0.3 {
+				IF ALTITUDE > 50000 AND globals["q_pressure"]() < 0.3 {
 					quiet1_1s["do"]({
 						this_craft["Deployables"]["fairing"]().
 					}).
@@ -250,6 +250,7 @@ function Aurora {
 						Display["print"]("BURN T: ", this_craft["Injection"]["burn_time"]()).
 					}).
 					IF ETA:APOAPSIS < (this_craft["Injection"]["burn_time"]() + safe_t) AND ETA:APOAPSIS > 0 {
+						my_program["append"]("time_to_apoapsis", MISSIONTIME).
 						ship_state["set"]("phase", "INJECTION").
 						ship_log["add"]("INJECTION phase").
 						KUNIVERSE:TIMEWARP:CANCELWARP().
